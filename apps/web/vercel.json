@@ -1,0 +1,5 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd ../.. && pnpm install",
+  "buildCommand": "cd ../.. && pnpm --filter @nxinmall/database exec prisma generate && pnpm exec turbo run build --filter=@nxinmall/web"
+}

@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+::selection {
+  background-color: rgba(25, 118, 210, 0.2);
+  color: inherit;
+}
+
+:root {
+  --brand-blue: #1976d2;
+  --brand-blue-50: #e3f2fd;
+  --brand-blue-100: #bbdefb;
+  --brand-blue-700: #1565c0;
+  --brand-dark: #1a1a2e;
+  --brand-gray: #6b7280;
+  --surface-light: #eff6ff;
+  --surface-mid: #dbeafe;
+  --success: #2e7d32;
+  --success-surface: #e8f5e9;
+  --warning: #f59e0b;
+  --warning-surface: #fef3c7;
+  --error: #ef4444;
+  --error-surface: #fee2e2;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --background: 0 0% 100%;
+  --foreground: 240 17% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 17% 14%;
+  --muted: 210 20% 96%;
+  --muted-foreground: 215 14% 45%;
+  --border: 214 17% 91%;
+  --input: 214 17% 91%;
+  --ring: 207 90% 54%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 17% 14%;
+  --accent: 210 20% 96%;
+  --accent-foreground: 240 17% 14%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  a {
+    @apply transition-colors duration-150;
+  }
+  *:focus-visible {
+    outline: 2px solid var(--brand-blue);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .btn-press {
+    @apply transition-all duration-150;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn-press {
+    @apply active:scale-[0.97];
+  }
+}
+
+/* Guided demo: scroll room for targets + floating panel; never lock overflow */
+body.demo-tour-active {
+  overflow-y: auto;
+  padding-bottom: 7.5rem;
+}
+
+[data-demo-target] {
+  scroll-margin: 5rem 1rem 9rem;
+}
+
+body.demo-tour-active [data-demo-target][data-demo-active-target="true"] {
+  outline: none;
+  box-shadow: none;
+}
+
+.demo-veil-full {
+  transition: opacity 0.15s ease;
+}
+
+.demo-veil-hole {
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, var(--demo-veil-opacity, 0.45));
+  transition: none;
+}
+
+.demo-panel-fade-out {
+  opacity: 0;
+  transition: opacity 400ms ease-out;
+}
