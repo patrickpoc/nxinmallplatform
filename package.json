@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "vercel-build": "pnpm --filter @nxinmall/database exec prisma generate && pnpm --filter @nxinmall/database build && pnpm --filter @nxinmall/web build",
+    "vercel-build": "pnpm --filter @nxinmall/database exec prisma generate && pnpm --filter @nxinmall/types build && pnpm --filter @nxinmall/constants build && pnpm --filter @nxinmall/validators build && pnpm --filter @nxinmall/database build && pnpm --filter @nxinmall/web build",
     "vercel-build-api": "pnpm --filter @nxinmall/database exec prisma generate && pnpm --filter @nxinmall/types build && pnpm --filter @nxinmall/validators build && pnpm --filter @nxinmall/database build && pnpm --filter @nxinmall/api build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
