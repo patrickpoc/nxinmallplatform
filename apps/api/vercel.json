@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd ../.. && PRISMA_SKIP_POSTINSTALL_GENERATE=true pnpm install",
+  "buildCommand": "cd ../.. && pnpm --filter @nxinmall/database exec prisma generate && pnpm --filter @nxinmall/api build",
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+  "build": {
+    "env": {
+      "PRISMA_SKIP_POSTINSTALL_GENERATE": "true"
+    }
+  }
+}
