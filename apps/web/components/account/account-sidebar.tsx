@@ -51,7 +51,7 @@ function NavItems({
 }) {
   return (
     <nav className="space-y-1">
-      {ITEMS.filter((item) => item.roles.includes(role as "BUYER" | "SELLER")).map((item) => {
+      {ITEMS.filter((item) => (item.roles as readonly string[]).includes(role)).map((item) => {
         const fullHref = `/${locale}${item.href}`;
         const active = pathname === fullHref || pathname.startsWith(fullHref + "/");
         const Icon = item.icon;

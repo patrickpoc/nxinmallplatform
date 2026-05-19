@@ -53,31 +53,32 @@ export function DemoFloatingPanel() {
     return () => window.clearInterval(interval);
   }, [demo?.isActive, demo?.stepReady, demo?.navigationEpoch, isFinishStep]);
 
-  if (!demo || !demo.isActive) return null;
+  if (!demo?.isActive) return null;
 
-  const step = demo.currentStep;
+  const tour = demo;
+  const step = tour.currentStep;
   const title = t(step.titleKey);
   const body = t(step.bodyKey);
-  const current = demo.stepIndex + 1;
-  const total = demo.totalSteps;
+  const current = tour.stepIndex + 1;
+  const total = tour.totalSteps;
   const progress = Math.round((current / total) * 100);
   const flowLabel =
-    demo.flow === "authenticated" ? t("flowAuthenticated") : t("flowGuest");
-  const modeLabel = demo.playbackMode === "auto" ? t("modeAutoBadge") : t("modeManualBadge");
+    tour.flow === "authenticated" ? t("flowAuthenticated") : t("flowGuest");
+  const modeLabel = tour.playbackMode === "auto" ? t("modeAutoBadge") : t("modeManualBadge");
   const farewellSeconds = Math.ceil(farewellRemainingMs / 1000);
   const farewellProgress =
     ((FINISH_FAREWELL_MS - farewellRemainingMs) / FINISH_FAREWELL_MS) * 100;
 
   function setMode(nextMode: DemoPlaybackMode) {
-    demo.setPlaybackMode(nextMode);
-    if (nextMode === "auto") demo.resumeAuto();
+    tour.setPlaybackMode(nextMode);
+    if (nextMode === "auto") tour.resumeAuto();
   }
 
   function handlePrimaryAction() {
-    if (demo.stepIndex >= total - 1) {
+    if (tour.stepIndex >= total - 1) {
       dismissFarewell();
     } else {
-      void demo.goNext();
+      void tour.goNext();
     }
   }
 
@@ -94,7 +95,7 @@ export function DemoFloatingPanel() {
         <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-blue">{flowLabel}</p>
         <span className="text-[10px] text-brand-gray">·</span>
         <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-brand-gray">
-          {demo.playbackMode === "auto" ? (
+          {tour.playbackMode === "auto" ? (
             <Sparkles className="h-3 w-3 text-brand-blue" aria-hidden />
           ) : (
             <Hand className="h-3 w-3 text-brand-blue" aria-hidden />
@@ -112,7 +113,7 @@ export function DemoFloatingPanel() {
 
       <p className="text-xs font-semibold uppercase tracking-wide text-brand-gray" aria-live="polite">
         {t("stepProgress", { current: String(current), total: String(total) })}
-        {demo.isResolvingTarget || demo.isNavigating ? (
+        {tour.isResolvingTarget || tour.isNavigating ? (
           <span className="ml-2 font-normal normal-case text-brand-blue">{t("transitioning")}</span>
         ) : null}
       </p>
@@ -140,7 +141,7 @@ export function DemoFloatingPanel() {
             variant="outline"
             size="sm"
             className="btn-press w-full"
-            onClick={() => void demo.startDemo(demo.playbackMode)}
+            onClick={() => void tour.startDemo(tour.playbackMode)}
           >
             {t("restartTour")}
           </Button>
@@ -151,7 +152,7 @@ export function DemoFloatingPanel() {
             type="button"
             onClick={() => setMode("manual")}
             className={`flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
-              demo.playbackMode === "manual" ? "bg-white text-brand-dark shadow-sm" : "text-brand-gray hover:text-brand-dark"
+              tour.playbackMode === "manual" ? "bg-white text-brand-dark shadow-sm" : "text-brand-gray hover:text-brand-dark"
             }`}
           >
             <Hand className="h-3.5 w-3.5" aria-hidden />
@@ -161,7 +162,7 @@ export function DemoFloatingPanel() {
             type="button"
             onClick={() => setMode("auto")}
             className={`flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
-              demo.playbackMode === "auto" ? "bg-white text-brand-dark shadow-sm" : "text-brand-gray hover:text-brand-dark"
+              tour.playbackMode === "auto" ? "bg-white text-brand-dark shadow-sm" : "text-brand-gray hover:text-brand-dark"
             }`}
           >
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
@@ -170,11 +171,11 @@ export function DemoFloatingPanel() {
         </div>
       )}
 
-      {demo.playbackMode === "auto" && !isFinishStep ? (
+      {tour.playbackMode === "auto" && !isFinishStep ? (
         <DemoSpeedControl
           className="mt-3"
-          value={demo.scrollSpeed}
-          onChange={(speed) => demo.setScrollSpeed(speed)}
+          value={tour.scrollSpeed}
+          onChange={(speed) => tour.setScrollSpeed(speed)}
         />
       ) : null}
 
@@ -184,23 +185,23 @@ export function DemoFloatingPanel() {
           variant="outline"
           size="sm"
           className="btn-press"
-          onClick={() => void demo.goPrev()}
-          disabled={demo.stepIndex === 0 || demo.isNavigating || fadeOut}
+          onClick={() => void tour.goPrev()}
+          disabled={tour.stepIndex === 0 || tour.isNavigating || fadeOut}
         >
           <ChevronLeft className="mr-1 h-4 w-4" aria-hidden />
           {t("prev")}
         </Button>
-        {demo.playbackMode === "auto" && !isFinishStep ? (
+        {tour.playbackMode === "auto" && !isFinishStep ? (
           <Button
             type="button"
             variant="outline"
             size="sm"
             className="btn-press"
-            onClick={demo.isAutoPlaying ? demo.pauseAuto : demo.resumeAuto}
-            disabled={demo.isResolvingTarget || demo.isNavigating}
-            aria-label={demo.isAutoPlaying ? t("pauseAuto") : t("resumeAuto")}
+            onClick={tour.isAutoPlaying ? tour.pauseAuto : tour.resumeAuto}
+            disabled={tour.isResolvingTarget || tour.isNavigating}
+            aria-label={tour.isAutoPlaying ? t("pauseAuto") : t("resumeAuto")}
           >
-            {demo.isAutoPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            {tour.isAutoPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
         ) : null}
         <Button
@@ -208,10 +209,10 @@ export function DemoFloatingPanel() {
           size="sm"
           className="btn-press flex-1"
           onClick={handlePrimaryAction}
-          disabled={(demo.isResolvingTarget || demo.isNavigating) && !isFinishStep}
+          disabled={(tour.isResolvingTarget || tour.isNavigating) && !isFinishStep}
         >
-          {demo.stepIndex >= total - 1 ? t("finishDismiss") : t("next")}
-          {demo.stepIndex < total - 1 ? <ChevronRight className="ml-1 h-4 w-4" aria-hidden /> : null}
+          {tour.stepIndex >= total - 1 ? t("finishDismiss") : t("next")}
+          {tour.stepIndex < total - 1 ? <ChevronRight className="ml-1 h-4 w-4" aria-hidden /> : null}
         </Button>
         <Button
           type="button"

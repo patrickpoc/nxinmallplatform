@@ -11,7 +11,7 @@ import { HorizontalRail } from "@/components/marketplace/horizontal-rail";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { productListInclude } from "@/lib/product-listing";
+import { productListInclude, type ProductListRow } from "@/lib/product-listing";
 import type { CartPriceCurrency } from "@/lib/cart/types";
 
 export const dynamic = "force-dynamic";
@@ -80,7 +80,7 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
       (parentCat.name as { en?: string })?.en ?? ""
     : null;
 
-  let relatedProducts: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
+  let relatedProducts: ProductListRow[] = [];
   try {
     relatedProducts = await prisma.product.findMany({
       where: {

@@ -641,7 +641,7 @@ function PaymentPendingScreen({
               <ClipboardCopy className="h-4 w-4" />
               {copied ? t("copied") : t("copyCode")}
             </Button>
-            <p className="text-xs text-brand-gray">{t("pendingBoletoDue", { date: dueDateStr })}</p>
+            <p className="text-xs text-brand-gray">{t("pendingBoletoDue").replace("{date}", dueDateStr)}</p>
           </CardContent>
         </Card>
       )}
@@ -688,7 +688,9 @@ function PaymentPendingScreen({
               <span className="text-xs font-medium text-brand-gray">{demoCard.brand}</span>
             </div>
             <p className="text-sm text-brand-dark">
-              {t("pendingCardInstallments", { n: String(payment.installments), amount: totalFormatted })}
+              {t("pendingCardInstallments")
+                .replace("{n}", String(payment.installments))
+                .replace("{amount}", totalFormatted)}
             </p>
             <p className="rounded-lg bg-green-50 px-3 py-2 text-center text-sm font-semibold text-green-700">
               {t("pendingCardApproved")}

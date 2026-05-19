@@ -170,8 +170,8 @@ export default async function ProductsPage({ params, searchParams }: { params: {
       <div className="mx-auto max-w-6xl space-y-4 px-4 py-16 md:px-6">
         {breadcrumbs}
         <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
-        {parentCatName && <p className="text-lg font-medium text-brand-blue">{catLabel(parentCatName, locale)}</p>}
-        {!parentCatName && activeCat && <p className="text-lg font-medium text-brand-blue">{catLabel(activeCat.name, locale)}</p>}
+        {parentCatName ? <p className="text-lg font-medium text-brand-blue">{catLabel(parentCatName, locale)}</p> : null}
+        {!parentCatName && activeCat ? <p className="text-lg font-medium text-brand-blue">{catLabel(activeCat.name, locale)}</p> : null}
         {subcategoryChips}
         <div className="flex flex-col items-center gap-4 py-12 text-center">
           <PackageSearch className="h-16 w-16 text-brand-gray/40" aria-hidden />
@@ -190,8 +190,8 @@ export default async function ProductsPage({ params, searchParams }: { params: {
 
       <div className="space-y-3">
         <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
-        {parentCatName && <p className="text-lg font-medium text-brand-blue">{catLabel(parentCatName, locale)}</p>}
-        {!parentCatName && activeCat && <p className="text-lg font-medium text-brand-blue">{catLabel(activeCat.name, locale)}</p>}
+        {parentCatName ? <p className="text-lg font-medium text-brand-blue">{catLabel(parentCatName, locale)}</p> : null}
+        {!parentCatName && activeCat ? <p className="text-lg font-medium text-brand-blue">{catLabel(activeCat.name, locale)}</p> : null}
         {q ? <p className="text-sm text-brand-gray">{t("searchingFor", { q })}</p> : null}
         {subcategoryChips}
       </div>
