@@ -1,4 +1,4 @@
-import { prisma } from "@nxinmall/database";
+import { prismaWrite } from "@nxinmall/database";
 import { registerSchema } from "@nxinmall/validators";
 import bcrypt from "bcryptjs";
 import type { ApiEnvelope } from "@nxinmall/types";
@@ -29,18 +29,18 @@ export async function registerUser(body: unknown): Promise<RegisterResult> {
   const { email, password, role } = parsed.data;
   const normalized = email.toLowerCase();
 
-  const existing = await prisma.user.findUnique({ where: { email: normalized } });
+  const existing = await prismaWrite.user.findUnique({ where: { email: normalized } });
   if (existing) {
     return { ok: false, status: 409, envelope: fail("EMAIL_IN_USE", "An account with this email already exists") };
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
-  const user = await prisma.user.create({
+  const user = await prismaWrite.user.create({
     data: {
       email: normalized,
       passwordHash,
       role,
-      status: "PENDING_VERIFICATION",
+      status: "ACTIVE",
     },
     select: { id: true, email: true, role: true, status: true, createdAt: true },
   });

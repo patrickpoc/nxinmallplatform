@@ -48,4 +48,30 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 
+/**
+ * Prefer DIRECT_URL (port 5432) for writes. Supabase transaction pooler (6543) can fail on INSERT from serverless.
+ */
+const globalForWrite = globalThis as unknown as { prismaWrite: PrismaClient | undefined };
+
+function writeDatasourceUrl(): string | undefined {
+  return process.env.DIRECT_URL?.trim() || process.env.DATABASE_URL?.trim();
+}
+
+export const prismaWrite =
+  globalForWrite.prismaWrite ??
+  (() => {
+    const url = writeDatasourceUrl();
+    if (!url || url === process.env.DATABASE_URL) {
+      return prisma;
+    }
+    return new PrismaClient({
+      datasources: { db: { url } },
+      log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+    });
+  })();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForWrite.prismaWrite = prismaWrite;
+}
+
 export * from "@prisma/client";

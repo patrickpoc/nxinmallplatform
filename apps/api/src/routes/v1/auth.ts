@@ -1,4 +1,4 @@
-import { prisma } from "@nxinmall/database";
+import { prismaWrite } from "@nxinmall/database";
 import { registerSchema } from "@nxinmall/validators";
 import bcrypt from "bcryptjs";
 import { Hono } from "hono";
@@ -22,17 +22,17 @@ app.post("/auth/register", async (c) => {
     return c.json(fail("VALIDATION_ERROR", parsed.error.flatten().formErrors.join("; ")), 400);
   }
   const { email, password, role } = parsed.data;
-  const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  const existing = await prismaWrite.user.findUnique({ where: { email: email.toLowerCase() } });
   if (existing) {
     return c.json(fail("EMAIL_IN_USE", "An account with this email already exists"), 409);
   }
   const passwordHash = await bcrypt.hash(password, 12);
-  const user = await prisma.user.create({
+  const user = await prismaWrite.user.create({
     data: {
       email: email.toLowerCase(),
       passwordHash,
       role,
-      status: "PENDING_VERIFICATION",
+      status: "ACTIVE",
     },
     select: { id: true, email: true, role: true, status: true, createdAt: true },
   });
