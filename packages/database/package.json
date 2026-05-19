@@ -21,9 +21,6 @@
     "type-check": "tsc --noEmit",
     "lint": "echo skip"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@prisma/client": "^6.2.1"
   },

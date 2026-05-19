@@ -21,7 +21,10 @@
   },
   "packageManager": "pnpm@9.15.0",
   "pnpm": {
-    "ignoredBuiltDependencies": ["@prisma/client", "@prisma/engines"]
+    "ignoredBuiltDependencies": ["@prisma/client", "@prisma/engines"],
+    "peerDependencyRules": {
+      "ignoreMissing": ["*"]
+    }
   },
   "engines": {
     "node": ">=20"
