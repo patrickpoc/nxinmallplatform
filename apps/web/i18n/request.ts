@@ -14,5 +14,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale,
     timeZone: "America/Sao_Paulo",
     messages: (await import(`../messages/${locale}.json`)).default,
+    onError(error) {
+      // Client components (header/footer) pre-render during `next build` without full intl context.
+      if (error.code === "ENVIRONMENT_FALLBACK") {
+        return;
+      }
+      console.error(error);
+    },
   };
 });

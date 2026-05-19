@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/routing";
@@ -11,6 +11,7 @@ export default async function AdminLayout({
   children: ReactNode;
   params: { locale: string };
 }) {
+  setRequestLocale(params.locale);
   const session = await auth();
   if (!session?.user) {
     redirect(`/${params.locale}/auth/login`);
