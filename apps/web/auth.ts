@@ -11,6 +11,7 @@ import Google from "next-auth/providers/google";
  * JWT sessions carry `role` for fast RBAC in middleware/layouts without a DB round-trip per request.
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env.AUTH_SECRET,
   trustHost: true,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt", maxAge: 60 * 60 * 24 * 7 },

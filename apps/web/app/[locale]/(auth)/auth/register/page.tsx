@@ -92,52 +92,64 @@ export default function RegisterPage() {
     if (demoRegisterLocked) return;
     setError(null);
     setSubmitting(true);
-    const res = await fetch("/api/v1/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-    const json = (await res.json()) as {
-      success?: boolean;
-      error?: { message?: string } | null;
-    };
-    if (!res.ok || !json.success) {
-      setError(json.error?.message ?? t("registerError"));
+    try {
+      const res = await fetch("/api/v1/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      let json: { success?: boolean; error?: { message?: string } | null } = {};
+      try {
+        json = (await res.json()) as typeof json;
+      } catch {
+        setError(t("registerError"));
+        return;
+      }
+      if (!res.ok || !json.success) {
+        setError(json.error?.message ?? t("registerError"));
+        return;
+      }
+      const sign = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+        callbackUrl,
+      });
+      if (sign?.error) {
+        setError(t("signInAfterRegisterError"));
+        return;
+      }
+      router.push(callbackUrl);
+      router.refresh();
+    } catch {
+      setError(t("registerError"));
+    } finally {
       setSubmitting(false);
-      return;
     }
-    const sign = await signIn("credentials", {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-      callbackUrl,
-    });
-    setSubmitting(false);
-    if (sign?.error) {
-      setError(t("signInAfterRegisterError"));
-      return;
-    }
-    router.push(callbackUrl);
-    router.refresh();
   }
 
   async function handleGoogleDemo() {
     if (demoRegisterLocked) return;
     setGoogleLoading(true);
     setError(null);
-    const res = await signIn("credentials", {
-      email: "demo-buyer@nxinmall.local",
-      password: "demo",
-      redirect: false,
-      callbackUrl,
-    });
-    if (res?.error) {
+    try {
+      const res = await signIn("credentials", {
+        email: "demo-buyer@nxinmall.local",
+        password: "demo",
+        redirect: false,
+        callbackUrl,
+      });
+      if (res?.error) {
+        setError(t("demoUnavailable"));
+        return;
+      }
+      router.push(callbackUrl);
+      router.refresh();
+    } catch {
       setError(t("demoUnavailable"));
+    } finally {
       setGoogleLoading(false);
-      return;
     }
-    router.push(callbackUrl);
-    router.refresh();
   }
 
   return (

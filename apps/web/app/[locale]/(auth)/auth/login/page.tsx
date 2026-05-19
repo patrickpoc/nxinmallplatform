@@ -32,32 +32,42 @@ export default function LoginPage() {
   async function onSubmit(values: Form) {
     setError(null);
     setSubmitting(true);
-    const res = await signIn("credentials", { ...values, redirect: false, callbackUrl });
-    setSubmitting(false);
-    if (res?.error) {
+    try {
+      const res = await signIn("credentials", { ...values, redirect: false, callbackUrl });
+      if (res?.error) {
+        setError(t("loginError"));
+        return;
+      }
+      router.push(callbackUrl);
+      router.refresh();
+    } catch {
       setError(t("loginError"));
-      return;
+    } finally {
+      setSubmitting(false);
     }
-    router.push(callbackUrl);
-    router.refresh();
   }
 
   async function handleGoogleDemo() {
     setGoogleLoading(true);
     setError(null);
-    const res = await signIn("credentials", {
-      email: "demo-buyer@nxinmall.local",
-      password: "demo",
-      redirect: false,
-      callbackUrl,
-    });
-    if (res?.error) {
+    try {
+      const res = await signIn("credentials", {
+        email: "demo-buyer@nxinmall.local",
+        password: "demo",
+        redirect: false,
+        callbackUrl,
+      });
+      if (res?.error) {
+        setError(t("demoUnavailable"));
+        return;
+      }
+      router.push(callbackUrl);
+      router.refresh();
+    } catch {
       setError(t("demoUnavailable"));
+    } finally {
       setGoogleLoading(false);
-      return;
     }
-    router.push(callbackUrl);
-    router.refresh();
   }
 
   return (

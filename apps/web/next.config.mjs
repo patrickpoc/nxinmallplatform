@@ -6,7 +6,9 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const nextConfig = {
   transpilePackages: ["@nxinmall/database", "@nxinmall/constants", "@nxinmall/types", "@nxinmall/validators"],
   async rewrites() {
-    const api = process.env.API_PROXY_TARGET ?? "http://localhost:4000";
+    // Sem API_PROXY_TARGET (ex.: só web na Vercel), rotas em app/api/v1/* respondem no próprio Next.js.
+    const api = process.env.API_PROXY_TARGET?.trim();
+    if (!api) return [];
     return [{ source: "/api/v1/:path*", destination: `${api}/api/v1/:path*` }];
   },
 };
