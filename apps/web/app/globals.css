@@ -99,6 +99,14 @@ body.demo-tour-active {
   padding-bottom: max(7.5rem, calc(7.5rem + env(safe-area-inset-bottom)));
 }
 
+body.demo-tour-active.demo-pocket {
+  padding-bottom: max(4.5rem, calc(4.5rem + env(safe-area-inset-bottom)));
+}
+
+body.demo-tour-active.demo-pocket.demo-pocket-expanded {
+  padding-bottom: max(7rem, calc(7rem + env(safe-area-inset-bottom)));
+}
+
 [data-demo-target] {
   scroll-margin: 5rem 1rem 9rem;
 }

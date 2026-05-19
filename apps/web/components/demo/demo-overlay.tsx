@@ -34,6 +34,7 @@ import { bindLayoutSync } from "@/lib/demo/demo-layout-sync";
 
 import {
 
+  getDemoViewportBottomMargin,
   getRevealScrollDelayMs,
 
   scrollToPageTop,
@@ -147,6 +148,10 @@ export function DemoOverlay() {
   const stepId = demo?.currentStep.id;
 
   const speed = demo?.scrollSpeed ?? 1;
+
+  const tourSurface = demo?.surface ?? "desktop";
+
+  const bottomMargin = getDemoViewportBottomMargin(tourSurface, demo?.pocketExpanded ?? false);
 
   const navigationEpoch = demo?.navigationEpoch ?? 0;
 
@@ -289,7 +294,9 @@ export function DemoOverlay() {
 
             resetTop: false,
 
-            delayMs: getRevealScrollDelayMs(stepId),
+            delayMs: getRevealScrollDelayMs(stepId, tourSurface),
+
+            bottomMargin,
 
             onProgress: scheduleLayoutSync,
 
@@ -327,7 +334,9 @@ export function DemoOverlay() {
 
             resetTop: false,
 
-            delayMs: getRevealScrollDelayMs(stepId),
+            delayMs: getRevealScrollDelayMs(stepId, tourSurface),
+
+            bottomMargin,
 
             onProgress: scheduleLayoutSync,
 

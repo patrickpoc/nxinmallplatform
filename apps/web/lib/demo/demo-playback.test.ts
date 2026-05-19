@@ -21,4 +21,10 @@ describe("getAutoAdvanceDelay", () => {
     const delay05 = getAutoAdvanceDelay(baseStep, false, 0.5);
     expect(delay05).toBe(Math.round(delay1 / 0.5));
   });
+
+  it("uses shorter delays on mobile surface", () => {
+    const desktop = getAutoAdvanceDelay(baseStep, false, 1, "desktop");
+    const mobile = getAutoAdvanceDelay(baseStep, false, 1, "mobile");
+    expect(mobile).toBeLessThan(desktop);
+  });
 });

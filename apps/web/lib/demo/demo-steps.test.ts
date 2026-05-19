@@ -12,11 +12,22 @@ describe("isSamePathSubSteps", () => {
     companyId: "co1",
   };
 
-  it("treats home overlay steps on / as same-path", () => {
-    const steps = getDemoSteps("guest");
+  it("treats home overlay steps on / as same-path (desktop)", () => {
+    const steps = getDemoSteps("guest", "desktop");
     const search = steps.find((s) => s.id === "search")!;
     const categoryNav = steps.find((s) => s.id === "category-nav")!;
     expect(isSamePathSubSteps(search, categoryNav, bootstrap)).toBe(true);
+  });
+
+  it("treats home overlay steps on / as same-path (mobile)", () => {
+    const steps = getDemoSteps("guest", "mobile");
+    const search = steps.find((s) => s.id === "search")!;
+    const categoryNav = steps.find((s) => s.id === "category-nav")!;
+    expect(isSamePathSubSteps(search, categoryNav, bootstrap)).toBe(true);
+  });
+
+  it("mobile guest flow is shorter than desktop", () => {
+    expect(getDemoSteps("guest", "mobile").length).toBeLessThan(getDemoSteps("guest", "desktop").length);
   });
 
   it("treats checkout sub-steps as same-path", () => {

@@ -7,13 +7,21 @@ export function DemoBodyClass() {
   const demo = useDemoTourOptional();
 
   useEffect(() => {
+    const body = document.body;
     if (demo?.isActive) {
-      document.body.classList.add("demo-tour-active");
+      body.classList.add("demo-tour-active");
+      if (demo.surface === "mobile") {
+        body.classList.add("demo-pocket");
+        if (demo.pocketExpanded) body.classList.add("demo-pocket-expanded");
+        else body.classList.remove("demo-pocket-expanded");
+      } else {
+        body.classList.remove("demo-pocket", "demo-pocket-expanded");
+      }
     } else {
-      document.body.classList.remove("demo-tour-active");
+      body.classList.remove("demo-tour-active", "demo-pocket", "demo-pocket-expanded");
     }
-    return () => document.body.classList.remove("demo-tour-active");
-  }, [demo?.isActive]);
+    return () => body.classList.remove("demo-tour-active", "demo-pocket", "demo-pocket-expanded");
+  }, [demo?.isActive, demo?.surface, demo?.pocketExpanded]);
 
   return null;
 }

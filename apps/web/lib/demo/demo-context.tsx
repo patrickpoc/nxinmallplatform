@@ -37,8 +37,9 @@ import {
   savePreferredScrollSpeed,
   type DemoScrollSpeed,
 } from "@/lib/demo/demo-scroll";
+import { detectDemoSurface, type DemoSurface } from "@/lib/demo/demo-surface";
 
-export type { DemoPlaybackMode, DemoScrollSpeed };
+export type { DemoPlaybackMode, DemoScrollSpeed, DemoSurface };
 
 export type CheckoutDemoHandlers = {
   setStep: (step: 1 | 2 | 3 | 4) => void;
@@ -52,6 +53,7 @@ type DemoPersisted = {
   stepIndex: number;
   flow: DemoFlow;
   playbackMode: DemoPlaybackMode;
+  surface: DemoSurface;
 };
 
 type DemoContextValue = {
@@ -75,6 +77,9 @@ type DemoContextValue = {
   isNavigating: boolean;
   navigationEpoch: number;
   activeDemoTargetId: string | null;
+  surface: DemoSurface;
+  pocketExpanded: boolean;
+  setPocketExpanded: (expanded: boolean) => void;
   startDemo: (mode?: DemoPlaybackMode) => Promise<void>;
   exitDemo: () => void;
   goNext: () => Promise<void>;
@@ -99,11 +104,16 @@ function loadPersisted(): DemoPersisted | null {
   try {
     const raw = sessionStorage.getItem(DEMO_STORAGE_KEY);
     if (!raw) return null;
-    const p = JSON.parse(raw) as DemoPersisted & { flow?: DemoFlow; playbackMode?: DemoPlaybackMode };
+    const p = JSON.parse(raw) as DemoPersisted & {
+      flow?: DemoFlow;
+      playbackMode?: DemoPlaybackMode;
+      surface?: DemoSurface;
+    };
     if (!p.active || typeof p.stepIndex !== "number") return null;
     const flow = p.flow === "authenticated" ? "authenticated" : "guest";
     const playbackMode = p.playbackMode === "auto" ? "auto" : "manual";
-    return { active: p.active, stepIndex: p.stepIndex, flow, playbackMode };
+    const surface = p.surface === "mobile" ? "mobile" : "desktop";
+    return { active: p.active, stepIndex: p.stepIndex, flow, playbackMode, surface };
   } catch {
     return null;
   }
@@ -139,6 +149,8 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   const [isNavigating, setIsNavigating] = useState(false);
   const [navigationEpoch, setNavigationEpoch] = useState(0);
   const [activeDemoTargetId, setActiveDemoTargetIdState] = useState<string | null>(null);
+  const [surface, setSurface] = useState<DemoSurface>("desktop");
+  const [pocketExpanded, setPocketExpanded] = useState(false);
 
   const navigatingRef = useRef(false);
   const autoAdvancingRef = useRef(false);
@@ -151,13 +163,19 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   const isLoggedIn = !!session?.user;
 
   const activeSteps = useMemo(
-    () => (flow ? getDemoSteps(flow) : getDemoSteps("guest")),
-    [flow],
+    () => (flow ? getDemoSteps(flow, surface) : getDemoSteps("guest", surface)),
+    [flow, surface],
   );
 
   const saveStep = useCallback(
-    (index: number, currentFlow: DemoFlow, mode: DemoPlaybackMode) => {
-      savePersisted({ active: true, stepIndex: index, flow: currentFlow, playbackMode: mode });
+    (index: number, currentFlow: DemoFlow, mode: DemoPlaybackMode, currentSurface: DemoSurface) => {
+      savePersisted({
+        active: true,
+        stepIndex: index,
+        flow: currentFlow,
+        playbackMode: mode,
+        surface: currentSurface,
+      });
     },
     [],
   );
@@ -181,6 +199,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     header.closeCategories();
     header.closeLocaleMenu();
     header.closeProfileMenu();
+    header.closeMobileNav();
   }, []);
 
   const beginStepTransition = useCallback(() => {
@@ -256,19 +275,21 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       }
 
       const header = headerHandlersRef.current;
+      const tourSurface = detectDemoSurface();
       if (header) {
         header.closeCategories();
         header.closeLocaleMenu();
         header.closeProfileMenu();
+        header.closeMobileNav();
         if (step.onEnter === "openCategories") {
           header.openCategories();
-          await new Promise((r) => setTimeout(r, 280));
+          await new Promise((r) => setTimeout(r, tourSurface === "mobile" ? 400 : 280));
         }
-        if (step.onEnter === "openLocaleMenu") {
+        if (step.onEnter === "openLocaleMenu" && tourSurface === "desktop") {
           header.openLocaleMenu();
           await new Promise((r) => setTimeout(r, 280));
         }
-        if (step.onEnter === "openProfileMenu") {
+        if (step.onEnter === "openProfileMenu" && tourSurface === "desktop") {
           header.openProfileMenu();
           await new Promise((r) => setTimeout(r, 280));
           const { queryDemoTarget } = await import("@/lib/demo/demo-overlay");
@@ -276,6 +297,10 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
             queryDemoTarget("profile-menu-trigger")?.click();
             await new Promise((r) => setTimeout(r, 150));
           }
+        }
+        if (step.onEnter === "openMobileNav") {
+          header.openMobileNav();
+          await new Promise((r) => setTimeout(r, 320));
         }
       }
 
@@ -295,7 +320,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       data?: DemoBootstrap | null,
       modeOverride?: DemoPlaybackMode,
     ) => {
-      const steps = getDemoSteps(currentFlow);
+      const steps = getDemoSteps(currentFlow, surface);
       const b = data ?? bootstrap;
       const step = steps[index];
       if (!step) return;
@@ -307,7 +332,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       try {
         beginStepTransition();
         setStepIndex(index);
-        saveStep(index, currentFlow, mode);
+        saveStep(index, currentFlow, mode, surface);
 
         const path = resolveStepPath(step, b);
         if (path.startsWith("/account") && !session?.user) {
@@ -327,7 +352,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
         setIsNavigating(false);
       }
     },
-    [beginStepTransition, bootstrap, locale, playbackMode, router, runOnEnter, saveStep, session?.user, updateSession],
+    [beginStepTransition, bootstrap, locale, playbackMode, router, runOnEnter, saveStep, session?.user, surface, updateSession],
   );
 
   const resolveFlow = useCallback((): DemoFlow => {
@@ -338,9 +363,12 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   const startDemo = useCallback(
     async (mode: DemoPlaybackMode = "manual") => {
       const chosenFlow = resolveFlow();
+      const chosenSurface = detectDemoSurface();
       const b = await fetchBootstrap();
       setBootstrap(b);
       setFlow(chosenFlow);
+      setSurface(chosenSurface);
+      setPocketExpanded(false);
       setPlaybackModeState(mode);
       setScrollSpeedState(loadPreferredScrollSpeed());
       setAutoPaused(false);
@@ -363,6 +391,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     setIsNavigating(false);
     setActiveDemoTargetIdState(null);
     setAutoPaused(false);
+    setPocketExpanded(false);
     prevStepRef.current = null;
     closeHeaderDemoUi();
     savePersisted(null);
@@ -372,9 +401,9 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     setPlaybackModeState(mode);
     if (mode === "auto") setAutoPaused(false);
     if (isActive && flow) {
-      saveStep(stepIndex, flow, mode);
+      saveStep(stepIndex, flow, mode, surface);
     }
-  }, [flow, isActive, saveStep, stepIndex]);
+  }, [flow, isActive, saveStep, stepIndex, surface]);
 
   const pauseAuto = useCallback(() => setAutoPaused(true), []);
   const resumeAuto = useCallback(() => setAutoPaused(false), []);
@@ -391,7 +420,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     }
     autoAdvancingRef.current = false;
 
-    const steps = getDemoSteps(flow);
+    const steps = getDemoSteps(flow, surface);
     const step = steps[stepIndex];
     if (!step) return;
 
@@ -411,7 +440,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       beginStepTransition();
       prevStepRef.current = step;
       setStepIndex(nextIndex);
-      saveStep(nextIndex, flow, playbackMode);
+      saveStep(nextIndex, flow, playbackMode, surface);
       if (next.checkoutSubStep) applyCheckoutSubStep(next.checkoutSubStep);
       await runOnEnter(next, steps);
       return;
@@ -419,12 +448,12 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
 
     prevStepRef.current = step;
     await navigateToStep(nextIndex, flow);
-  }, [applyCheckoutSubStep, beginStepTransition, bootstrap, exitDemo, flow, navigateToStep, playbackMode, runOnEnter, saveStep, stepIndex]);
+  }, [applyCheckoutSubStep, beginStepTransition, bootstrap, exitDemo, flow, navigateToStep, playbackMode, runOnEnter, saveStep, stepIndex, surface]);
 
   const goPrev = useCallback(async () => {
     if (!flow || stepIndex <= 0) return;
 
-    const steps = getDemoSteps(flow);
+    const steps = getDemoSteps(flow, surface);
     const step = steps[stepIndex];
     const prev = steps[stepIndex - 1];
     if (!step || !prev) return;
@@ -435,7 +464,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       setAutoPaused(true);
       prevStepRef.current = step;
       setStepIndex(prevIndex);
-      saveStep(prevIndex, flow, playbackMode);
+      saveStep(prevIndex, flow, playbackMode, surface);
       if (prev.checkoutSubStep) applyCheckoutSubStep(prev.checkoutSubStep);
       if (prev.onEnter === "prefillRegister" && prev.registerPhase && registerPrefillRef.current) {
         registerPrefillRef.current(prev.registerPhase);
@@ -449,7 +478,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     setAutoPaused(true);
     prevStepRef.current = step;
     await navigateToStep(stepIndex - 1, flow);
-  }, [applyCheckoutSubStep, beginStepTransition, bootstrap, flow, navigateToStep, playbackMode, runOnEnter, saveStep, stepIndex]);
+  }, [applyCheckoutSubStep, beginStepTransition, bootstrap, flow, navigateToStep, playbackMode, runOnEnter, saveStep, stepIndex, surface]);
 
   useEffect(() => {
     const persisted = loadPersisted();
@@ -459,10 +488,11 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       const b = await fetchBootstrap();
       setBootstrap(b);
       setFlow(persisted.flow);
+      setSurface(persisted.surface);
       setPlaybackModeState(persisted.playbackMode);
       setIsActive(true);
       setStepIndex(persisted.stepIndex);
-      const steps = getDemoSteps(persisted.flow);
+      const steps = getDemoSteps(persisted.flow, persisted.surface);
       const step = steps[persisted.stepIndex];
       if (step?.checkoutSubStep) applyCheckoutSubStep(step.checkoutSubStep);
     })();
@@ -470,31 +500,31 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isActive || navigatingRef.current || !bootstrap || !flow) return;
-    const steps = getDemoSteps(flow);
+    const steps = getDemoSteps(flow, surface);
     const idx = findStepIndexByPathname(pathname, steps, bootstrap, stepIndex);
     if (idx >= 0 && idx !== stepIndex) {
       beginStepTransition();
       setStepIndex(idx);
-      saveStep(idx, flow, playbackMode);
+      saveStep(idx, flow, playbackMode, surface);
       const step = steps[idx];
       if (step?.checkoutSubStep) applyCheckoutSubStep(step.checkoutSubStep);
       if (step?.registerPhase && registerPrefillRef.current) {
         registerPrefillRef.current(step.registerPhase);
       }
     }
-  }, [pathname, isActive, bootstrap, flow, stepIndex, applyCheckoutSubStep, beginStepTransition, playbackMode, saveStep]);
+  }, [pathname, isActive, bootstrap, flow, stepIndex, applyCheckoutSubStep, beginStepTransition, playbackMode, saveStep, surface]);
 
   useEffect(() => {
     if (!isActive || playbackMode !== "auto" || autoPaused || !stepReady || !flow) return;
 
-    const steps = getDemoSteps(flow);
+    const steps = getDemoSteps(flow, surface);
     const step = steps[stepIndex];
     const previous = prevStepRef.current;
     if (!step) return;
     if (step.id === "finish") return;
 
     const samePath = previous ? isSamePathSubSteps(previous, step, bootstrap) : false;
-    const delay = getAutoAdvanceDelay(step, samePath, scrollSpeed);
+    const delay = getAutoAdvanceDelay(step, samePath, scrollSpeed, surface);
 
     const timer = window.setTimeout(() => {
       autoAdvancingRef.current = true;
@@ -502,11 +532,11 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     }, delay);
 
     return () => window.clearTimeout(timer);
-  }, [autoPaused, bootstrap, flow, goNext, isActive, playbackMode, scrollSpeed, stepIndex, stepReady]);
+  }, [autoPaused, bootstrap, flow, goNext, isActive, playbackMode, scrollSpeed, stepIndex, stepReady, surface]);
 
   useEffect(() => {
     if (!isActive || !flow) return;
-    const steps = getDemoSteps(flow);
+    const steps = getDemoSteps(flow, surface);
     const step = steps[stepIndex];
     if (step?.checkoutSubStep) {
       applyCheckoutSubStep(step.checkoutSubStep);
@@ -517,7 +547,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     (handlers: CheckoutDemoHandlers | null) => {
       checkoutHandlersRef.current = handlers;
       if (handlers && isActive && flow) {
-        const steps = getDemoSteps(flow);
+        const steps = getDemoSteps(flow, surface);
         const step = steps[stepIndex];
         if (step?.checkoutSubStep) handlers.setStep(step.checkoutSubStep);
         if (step?.onEnter === "prefillCheckout") handlers.prefill();
@@ -536,7 +566,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   const registerPrefillHandler = useCallback((handler: RegisterPrefillHandler | null) => {
     registerPrefillRef.current = handler;
     if (handler && isActive && flow) {
-      const steps = getDemoSteps(flow);
+      const steps = getDemoSteps(flow, surface);
       const step = steps[stepIndex];
       if (step?.registerPhase) handler(step.registerPhase);
     }
@@ -570,6 +600,9 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       isNavigating,
       navigationEpoch,
       activeDemoTargetId,
+      surface,
+      pocketExpanded,
+      setPocketExpanded,
       startDemo,
       exitDemo,
       goNext,
@@ -605,6 +638,8 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       isNavigating,
       navigationEpoch,
       activeDemoTargetId,
+      surface,
+      pocketExpanded,
       startDemo,
       exitDemo,
       goNext,

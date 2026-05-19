@@ -18,7 +18,12 @@ export const SELLER_OVERVIEW_LEFT_EXTRA_PX = 10;
 export const HEADER_OVERLAY_STEP_IDS = new Set(["category-nav"]);
 
 /** Steps that use a full-page dim veil with no spotlight hole. */
-export const AMBIENT_ONLY_STEP_IDS = new Set(["locale-settings", "profile-menu"]);
+export const AMBIENT_ONLY_STEP_IDS = new Set([
+  "locale-settings",
+  "profile-menu",
+  "mobile-menu-settings",
+  "mobile-menu-account",
+]);
 
 /** Steps with no overlay at all (fully clear page). */
 export const NO_VEIL_STEP_IDS = new Set(["finish"]);
@@ -36,6 +41,8 @@ const STEP_FALLBACKS: Record<string, string[]> = {
   "category-nav": ["category-nav-trigger"],
   "locale-settings": [],
   "profile-menu": [],
+  "mobile-menu-settings": ["mobile-nav-menu"],
+  "mobile-menu-account": ["mobile-nav-menu"],
   categories: ["categories-grid"],
   products: ["products-sort"],
   sellers: ["sellers-grid"],

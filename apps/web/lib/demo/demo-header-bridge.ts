@@ -5,4 +5,6 @@ export type HeaderDemoHandlers = {
   closeLocaleMenu: () => void;
   openProfileMenu: () => void;
   closeProfileMenu: () => void;
+  openMobileNav: () => void;
+  closeMobileNav: () => void;
 };

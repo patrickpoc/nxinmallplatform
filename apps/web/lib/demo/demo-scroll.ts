@@ -1,3 +1,5 @@
+import type { DemoSurface } from "@/lib/demo/demo-surface";
+
 export type DemoScrollSpeed = 0.5 | 1 | 1.5 | 2;
 
 export const DEMO_SPEED_PREF_KEY = "nxinmall:demo-speed-pref";
@@ -18,6 +20,12 @@ const REVEAL_DELAY_BY_STEP: Record<string, number> = {
   "seller-categories": 2000,
   "checkout-address": 2000,
   "checkout-review": 2000,
+};
+
+const REVEAL_DELAY_BY_STEP_MOBILE: Record<string, number> = {
+  "category-nav": 1600,
+  "checkout-address": 1500,
+  "checkout-review": 1500,
 };
 
 /** Bottom clearance aligned with demo target scroll-margin in globals.css */
@@ -75,8 +83,21 @@ export function shouldScrollToTopOnStepEnter(stepId: string): boolean {
   return SCROLL_TO_TOP_ON_ENTER_STEP_IDS.has(stepId) || isTopFirstDemoStep(stepId);
 }
 
-export function getRevealScrollDelayMs(stepId: string): number {
+export function getRevealScrollDelayMs(stepId: string, surface: DemoSurface = "desktop"): number {
+  if (surface === "mobile") {
+    return REVEAL_DELAY_BY_STEP_MOBILE[stepId] ?? 1200;
+  }
   return REVEAL_DELAY_BY_STEP[stepId] ?? DEMO_SCROLL_REVEAL_DELAY_MS;
+}
+
+export function getDemoViewportBottomMargin(
+  surface: DemoSurface = "desktop",
+  pocketExpanded = false,
+): number {
+  if (surface === "mobile") {
+    return pocketExpanded ? 128 : 64;
+  }
+  return DEMO_VIEWPORT_BOTTOM_MARGIN;
 }
 
 export function isPageScrollable(): boolean {

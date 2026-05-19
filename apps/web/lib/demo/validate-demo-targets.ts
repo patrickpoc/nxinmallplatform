@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { getDemoSteps, type DemoFlow } from "@/lib/demo/demo-steps";
+import type { DemoSurface } from "@/lib/demo/demo-surface";
 
 function walkSourceFiles(dir: string, acc: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
@@ -24,6 +25,7 @@ export type DemoTargetAuditIssue = {
 export function collectDemoTargetAuditIssues(
   sourceRoot: string,
   flows: DemoFlow[] = ["guest", "authenticated"],
+  surfaces: DemoSurface[] = ["desktop", "mobile"],
 ): DemoTargetAuditIssue[] {
   const files = walkSourceFiles(sourceRoot);
   const source = files.map((f) => readFileSync(f, "utf8")).join("\n");
@@ -31,8 +33,9 @@ export function collectDemoTargetAuditIssues(
   const seen = new Set<string>();
 
   for (const flow of flows) {
-    for (const step of getDemoSteps(flow)) {
-      const key = `${flow}:${step.id}`;
+    for (const surface of surfaces) {
+    for (const step of getDemoSteps(flow, surface)) {
+      const key = `${flow}:${surface}:${step.id}`;
       if (seen.has(key)) continue;
       seen.add(key);
 
@@ -44,6 +47,7 @@ export function collectDemoTargetAuditIssues(
       if (!source.includes(marker)) {
         issues.push({ stepId: step.id, target: step.target, reason: "missing_dom_marker" });
       }
+    }
     }
   }
 

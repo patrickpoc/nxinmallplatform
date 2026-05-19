@@ -47,6 +47,7 @@
     "carouselPrev": "Anterior",
     "carouselNext": "Próximo",
     "carouselGoto": "Ir para o slide",
+    "heroSwipeHint": "Deslize para mudar o slide",
     "bannerKicker": "Marketplace B2B Global",
     "bannerTitle": "Do campo ao comércio — tudo do agro em um só lugar",
     "bannerSubtitle": "Explore milhares de produtos de fornecedores verificados ao redor do mundo. Sementes, equipamentos, insumos e muito mais — com preços transparentes e cotações diretas.",
@@ -502,6 +503,11 @@
     "exit": "Sair da demonstração",
     "flowGuest": "Demonstração · Visitante",
     "flowAuthenticated": "Demonstração · Conta conectada",
+    "flowMobile": "Demonstração · Mobile",
+    "pocket": {
+      "expand": "Mostrar detalhes",
+      "collapse": "Ocultar detalhes"
+    },
     "registerBanner": "Modo demonstração — dados fictícios",
     "startDialogTitle": "Iniciar demonstração",
     "startDialogDescription": "Escolha como deseja percorrer o tour da plataforma.",

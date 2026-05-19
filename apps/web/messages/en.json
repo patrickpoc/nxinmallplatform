@@ -49,6 +49,7 @@
     "carouselPrev": "Previous",
     "carouselNext": "Next",
     "carouselGoto": "Go to slide",
+    "heroSwipeHint": "Swipe to change slide",
     "bannerKicker": "Global B2B Marketplace",
     "bannerTitle": "From field to trade — everything agriculture in one place",
     "bannerSubtitle": "Explore thousands of products from verified suppliers across the globe. Seeds, equipment, inputs and more — all with transparent pricing and direct quotations.",
@@ -522,6 +523,11 @@
     "exit": "Exit demo",
     "flowGuest": "Demo · Guest",
     "flowAuthenticated": "Demo · Signed in",
+    "flowMobile": "Demo · Mobile",
+    "pocket": {
+      "expand": "Show details",
+      "collapse": "Hide details"
+    },
     "registerBanner": "Demo mode — fictional data",
     "startDialogTitle": "Start demonstration",
     "startDialogDescription": "Choose how you want to navigate the platform tour.",

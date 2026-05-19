@@ -1,4 +1,5 @@
 import type { DemoStep } from "@/lib/demo/demo-steps";
+import type { DemoSurface } from "@/lib/demo/demo-surface";
 import type { DemoScrollSpeed } from "@/lib/demo/demo-scroll";
 
 export type DemoPlaybackMode = "manual" | "auto";
@@ -29,13 +30,18 @@ export function savePreferredPlaybackMode(mode: DemoPlaybackMode) {
   }
 }
 
-function baseAutoAdvanceDelay(step: DemoStep, samePathAsPrevious: boolean): number {
-  if (step.onEnter === "signInDemo") return 9000;
-  if (step.onEnter === "confirmCheckout") return 8500;
-  if (step.onEnter === "prefillCheckout" || step.onEnter === "seedCart") return 7500;
-  if (samePathAsPrevious) return 5200;
-  if (step.path.includes("[id]")) return 6800;
-  return 6200;
+function baseAutoAdvanceDelay(
+  step: DemoStep,
+  samePathAsPrevious: boolean,
+  surface: DemoSurface,
+): number {
+  const mobile = surface === "mobile";
+  if (step.onEnter === "signInDemo") return mobile ? 6500 : 9000;
+  if (step.onEnter === "confirmCheckout") return mobile ? 6200 : 8500;
+  if (step.onEnter === "prefillCheckout" || step.onEnter === "seedCart") return mobile ? 5500 : 7500;
+  if (samePathAsPrevious) return mobile ? 3900 : 5200;
+  if (step.path.includes("[id]")) return mobile ? 5200 : 6800;
+  return mobile ? 4600 : 6200;
 }
 
 /** Delay before auto-advance once the step is ready (ms), scaled by scroll speed. */
@@ -43,6 +49,7 @@ export function getAutoAdvanceDelay(
   step: DemoStep,
   samePathAsPrevious: boolean,
   speed: DemoScrollSpeed = 1,
+  surface: DemoSurface = "desktop",
 ): number {
-  return Math.round(baseAutoAdvanceDelay(step, samePathAsPrevious) / speed);
+  return Math.round(baseAutoAdvanceDelay(step, samePathAsPrevious, surface) / speed);
 }

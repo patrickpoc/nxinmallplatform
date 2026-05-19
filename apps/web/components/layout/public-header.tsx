@@ -124,6 +124,13 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
         setProfileMenuOpen(true);
       },
       closeProfileMenu: () => setProfileMenuOpen(false),
+      openMobileNav: () => {
+        setCatOpen(false);
+        setLocaleMenuOpen(false);
+        setProfileMenuOpen(false);
+        setMobileOpen(true);
+      },
+      closeMobileNav: () => setMobileOpen(false),
     };
     demo.registerHeaderHandlers(handlers);
     return () => demo.registerHeaderHandlers(null);
@@ -395,7 +402,7 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="max-h-[min(85dvh,100vh)] overflow-y-auto overscroll-contain border-t border-border bg-white md:hidden"
           >
-            <div className="px-4 py-3">
+            <div className="px-4 py-3" data-demo-target="mobile-nav-menu">
               <nav aria-label={t("shopNavigation")} className="flex flex-col gap-1 text-sm font-medium">
                 <DemoStartButton variant="menu" onStarted={() => setMobileOpen(false)} />
                 {!session?.user ? (
@@ -413,7 +420,7 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
                   </div>
                 ) : null}
                 {session?.user ? (
-                  <div className="mb-2 space-y-1 border-b border-border pb-3">
+                  <div className="mb-2 space-y-1 border-b border-border pb-3" data-demo-target="mobile-nav-account">
                     <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-brand-gray">{t("sectionAccount")}</p>
                     <Link href="/account/dashboard" className="block rounded-md px-3 py-2.5 hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
                       {t("dashboard")}
@@ -463,7 +470,7 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
                 <Link href="/about" className="rounded-md px-3 py-2 transition-colors hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
                   {t("about")}
                 </Link>
-                <div className="mt-2 space-y-3 border-t border-border pt-3">
+                <div className="mt-2 space-y-3 border-t border-border pt-3" data-demo-target="mobile-nav-settings">
                   <div className="flex flex-wrap gap-2 text-xs">
                     <span className="text-brand-gray">{t("languageLabel")}:</span>
                     {locales.map((l) => (

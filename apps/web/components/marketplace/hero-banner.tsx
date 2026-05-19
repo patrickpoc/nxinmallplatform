@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 
@@ -106,6 +106,7 @@ const SLIDES: SlideConfig[] = [
 ];
 
 const INTERVAL_MS = 6000;
+const SWIPE_THRESHOLD_PX = 48;
 
 type HeroBannerProps = {
   categories: { id: string; slug: string; name: unknown }[];
@@ -113,8 +114,11 @@ type HeroBannerProps = {
 
 export function HeroBanner({ categories }: HeroBannerProps) {
   const locale = useLocale() as "en" | "pt" | "zh";
+  const t = useTranslations("marketplaceHome");
   const [index, setIndex] = useState(0);
   const [scrollY, setScrollY] = useState(0);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const slugToId: Record<string, string> = {};
   for (const c of categories) {
@@ -126,23 +130,62 @@ export function HeroBanner({ categories }: HeroBannerProps) {
   const next = useCallback(() => setIndex((i) => (i + 1) % total), [total]);
   const prev = useCallback(() => setIndex((i) => (i - 1 + total) % total), [total]);
 
-  useEffect(() => {
-    const timer = setInterval(next, INTERVAL_MS);
-    return () => clearInterval(timer);
+  const resetAutoplay = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(next, INTERVAL_MS);
   }, [next]);
 
   useEffect(() => {
-    function handleScroll() { setScrollY(window.scrollY); }
+    resetAutoplay();
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [resetAutoplay]);
+
+  useEffect(() => {
+    function handleScroll() {
+      setScrollY(window.scrollY);
+    }
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  function goToSlide(i: number) {
+    setIndex(i);
+    resetAutoplay();
+  }
+
+  function onTouchStart(e: React.TouchEvent) {
+    const t = e.touches[0];
+    if (!t) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("a, button")) return;
+    touchStart.current = { x: t.clientX, y: t.clientY };
+  }
+
+  function onTouchEnd(e: React.TouchEvent) {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) <= Math.abs(dy)) return;
+    if (dx < 0) next();
+    else prev();
+    resetAutoplay();
+  }
 
   const parallaxOffset = scrollY * 0.25;
 
   return (
     <section className="relative" data-demo-target="hero">
-      <div className="relative h-[38vh] w-full overflow-hidden sm:h-[45vh] md:h-[60vh] lg:h-[65vh]">
-        {/* Images */}
+      <div
+        className="relative h-[38vh] w-full touch-pan-y overflow-hidden sm:h-[45vh] md:h-[60vh] lg:h-[65vh]"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         {SLIDES.map((s, i) => (
           <div
             key={s.src}
@@ -166,11 +209,9 @@ export function HeroBanner({ categories }: HeroBannerProps) {
           </div>
         ))}
 
-        {/* Overlay gradients for text legibility */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
 
-        {/* Text content over image */}
         {SLIDES.map((slide, i) => {
           const catId = slugToId[slide.categorySlug];
           const href = catId ? `/products?category=${catId}` : `/products`;
@@ -196,9 +237,7 @@ export function HeroBanner({ categories }: HeroBannerProps) {
                     size="lg"
                     className="btn-press w-full rounded-md bg-green-600 px-7 py-3 text-sm font-semibold shadow-lg transition-colors hover:bg-green-700 sm:w-auto sm:text-base"
                   >
-                    <Link href={href}>
-                      {slide.cta[locale] ?? slide.cta.en}
-                    </Link>
+                    <Link href={href}>{slide.cta[locale] ?? slide.cta.en}</Link>
                   </Button>
                 </div>
               </div>
@@ -206,36 +245,43 @@ export function HeroBanner({ categories }: HeroBannerProps) {
           );
         })}
 
-        {/* Navigation arrows */}
         <button
           type="button"
-          onClick={prev}
-          className="absolute left-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white shadow backdrop-blur-sm transition-colors hover:bg-black/50 md:left-5 md:h-12 md:w-12"
+          onClick={() => {
+            prev();
+            resetAutoplay();
+          }}
+          className="absolute left-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white shadow backdrop-blur-sm transition-colors hover:bg-black/50 md:left-5 md:flex md:h-12 md:w-12"
           aria-label="Previous slide"
         >
           <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
         </button>
         <button
           type="button"
-          onClick={next}
-          className="absolute right-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white shadow backdrop-blur-sm transition-colors hover:bg-black/50 md:right-5 md:h-12 md:w-12"
+          onClick={() => {
+            next();
+            resetAutoplay();
+          }}
+          className="absolute right-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white shadow backdrop-blur-sm transition-colors hover:bg-black/50 md:right-5 md:flex md:h-12 md:w-12"
           aria-label="Next slide"
         >
           <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
         </button>
 
-        {/* Dots */}
-        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2 md:bottom-6">
-          {SLIDES.map((s, i) => (
-            <button
-              key={s.categorySlug}
-              type="button"
-              onClick={() => setIndex(i)}
-              className={`h-2.5 rounded-full transition-all ${i === index ? "w-8 bg-white shadow" : "w-2.5 bg-white/40 hover:bg-white/70"}`}
-              aria-label={`Slide ${i + 1} – ${s.cta[locale] ?? s.cta.en}`}
-              aria-current={i === index}
-            />
-          ))}
+        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2 md:bottom-6">
+          <p className="text-[10px] font-medium uppercase tracking-wide text-white/80 md:hidden">{t("heroSwipeHint")}</p>
+          <div className="flex gap-2">
+            {SLIDES.map((s, i) => (
+              <button
+                key={s.categorySlug}
+                type="button"
+                onClick={() => goToSlide(i)}
+                className={`h-2.5 rounded-full transition-all ${i === index ? "w-8 bg-white shadow" : "w-2.5 bg-white/40 hover:bg-white/70"}`}
+                aria-label={`Slide ${i + 1} – ${s.cta[locale] ?? s.cta.en}`}
+                aria-current={i === index}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

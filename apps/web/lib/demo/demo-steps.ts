@@ -1,3 +1,12 @@
+import type { DemoSurface } from "@/lib/demo/demo-surface";
+import {
+  DEMO_STEPS_MOBILE_AUTHENTICATED,
+  DEMO_STEPS_MOBILE_GUEST,
+  MOBILE_HOME_OVERLAY_STEP_IDS,
+} from "@/lib/demo/demo-steps-mobile";
+
+export type { DemoSurface } from "@/lib/demo/demo-surface";
+
 export type DemoFlow = "guest" | "authenticated";
 
 export type DemoOnEnter =
@@ -9,6 +18,7 @@ export type DemoOnEnter =
   | "openCategories"
   | "openLocaleMenu"
   | "openProfileMenu"
+  | "openMobileNav"
   | "openProductsSort";
 
 export type RegisterPhase = "intro" | "credentials" | "role" | "review";
@@ -326,7 +336,10 @@ export const DEMO_STEPS = DEMO_STEPS_GUEST;
 
 export const DEMO_STORAGE_KEY = "nxinmall:demo";
 
-export function getDemoSteps(flow: DemoFlow): DemoStep[] {
+export function getDemoSteps(flow: DemoFlow, surface: DemoSurface = "desktop"): DemoStep[] {
+  if (surface === "mobile") {
+    return flow === "authenticated" ? DEMO_STEPS_MOBILE_AUTHENTICATED : DEMO_STEPS_MOBILE_GUEST;
+  }
   return flow === "authenticated" ? DEMO_STEPS_LOGGED_IN : DEMO_STEPS_GUEST;
 }
 
@@ -336,6 +349,7 @@ const HOME_OVERLAY_STEP_IDS = new Set([
   "category-nav",
   "locale-settings",
   "profile-menu",
+  ...MOBILE_HOME_OVERLAY_STEP_IDS,
 ]);
 
 export function resolveStepPath(step: DemoStep, bootstrap: DemoBootstrap | null): string {

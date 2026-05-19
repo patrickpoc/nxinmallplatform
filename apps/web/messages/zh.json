@@ -47,6 +47,7 @@
     "carouselPrev": "上一张",
     "carouselNext": "下一张",
     "carouselGoto": "转到",
+    "heroSwipeHint": "滑动切换幻灯片",
     "bannerKicker": "全球 B2B 农业市场",
     "bannerTitle": "从田间到贸易 — 一站式农业采购平台",
     "bannerSubtitle": "探索来自全球认证供应商的数千种产品。种子、设备、农资等应有尽有 — 价格透明，直接询价。",
@@ -502,6 +503,11 @@
     "exit": "退出演示",
     "flowGuest": "演示 · 访客",
     "flowAuthenticated": "演示 · 已登录",
+    "flowMobile": "演示 · 手机版",
+    "pocket": {
+      "expand": "展开详情",
+      "collapse": "收起详情"
+    },
     "registerBanner": "演示模式 — 虚构数据",
     "startDialogTitle": "开始演示",
     "startDialogDescription": "选择您希望如何浏览平台导览。",

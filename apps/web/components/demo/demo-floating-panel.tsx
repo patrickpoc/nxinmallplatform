@@ -87,7 +87,7 @@ export function DemoFloatingPanel() {
       role="dialog"
       aria-labelledby="demo-panel-title"
       aria-describedby="demo-panel-body"
-      className={`fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md rounded-xl border border-border bg-white p-4 shadow-dropdown sm:left-auto sm:right-6 sm:max-w-sm pb-[max(1rem,env(safe-area-inset-bottom))] ${
+      className={`fixed bottom-4 left-4 right-4 z-50 mx-auto hidden max-w-md rounded-xl border border-border bg-white p-4 shadow-dropdown sm:left-auto sm:right-6 sm:max-w-sm md:block pb-[max(1rem,env(safe-area-inset-bottom))] ${
         fadeOut ? "demo-panel-fade-out pointer-events-none" : "transition-shadow duration-300"
       }`}
     >

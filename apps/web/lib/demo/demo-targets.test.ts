@@ -1,11 +1,16 @@
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { DEMO_STEPS_GUEST, DEMO_STEPS_LOGGED_IN } from "@/lib/demo/demo-steps";
+import { getDemoSteps } from "@/lib/demo/demo-steps";
 import { assertDemoTargetsValid } from "@/lib/demo/validate-demo-targets";
 
 describe("demo step targets", () => {
-  it("every guest and logged-in step defines a target", () => {
-    for (const step of [...DEMO_STEPS_GUEST, ...DEMO_STEPS_LOGGED_IN]) {
+  it("every guest and logged-in step defines a target (desktop and mobile)", () => {
+    for (const step of [
+      ...getDemoSteps("guest", "desktop"),
+      ...getDemoSteps("authenticated", "desktop"),
+      ...getDemoSteps("guest", "mobile"),
+      ...getDemoSteps("authenticated", "mobile"),
+    ]) {
       expect(step.target, `step ${step.id} missing target`).toBeTruthy();
     }
   });
