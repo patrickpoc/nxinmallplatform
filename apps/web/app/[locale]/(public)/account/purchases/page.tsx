@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { Check, Clock, Trash2 } from "lucide-react";
@@ -14,9 +15,13 @@ const LOCALE_MAP: Record<string, string> = { en: "en-US", pt: "pt-BR", zh: "zh-C
 export default function PurchasesPage() {
   const t = useTranslations("account");
   const locale = useLocale();
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
   const [orders, setOrders] = useState<SavedOrder[]>([]);
 
-  const refresh = useCallback(() => setOrders(loadOrders()), []);
+  const refresh = useCallback(() => {
+    if (userId) setOrders(loadOrders(userId));
+  }, [userId]);
 
   useEffect(() => {
     refresh();
@@ -34,14 +39,16 @@ export default function PurchasesPage() {
   }, [refresh]);
 
   function handleConfirm(orderId: string) {
-    confirmOrder(orderId);
+    if (!userId) return;
+    confirmOrder(userId, orderId);
     refresh();
     toast.success(t("confirmPaymentSuccess"));
   }
 
   function handleRemove(orderId: string) {
+    if (!userId) return;
     if (!window.confirm(t("removePurchaseConfirm"))) return;
-    if (removeOrder(orderId)) {
+    if (removeOrder(userId, orderId)) {
       refresh();
       toast.success(t("removePurchaseSuccess"));
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Check, Clock, DollarSign, Info, ShoppingCart } from "lucide-react";
@@ -34,16 +35,22 @@ function formatDate(iso: string) {
 
 export default function AccountDashboardPage() {
   const t = useTranslations("account");
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
   const [orders, setOrders] = useState<SavedOrder[]>([]);
   const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
-    setOrders(loadOrders());
-    const profile = loadProfile();
-    if (profile?.name) setUserName(profile.name);
-    const interval = setInterval(() => setOrders(loadOrders()), 30_000);
+    if (!userId) return;
+    const refresh = () => {
+      setOrders(loadOrders(userId));
+      const profile = loadProfile(userId);
+      if (profile?.name) setUserName(profile.name);
+    };
+    refresh();
+    const interval = setInterval(refresh, 30_000);
     return () => clearInterval(interval);
-  }, []);
+  }, [userId]);
 
   const recent = orders.slice(0, 3);
 

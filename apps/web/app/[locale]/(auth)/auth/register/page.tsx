@@ -36,7 +36,7 @@ export default function RegisterPage() {
   const searchParams = useSearchParams();
   const demo = useDemoTourOptional();
   const roleParam = searchParams.get("role");
-  const callbackUrl = `/${locale}/account/dashboard`;
+  const callbackUrl = `/${locale}/account/personal`;
   const [error, setError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);

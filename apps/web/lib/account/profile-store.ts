@@ -20,8 +20,16 @@ export type SavedAddress = {
   state: string;
 };
 
-const PROFILE_KEY = "nxin_profile";
-const ADDRESS_KEY = "nxin_address";
+const PROFILE_KEY_PREFIX = "nxin_profile:";
+const ADDRESS_KEY_PREFIX = "nxin_address:";
+
+function profileKey(userId: string): string {
+  return `${PROFILE_KEY_PREFIX}${userId}`;
+}
+
+function addressKey(userId: string): string {
+  return `${ADDRESS_KEY_PREFIX}${userId}`;
+}
 
 function readJson<T>(key: string): T | null {
   if (typeof window === "undefined") return null;
@@ -38,18 +46,18 @@ function writeJson<T>(key: string, data: T): void {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
-export function saveProfile(data: SavedProfile): void {
-  writeJson(PROFILE_KEY, data);
+export function saveProfile(userId: string, data: SavedProfile): void {
+  writeJson(profileKey(userId), data);
 }
 
-export function loadProfile(): SavedProfile | null {
-  return readJson<SavedProfile>(PROFILE_KEY);
+export function loadProfile(userId: string): SavedProfile | null {
+  return readJson<SavedProfile>(profileKey(userId));
 }
 
-export function saveAddress(data: SavedAddress): void {
-  writeJson(ADDRESS_KEY, data);
+export function saveAddress(userId: string, data: SavedAddress): void {
+  writeJson(addressKey(userId), data);
 }
 
-export function loadAddress(): SavedAddress | null {
-  return readJson<SavedAddress>(ADDRESS_KEY);
+export function loadAddress(userId: string): SavedAddress | null {
+  return readJson<SavedAddress>(addressKey(userId));
 }

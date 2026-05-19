@@ -728,12 +728,13 @@ export function CheckoutPageClient() {
   const [orderId, setOrderId] = useState("");
   const [savedPayment, setSavedPayment] = useState<PaymentMethod | null>(null);
 
+  const userId = session?.user?.id;
   const hydrated = useRef(false);
   useEffect(() => {
-    if (hydrated.current) return;
+    if (hydrated.current || !userId) return;
     hydrated.current = true;
-    const profile = loadProfile();
-    const addr = loadAddress();
+    const profile = loadProfile(userId);
+    const addr = loadAddress(userId);
     if (!profile && !addr) return;
     setAddress((prev) => ({
       ...prev,
@@ -750,7 +751,7 @@ export function CheckoutPageClient() {
       city: addr?.city || prev.city,
       state: addr?.state || prev.state,
     }));
-  }, []);
+  }, [userId]);
 
   const { total, fmt, isLoading } = useTotals(lines, selectedFreight, payment);
   const totalFormatted = isLoading ? "…" : fmt(total);
@@ -758,27 +759,29 @@ export function CheckoutPageClient() {
   const doConfirm = useCallback(() => {
     if (!selectedFreight || !payment) return;
     const id = `#NXM-${Date.now().toString(36).toUpperCase()}`;
-    saveOrder({
-      id,
-      createdAt: new Date().toISOString(),
-      items: lines.map((l) => ({
-        name: l.name,
-        quantity: l.quantity,
-        priceAmount: l.priceAmount,
-        priceCurrency: l.priceCurrency,
-        imageUrl: l.imageUrl,
-      })),
-      address,
-      freight: selectedFreight,
-      payment,
-      totalFormatted: isLoading ? "…" : fmt(total),
-      status: "pending",
-    });
+    if (userId) {
+      saveOrder(userId, {
+        id,
+        createdAt: new Date().toISOString(),
+        items: lines.map((l) => ({
+          name: l.name,
+          quantity: l.quantity,
+          priceAmount: l.priceAmount,
+          priceCurrency: l.priceCurrency,
+          imageUrl: l.imageUrl,
+        })),
+        address,
+        freight: selectedFreight,
+        payment,
+        totalFormatted: isLoading ? "…" : fmt(total),
+        status: "pending",
+      });
+    }
     setOrderId(id);
     setSavedPayment(payment);
     clear();
     setDone(true);
-  }, [address, clear, fmt, isLoading, lines, payment, selectedFreight, total]);
+  }, [address, clear, fmt, isLoading, lines, payment, selectedFreight, total, userId]);
 
   useEffect(() => {
     if (!demo?.isActive) {

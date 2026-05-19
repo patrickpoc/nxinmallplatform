@@ -22,6 +22,7 @@ import { loadProfile } from "@/lib/account/profile-store";
 type SidebarProps = {
   locale: string;
   role: string;
+  userId: string;
   userName: string | null;
   userEmail: string;
 };
@@ -76,16 +77,16 @@ function NavItems({
   );
 }
 
-export function AccountSidebar({ locale, role, userName, userEmail }: SidebarProps) {
+export function AccountSidebar({ locale, role, userId, userName, userEmail }: SidebarProps) {
   const t = useTranslations("account");
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [displayName, setDisplayName] = useState(userName);
 
   useEffect(() => {
-    const saved = loadProfile();
+    const saved = loadProfile(userId);
     if (saved?.name) setDisplayName(saved.name);
-  }, []);
+  }, [userId]);
 
   const avatar = (displayName ?? userEmail).charAt(0).toUpperCase();
 

@@ -24,6 +24,7 @@ const PROFILE_OPTIONS = [
 export default function PersonalDataPage() {
   const t = useTranslations("account");
   const { data: session } = useSession();
+  const userId = session?.user?.id;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -36,7 +37,8 @@ export default function PersonalDataPage() {
   const [profiles, setProfiles] = useState<string[]>([]);
 
   useEffect(() => {
-    const saved = loadProfile();
+    if (!userId) return;
+    const saved = loadProfile(userId);
     if (saved) {
       setName(saved.name || session?.user?.name || "");
       setEmail(saved.email || session?.user?.email || "");
@@ -49,7 +51,7 @@ export default function PersonalDataPage() {
       setName(session?.user?.name || "");
       setEmail(session?.user?.email || "");
     }
-  }, [session]); // re-run when session loads
+  }, [session, userId]);
 
   function toggleProfile(key: string) {
     setProfiles((prev) => (prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]));
@@ -57,7 +59,8 @@ export default function PersonalDataPage() {
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    saveProfile({ name, email, phone, docType, cpfCnpj, whatsapp, profiles });
+    if (!userId) return;
+    saveProfile(userId, { name, email, phone, docType, cpfCnpj, whatsapp, profiles });
     toast.success(t("personalSaved"));
   }
 

@@ -19,32 +19,36 @@ export type SavedOrder = {
   status: "pending" | "approved";
 };
 
-const ORDERS_KEY = "nxin_orders";
+const ORDERS_KEY_PREFIX = "nxin_orders:";
 const AUTO_APPROVE_MS = 5 * 60 * 1000;
 
-function readOrders(): SavedOrder[] {
+function ordersKey(userId: string): string {
+  return `${ORDERS_KEY_PREFIX}${userId}`;
+}
+
+function readOrders(userId: string): SavedOrder[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(ORDERS_KEY);
+    const raw = localStorage.getItem(ordersKey(userId));
     return raw ? (JSON.parse(raw) as SavedOrder[]) : [];
   } catch {
     return [];
   }
 }
 
-function writeOrders(orders: SavedOrder[]): void {
+function writeOrders(userId: string, orders: SavedOrder[]): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  localStorage.setItem(ordersKey(userId), JSON.stringify(orders));
 }
 
-export function saveOrder(order: SavedOrder): void {
-  const orders = readOrders();
+export function saveOrder(userId: string, order: SavedOrder): void {
+  const orders = readOrders(userId);
   orders.unshift(order);
-  writeOrders(orders);
+  writeOrders(userId, orders);
 }
 
-export function loadOrders(): SavedOrder[] {
-  const orders = readOrders();
+export function loadOrders(userId: string): SavedOrder[] {
+  const orders = readOrders(userId);
   const now = Date.now();
   let changed = false;
 
@@ -58,27 +62,27 @@ export function loadOrders(): SavedOrder[] {
     }
   }
 
-  if (changed) writeOrders(orders);
+  if (changed) writeOrders(userId, orders);
   return orders;
 }
 
-export function confirmOrder(orderId: string): void {
-  const orders = readOrders();
+export function confirmOrder(userId: string, orderId: string): void {
+  const orders = readOrders(userId);
   const order = orders.find((o) => o.id === orderId);
   if (order && order.status === "pending") {
     order.status = "approved";
-    writeOrders(orders);
+    writeOrders(userId, orders);
   }
 }
 
-export function removeOrder(orderId: string): boolean {
-  const orders = readOrders();
+export function removeOrder(userId: string, orderId: string): boolean {
+  const orders = readOrders(userId);
   const next = orders.filter((o) => o.id !== orderId);
   if (next.length === orders.length) return false;
-  writeOrders(next);
+  writeOrders(userId, next);
   return true;
 }
 
-export function orderCount(): number {
-  return readOrders().length;
+export function orderCount(userId: string): number {
+  return readOrders(userId).length;
 }

@@ -23,6 +23,7 @@ export default async function AccountLayout({
       <AccountSidebar
         locale={params.locale}
         role={session.user.role}
+        userId={session.user.id}
         userName={session.user.name ?? null}
         userEmail={session.user.email ?? ""}
       />

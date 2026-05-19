@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -22,15 +23,18 @@ const EMPTY: SavedAddress = { cep: "", street: "", number: "", complement: "", n
 export default function AddressesPage() {
   const t = useTranslations("account");
   const tc = useTranslations("checkout");
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
 
   const [saved, setSaved] = useState<SavedAddress | null>(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<SavedAddress>(EMPTY);
 
   useEffect(() => {
-    const loaded = loadAddress();
-    if (loaded) setSaved(loaded);
-  }, []);
+    if (!userId) return;
+    const loaded = loadAddress(userId);
+    if (loaded?.cep) setSaved(loaded);
+  }, [userId]);
 
   function update(field: keyof SavedAddress, value: string) {
     const next = { ...form, [field]: value };
@@ -52,7 +56,8 @@ export default function AddressesPage() {
   }
 
   function handleSave() {
-    saveAddress(form);
+    if (!userId) return;
+    saveAddress(userId, form);
     setSaved(form);
     setEditing(false);
     toast.success(t("personalSaved"));
@@ -64,7 +69,8 @@ export default function AddressesPage() {
   }
 
   function handleDelete() {
-    saveAddress(EMPTY);
+    if (!userId) return;
+    saveAddress(userId, EMPTY);
     setSaved(null);
     setForm(EMPTY);
     setEditing(false);
