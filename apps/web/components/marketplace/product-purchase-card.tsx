@@ -83,7 +83,7 @@ export function ProductPurchaseCard({
             )}
           </div>
 
-          <div className="mt-auto space-y-3" data-demo-target="add-to-cart">
+          <div className="mt-auto space-y-3 [&_button]:w-full sm:[&_button]:w-auto" data-demo-target="add-to-cart">
             {variantId ? (
               <>
                 <QuantitySelector value={qty} onChange={setQty} />

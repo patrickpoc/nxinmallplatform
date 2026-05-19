@@ -36,7 +36,7 @@ export default async function CategoriesPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-16 md:px-6" data-demo-target="categories-page">
-      <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
+      <h1 className="heading-page">{t("title")}</h1>
       <AnimatedGrid className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-demo-target="categories-grid">
         {rows.map((c) => (
           <AnimatedGridItem key={c.id}>

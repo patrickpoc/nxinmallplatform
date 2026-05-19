@@ -87,9 +87,9 @@ export async function MarketplaceHome() {
       {/* Categories strip */}
       <FadeIn delay={0.1}>
       <section className="border-b border-border py-6">
-        <div className="mx-auto max-w-6xl px-4 md:px-6">
+        <div className="page-container">
           <h2 className="mb-3 text-center text-sm font-semibold uppercase tracking-wide text-brand-gray">{t("categoriesStrip")}</h2>
-          <div className="flex flex-wrap justify-center gap-3 pb-1">
+          <div className="grid grid-cols-2 gap-2 pb-1 sm:grid-cols-3 sm:gap-3 md:flex md:flex-wrap md:justify-center">
             {categories.map((c) => (
               <Link
                 key={c.id}
@@ -108,7 +108,7 @@ export async function MarketplaceHome() {
       {/* Rail A: New Arrivals */}
       <FadeIn delay={0.15}>
       <section className="border-b border-border bg-surface-light/40 py-10">
-        <div className="mx-auto max-w-6xl px-4 md:px-6">
+        <div className="page-container">
           <HorizontalRail title={t("railNewArrivals")} scrollPrevLabel={t("carouselPrev")} scrollNextLabel={t("carouselNext")}>
             {railA.map((p) => <RailProductCard key={p.id} product={toRailCard(p)} />)}
           </HorizontalRail>
@@ -119,7 +119,7 @@ export async function MarketplaceHome() {
       {/* Rail B: More to Explore */}
       <FadeIn delay={0.2}>
       <section className="border-b border-border py-10">
-        <div className="mx-auto max-w-6xl px-4 md:px-6">
+        <div className="page-container">
           <HorizontalRail title={t("railMoreToExplore")} scrollPrevLabel={t("carouselPrev")} scrollNextLabel={t("carouselNext")}>
             {railB.map((p) => <RailProductCard key={p.id} product={toRailCard(p)} />)}
           </HorizontalRail>
@@ -130,7 +130,7 @@ export async function MarketplaceHome() {
       {/* Rail C: Recently Added */}
       <FadeIn delay={0.25}>
       <section className="border-b border-border bg-surface-light/40 py-10">
-        <div className="mx-auto max-w-6xl px-4 md:px-6">
+        <div className="page-container">
           <HorizontalRail title={t("railRecentlyAdded")} scrollPrevLabel={t("carouselPrev")} scrollNextLabel={t("carouselNext")}>
             {railC.map((p) => <RailProductCard key={p.id} product={toRailCard(p)} />)}
           </HorizontalRail>

@@ -36,7 +36,7 @@ export function CartHeaderMenu() {
           </Badge>
         ) : null}
       </Button>
-      <DialogContent className="max-h-[85vh] max-w-md overflow-y-auto">
+      <DialogContent className="max-h-[70dvh] w-[calc(100vw-2rem)] max-w-md overflow-y-auto sm:w-full">
         <DialogHeader>
           <DialogTitle>{tc("miniTitle")}</DialogTitle>
           <DialogDescription>{tc("miniDescription")}</DialogDescription>

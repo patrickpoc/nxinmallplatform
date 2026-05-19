@@ -67,7 +67,12 @@ function StepBar({ current, t }: { current: number; t: (k: string) => string }) 
             >
               {done ? <Check className="h-3.5 w-3.5" /> : stepNum}
             </div>
-            <span className={cn(active ? "inline text-brand-blue" : "hidden sm:inline", done ? "text-brand-dark" : "text-brand-gray")}>
+            <span
+              className={cn(
+                "max-w-[4.5rem] truncate text-[10px] leading-tight sm:max-w-none sm:text-xs",
+                active ? "text-brand-blue" : done ? "text-brand-dark" : "text-brand-gray",
+              )}
+            >
               {t(`step${stepNum}Label`)}
             </span>
           </div>
@@ -848,7 +853,7 @@ export function CheckoutPageClient() {
   if (lines.length === 0 && !done) {
     return (
       <div className="mx-auto max-w-lg space-y-6 px-4 py-16 md:px-6">
-        <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
+        <h1 className="heading-page">{t("title")}</h1>
         <p className="text-brand-gray">{t("emptyCart")}</p>
         <Button asChild variant="outline">
           <Link href="/cart">{t("backToCart")}</Link>

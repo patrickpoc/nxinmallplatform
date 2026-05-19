@@ -25,7 +25,7 @@ export function RailProductCard({ product }: { product: RailProductCardData }) {
   const { id, name, imageUrl, priceAmount, priceCurrency, variantId, unit } = product;
 
   return (
-    <div className="w-[240px] shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-white shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-blue hover:shadow-md">
+    <div className="w-[min(85vw,240px)] shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-white shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-blue hover:shadow-md sm:w-[240px]">
       <Link href={`/products/${id}`} className="block">
         <div className="relative aspect-[4/3] bg-white">
           {imageUrl ? (

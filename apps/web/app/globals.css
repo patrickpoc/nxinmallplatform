@@ -50,7 +50,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply min-h-dvh overflow-x-hidden bg-background text-foreground antialiased;
   }
   a {
     @apply transition-colors duration-150;
@@ -65,6 +65,26 @@
   .btn-press {
     @apply transition-all duration-150;
   }
+
+  .page-container {
+    @apply mx-auto max-w-6xl px-4 md:px-6;
+  }
+
+  .heading-page {
+    @apply text-2xl font-bold text-brand-dark sm:text-3xl;
+  }
+
+  .touch-target {
+    @apply min-h-11 min-w-11;
+  }
+
+  .tabs-scroll {
+    @apply -mx-1 max-w-full overflow-x-auto pb-1;
+  }
+
+  .tabs-scroll > [role="tablist"] {
+    @apply inline-flex w-max min-w-full justify-start;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -76,7 +96,7 @@
 /* Guided demo: scroll room for targets + floating panel; never lock overflow */
 body.demo-tour-active {
   overflow-y: auto;
-  padding-bottom: 7.5rem;
+  padding-bottom: max(7.5rem, calc(7.5rem + env(safe-area-inset-bottom)));
 }
 
 [data-demo-target] {

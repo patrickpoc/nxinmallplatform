@@ -10,5 +10,5 @@ export default async function BuyerLayout({ children, params }: { children: Reac
   if (session.user.role !== "BUYER") {
     redirect(`/${params.locale}/dashboard`);
   }
-  return <div className="mx-auto max-w-6xl px-4 py-10 md:px-6">{children}</div>;
+  return <div className="page-container py-8 md:py-10">{children}</div>;
 }

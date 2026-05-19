@@ -100,7 +100,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12">
+    <div className="mx-auto w-full max-w-lg px-4 py-8 sm:py-12">
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle>{t("title")}</CardTitle>
@@ -145,16 +145,16 @@ export default function OnboardingPage() {
             </div>
           ) : null}
 
-          <div className="flex justify-between pt-4">
-            <Button type="button" variant="outline" disabled={step === 1} onClick={() => setStep((s) => Math.max(1, s - 1))}>
+          <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-between">
+            <Button type="button" variant="outline" disabled={step === 1} onClick={() => setStep((s) => Math.max(1, s - 1))} className="w-full sm:w-auto">
               Back
             </Button>
             {step < 5 ? (
-              <Button type="button" onClick={nextStep}>
+              <Button type="button" onClick={nextStep} className="w-full sm:w-auto">
                 {t("next")}
               </Button>
             ) : (
-              <Button type="button" onClick={submit}>
+              <Button type="button" onClick={submit} className="w-full sm:w-auto">
                 {t("submit")}
               </Button>
             )}

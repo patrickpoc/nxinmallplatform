@@ -75,7 +75,7 @@ export default async function SellersPage() {
   if (companies.length === 0) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-16 md:px-6">
-        <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
+        <h1 className="heading-page">{t("title")}</h1>
         <p className="mt-4 text-brand-gray">{t("empty")}</p>
       </div>
     );
@@ -83,7 +83,7 @@ export default async function SellersPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-16 md:px-6" data-demo-target="sellers-page">
-      <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
+      <h1 className="heading-page">{t("title")}</h1>
       <AnimatedGrid className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-demo-target="sellers-grid">
         {companies.map((co) => {
           const rng = seededRandom(co.id);

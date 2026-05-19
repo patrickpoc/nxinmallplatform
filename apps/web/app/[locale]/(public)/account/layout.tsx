@@ -27,7 +27,7 @@ export default async function AccountLayout({
         userName={session.user.name ?? null}
         userEmail={session.user.email ?? ""}
       />
-      <main className="flex-1 px-4 py-8 md:px-8 md:py-10">
+      <main className="flex-1 px-4 py-6 md:px-8 md:py-10">
         {children}
       </main>
     </div>

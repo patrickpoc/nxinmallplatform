@@ -102,7 +102,7 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 md:px-6 md:py-12">
+    <div className="page-container space-y-6 py-6 md:py-12">
       <div className="space-y-6" data-demo-target="pdp-showcase">
       <ProductBreadcrumbs
         categoryId={product.categoryId}
@@ -117,7 +117,7 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
       <div className="space-y-6" data-demo-target="pdp-main">
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-4">
-          <h1 className="text-3xl font-bold text-brand-dark">{name}</h1>
+          <h1 className="heading-page min-w-0 flex-1 truncate sm:whitespace-normal">{name}</h1>
           <ShareButton />
         </div>
         {product.seller.company ? (
@@ -163,11 +163,13 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
 
       <div className="mt-2 rounded-xl bg-surface-light/30 p-4">
         <Tabs defaultValue="details">
+          <div className="tabs-scroll">
           <TabsList className="bg-surface-light">
             <TabsTrigger value="details">{t("tabDetails")}</TabsTrigger>
             <TabsTrigger value="specs">{t("tabSpecifications")}</TabsTrigger>
             <TabsTrigger value="docs">{t("tabDocuments")}</TabsTrigger>
           </TabsList>
+          </div>
           <TabsContent value="details">
             <Card className="shadow-card">
               <CardContent className="space-y-2 p-6 text-sm text-brand-gray">

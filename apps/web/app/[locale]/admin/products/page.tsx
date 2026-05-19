@@ -46,8 +46,9 @@ export default async function AdminProductsPage({ params }: { params: { locale: 
           <CardContent className="p-8 text-center text-sm text-brand-gray">{t("productsEmpty")}</CardContent>
         </Card>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <table className="w-full min-w-[640px] text-left text-sm">
+        <>
+        <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
+          <table className="w-full text-left text-sm">
             <thead className="border-b border-border bg-surface-light">
               <tr>
                 <th className="px-4 py-3 font-semibold text-brand-dark">{t("productsColImage")}</th>
@@ -89,6 +90,38 @@ export default async function AdminProductsPage({ params }: { params: { locale: 
             </tbody>
           </table>
         </div>
+
+        <div className="space-y-3 md:hidden">
+          {products.map((p) => {
+            const name = (p.name as { en?: string }).en ?? p.id;
+            const price = p.variants[0]?.priceUsd ? Number(p.variants[0].priceUsd) : 0;
+            const img = p.images[0]?.url;
+            return (
+              <Card key={p.id} className="shadow-card">
+                <CardContent className="flex gap-4 p-4">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded bg-surface-light">
+                    {img ? (
+                      <Image src={img} alt="" fill className="object-contain p-1" unoptimized sizes="64px" />
+                    ) : (
+                      <span className="flex h-full items-center justify-center text-xs text-brand-gray">—</span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <p className="font-medium text-brand-dark">{name}</p>
+                    <p className="text-sm text-brand-gray">
+                      <CurrencyDisplay amountUsd={price} />
+                    </p>
+                    <p className="text-xs text-brand-gray">{p.status}</p>
+                    <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
+                      <Link href={`/admin/products/${p.id}/edit`}>{t("productsEdit")}</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+        </>
       )}
     </div>
   );

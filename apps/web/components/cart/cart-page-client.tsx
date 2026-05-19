@@ -31,8 +31,8 @@ export function CartPageClient() {
 
   if (lines.length === 0) {
     return (
-      <div className="mx-auto max-w-2xl space-y-6 px-4 py-16 text-center md:px-6">
-        <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
+      <div className="page-container max-w-2xl space-y-6 py-12 text-center sm:py-16">
+        <h1 className="heading-page">{t("title")}</h1>
         <p className="text-brand-gray">{t("empty")}</p>
         <Button asChild variant="outline">
           <Link href="/products">{t("continueShopping")}</Link>
@@ -42,8 +42,8 @@ export function CartPageClient() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 px-4 py-16 md:px-6" data-demo-target="cart-summary">
-      <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
+    <div className="page-container max-w-3xl space-y-8 py-10 pb-28 sm:py-16 sm:pb-16" data-demo-target="cart-summary">
+      <h1 className="heading-page">{t("title")}</h1>
       <ul className="space-y-4">
         {lines.map((line) => (
           <li key={line.lineId}>
@@ -66,17 +66,14 @@ export function CartPageClient() {
                     {line.unit ? ` · ${line.unit}` : ""}
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
-                    <QuantitySelector
-                      value={line.quantity}
-                      onChange={(n) => updateQuantity(line.lineId, n)}
-                    />
+                    <QuantitySelector value={line.quantity} onChange={(n) => updateQuantity(line.lineId, n)} />
                     <Button type="button" variant="ghost" size="sm" className="text-error" onClick={() => removeLine(line.lineId)}>
                       {t("remove")}
                     </Button>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs text-brand-gray">{t("lineTotal")}</p>
+                <div className="flex items-center justify-between gap-4 sm:block sm:text-right">
+                  <p className="text-xs text-brand-gray sm:hidden">{t("lineTotal")}</p>
                   <PriceDisplay
                     amount={line.priceAmount * line.quantity}
                     currency={line.priceCurrency}
@@ -98,7 +95,7 @@ export function CartPageClient() {
           <CartTotalRow lines={lines} locale={locale} />
         </CardContent>
       </Card>
-      <div className="flex flex-wrap gap-3">
+      <div className="hidden flex-wrap gap-3 sm:flex">
         <Button asChild variant="outline">
           <Link href="/products">{t("continueShopping")}</Link>
         </Button>
@@ -106,6 +103,21 @@ export function CartPageClient() {
           <Link href="/checkout">{t("goCheckout")}</Link>
         </Button>
       </div>
+
+      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-white/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg backdrop-blur sm:hidden">
+        <div className="mx-auto flex max-w-3xl flex-col gap-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-brand-gray">{t("estimatedTotal")}</span>
+            <CartTotalRow lines={lines} locale={locale} />
+          </div>
+          <Button asChild className="w-full touch-target">
+            <Link href="/checkout">{t("goCheckout")}</Link>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
+
+
+

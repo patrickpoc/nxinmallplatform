@@ -144,11 +144,11 @@ export default async function ProductsPage({ params, searchParams }: { params: {
   );
 
   const subcategoryChips = subcategories.length > 0 && (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible sm:gap-3">
       {parentCatId && (
         <Link
           href={`/products?category=${parentCatId}`}
-          className={`rounded-xl border px-4 py-3 text-sm font-medium shadow-sm transition-colors ${searchParams.category === parentCatId ? "border-brand-blue bg-brand-blue text-white" : "border-border bg-white text-brand-dark hover:border-brand-blue hover:text-brand-blue"}`}
+          className={`shrink-0 snap-start rounded-xl border px-4 py-3 text-sm font-medium shadow-sm transition-colors ${searchParams.category === parentCatId ? "border-brand-blue bg-brand-blue text-white" : "border-border bg-white text-brand-dark hover:border-brand-blue hover:text-brand-blue"}`}
         >
           {t("all")}
         </Link>
@@ -157,7 +157,7 @@ export default async function ProductsPage({ params, searchParams }: { params: {
         <Link
           key={sub.id}
           href={`/products?category=${sub.id}`}
-          className={`rounded-xl border px-4 py-3 text-sm font-medium shadow-sm transition-colors ${sub.id === searchParams.category ? "border-brand-blue bg-brand-blue text-white" : "border-border bg-white text-brand-dark hover:border-brand-blue hover:text-brand-blue"}`}
+          className={`shrink-0 snap-start rounded-xl border px-4 py-3 text-sm font-medium shadow-sm transition-colors ${sub.id === searchParams.category ? "border-brand-blue bg-brand-blue text-white" : "border-border bg-white text-brand-dark hover:border-brand-blue hover:text-brand-blue"}`}
         >
           {catLabel(sub.name, locale)}
         </Link>
@@ -167,9 +167,9 @@ export default async function ProductsPage({ params, searchParams }: { params: {
 
   if (products.length === 0) {
     return (
-      <div className="mx-auto max-w-6xl space-y-4 px-4 py-16 md:px-6">
+      <div className="page-container space-y-4 py-12 sm:py-16">
         {breadcrumbs}
-        <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
+        <h1 className="heading-page">{t("title")}</h1>
         {parentCatName ? <p className="text-lg font-medium text-brand-blue">{catLabel(parentCatName, locale)}</p> : null}
         {!parentCatName && activeCat ? <p className="text-lg font-medium text-brand-blue">{catLabel(activeCat.name, locale)}</p> : null}
         {subcategoryChips}
@@ -185,18 +185,18 @@ export default async function ProductsPage({ params, searchParams }: { params: {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-16 md:px-6">
+    <div className="page-container space-y-6 py-12 sm:py-16">
       {breadcrumbs}
 
       <div className="space-y-3">
-        <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
+        <h1 className="heading-page">{t("title")}</h1>
         {parentCatName ? <p className="text-lg font-medium text-brand-blue">{catLabel(parentCatName, locale)}</p> : null}
         {!parentCatName && activeCat ? <p className="text-lg font-medium text-brand-blue">{catLabel(activeCat.name, locale)}</p> : null}
         {q ? <p className="text-sm text-brand-gray">{t("searchingFor", { q })}</p> : null}
         {subcategoryChips}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <p className="text-sm text-brand-gray">{t("showingCount", { count: products.length })}</p>
         <SortSelect
           currentSort={currentSort}

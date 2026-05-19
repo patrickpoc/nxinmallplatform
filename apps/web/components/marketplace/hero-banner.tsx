@@ -190,11 +190,11 @@ export function HeroBanner({ categories }: HeroBannerProps) {
                 <p className="max-w-md text-sm leading-relaxed text-white/90 drop-shadow sm:text-base md:text-lg">
                   {slide.sub[locale] ?? slide.sub.en}
                 </p>
-                <div className={`pt-1 ${slide.align === "right" ? "flex justify-end" : ""}`}>
+                <div className={`flex w-full flex-col gap-2 pt-1 sm:w-auto ${slide.align === "right" ? "sm:items-end" : ""}`}>
                   <Button
                     asChild
                     size="lg"
-                    className="btn-press rounded-md bg-green-600 px-7 py-3 text-sm font-semibold shadow-lg transition-colors hover:bg-green-700 sm:text-base"
+                    className="btn-press w-full rounded-md bg-green-600 px-7 py-3 text-sm font-semibold shadow-lg transition-colors hover:bg-green-700 sm:w-auto sm:text-base"
                   >
                     <Link href={href}>
                       {slide.cta[locale] ?? slide.cta.en}

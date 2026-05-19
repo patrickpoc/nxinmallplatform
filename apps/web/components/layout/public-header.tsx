@@ -146,7 +146,7 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
     <header className="sticky top-0 z-40 border-b border-border bg-white/95 backdrop-blur">
       <span className="sr-only" data-demo-target="locale-settings-zone" aria-hidden />
       {/* ─── BAR 1: Logo + Search + Icon actions ─── */}
-      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-2.5 md:px-6 md:py-3">
+      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4 md:gap-4 md:px-6 md:py-3">
         <Link href="/" className="flex shrink-0 items-center gap-2 justify-self-start" aria-label={t("logoHome")}>
           <NxinLogo />
         </Link>
@@ -173,7 +173,7 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
           </div>
         </form>
 
-        <div className="flex shrink-0 items-center gap-1 justify-self-end">
+        <div className="flex shrink-0 items-center gap-0.5 justify-self-end sm:gap-1">
             {session?.user ? (
               <>
             <DemoStartButton className="hidden md:inline-flex" />
@@ -233,7 +233,7 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
             ) : (
               <>
                 <DemoStartButton />
-                <Button variant="outline" size="sm" asChild className="hidden md:inline-flex">
+                <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
                   <Link href="/auth/login">{t("login")}</Link>
                 </Button>
               </>
@@ -393,12 +393,65 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="overflow-hidden border-t border-border bg-white md:hidden"
+            className="max-h-[min(85dvh,100vh)] overflow-y-auto overscroll-contain border-t border-border bg-white md:hidden"
           >
             <div className="px-4 py-3">
               <nav aria-label={t("shopNavigation")} className="flex flex-col gap-1 text-sm font-medium">
                 <DemoStartButton variant="menu" onStarted={() => setMobileOpen(false)} />
-                <Link href="/products" className="rounded-md px-3 py-2 transition-colors hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
+                {!session?.user ? (
+                  <div className="flex flex-col gap-2 py-1 sm:hidden">
+                    <Button asChild size="sm" className="w-full">
+                      <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
+                        {t("login")}
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
+                        {t("register")}
+                      </Link>
+                    </Button>
+                  </div>
+                ) : null}
+                {session?.user ? (
+                  <div className="mb-2 space-y-1 border-b border-border pb-3">
+                    <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-brand-gray">{t("sectionAccount")}</p>
+                    <Link href="/account/dashboard" className="block rounded-md px-3 py-2.5 hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
+                      {t("dashboard")}
+                    </Link>
+                    <Link href="/account/purchases" className="block rounded-md px-3 py-2.5 hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
+                      {t("myPurchases")}
+                    </Link>
+                    <Link href="/account/personal" className="block rounded-md px-3 py-2.5 hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
+                      {t("myData")}
+                    </Link>
+                    <Link href="/account/addresses" className="block rounded-md px-3 py-2.5 hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
+                      {t("addresses")}
+                    </Link>
+                    {session.user.role === "SELLER" ? (
+                      <>
+                        <p className="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wide text-brand-gray">{t("sectionSell")}</p>
+                        <Link href="/account/sales" className="block rounded-md px-3 py-2.5 hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
+                          {t("mySales")}
+                        </Link>
+                        <Link href="/account/listings" className="block rounded-md px-3 py-2.5 hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
+                          {t("myListings")}
+                        </Link>
+                      </>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="flex w-full items-center rounded-md px-3 py-2.5 text-left text-error hover:bg-error-surface"
+                      onClick={() => {
+                        setMobileOpen(false);
+                        void signOut({ callbackUrl: `/${locale}` });
+                      }}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" aria-hidden />
+                      {t("signOut")}
+                    </button>
+                  </div>
+                ) : null}
+                <Link href="/products" className="rounded-md px-3 py-2.5 transition-colors hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
                   {t("products")}
                 </Link>
                 <Link href="/categories" className="rounded-md px-3 py-2 transition-colors hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
@@ -446,6 +499,37 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
         )}
       </AnimatePresence>
 
+      {categories.length > 0 ? (
+        <nav
+          aria-label={t("shopNavigation")}
+          className="flex gap-1 overflow-x-auto border-t border-border bg-surface-light/40 px-4 py-2 md:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <button
+            type="button"
+            data-demo-target="category-nav-trigger"
+            onClick={() => setCatOpen(true)}
+            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-brand-blue/30 bg-brand-blue/10 px-3 py-1.5 text-xs font-semibold text-brand-blue"
+          >
+            <LayoutGrid className="h-3.5 w-3.5" aria-hidden />
+            {t("allCategoriesHover")}
+          </button>
+          {categories.map((c) => (
+            <Link
+              key={c.id}
+              href={`/products?category=${c.id}`}
+              className={cn(
+                "shrink-0 snap-start whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                pathname.includes(`category=${c.id}`)
+                  ? "bg-brand-blue text-white"
+                  : "bg-white text-brand-dark ring-1 ring-border hover:text-brand-blue",
+              )}
+            >
+              {categoryLabel(c.name)}
+            </Link>
+          ))}
+        </nav>
+      ) : null}
+
     </header>
 
     {/* Categories slide panel */}
@@ -457,7 +541,7 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 overscroll-contain bg-black/40"
             onClick={() => setCatOpen(false)}
             role="presentation"
           />
@@ -468,7 +552,7 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="relative z-10 flex h-full w-72 flex-col bg-white shadow-lg"
+            className="relative z-10 flex h-full w-full max-w-sm flex-col overscroll-contain bg-white shadow-lg sm:w-72"
             role="dialog"
             aria-modal="true"
             aria-label={t("allCategoriesHover")}

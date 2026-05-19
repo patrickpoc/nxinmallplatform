@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { getMessages, setRequestLocale } from "next-intl/server";
@@ -30,6 +30,12 @@ export const metadata: Metadata = {
     "Connecting Global Agriculture Through Digital Intelligence. Professional B2B marketplace for agricultural trade.",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
@@ -46,7 +52,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} className={`${inter.variable} ${jetbrains.variable}`}>
-      <body className="min-h-screen font-sans">
+      <body className="min-h-dvh font-sans">
         <Providers locale={locale} messages={messages}>
           {children}
         </Providers>

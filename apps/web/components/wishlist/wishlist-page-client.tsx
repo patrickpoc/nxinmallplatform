@@ -16,7 +16,7 @@ export function WishlistPageClient() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-2xl space-y-6 px-4 py-16 md:px-6">
-        <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
+        <h1 className="heading-page">{t("title")}</h1>
         <p className="text-brand-gray">{t("empty")}</p>
         <Button asChild variant="outline">
           <Link href="/products">{t("continueShopping")}</Link>
@@ -27,7 +27,7 @@ export function WishlistPageClient() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 px-4 py-16 md:px-6">
-      <h1 className="text-3xl font-bold text-brand-dark">{t("title")}</h1>
+      <h1 className="heading-page">{t("title")}</h1>
       <div className="grid gap-4 sm:grid-cols-2" data-demo-target="wishlist-list">
         {items.map((item) => (
           <Card key={item.productId} className="shadow-card">

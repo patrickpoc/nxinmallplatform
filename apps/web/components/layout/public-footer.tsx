@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { ArrowUp, Barcode, CreditCard, QrCode } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { NxinLogo } from "@/components/brand/nxin-logo";
-import { Button } from "@/components/ui/button";
 
 export function PublicFooter() {
   const t = useTranslations("footer");
@@ -17,9 +16,8 @@ export function PublicFooter() {
 
   return (
     <footer className="border-t border-border bg-white">
-      {/* Back to top */}
       <div className="border-b border-border bg-surface-light/50">
-        <div className="mx-auto max-w-6xl px-4 md:px-6">
+        <div className="page-container">
           <button
             type="button"
             onClick={scrollToTop}
@@ -31,19 +29,16 @@ export function PublicFooter() {
         </div>
       </div>
 
-      {/* Multi-column links */}
-      <div className="mx-auto max-w-6xl px-4 py-10 md:px-6">
+      <div className="page-container py-8 sm:py-10">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
-          {/* Brand column */}
           <div className="lg:col-span-2">
             <NxinLogo />
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-brand-gray">
               B2B agricultural marketplace connecting verified suppliers and buyers worldwide.
             </p>
-            {/* Payment badges */}
             <div className="mt-4 space-y-2">
               <p className="text-xs font-semibold uppercase tracking-wide text-brand-gray">{t("paymentMethods")}</p>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <span className="flex items-center gap-1 rounded border border-border px-2 py-1 text-xs text-brand-gray">
                   <QrCode className="h-3.5 w-3.5" aria-hidden /> PIX
                 </span>
@@ -57,7 +52,6 @@ export function PublicFooter() {
             </div>
           </div>
 
-          {/* Company */}
           <div>
             <h3 className="mb-3 text-sm font-semibold text-brand-dark">{t("company")}</h3>
             <ul className="space-y-2 text-sm">
@@ -67,7 +61,6 @@ export function PublicFooter() {
             </ul>
           </div>
 
-          {/* Support */}
           <div>
             <h3 className="mb-3 text-sm font-semibold text-brand-dark">{t("support")}</h3>
             <ul className="space-y-2 text-sm">
@@ -76,7 +69,6 @@ export function PublicFooter() {
             </ul>
           </div>
 
-          {/* Legal */}
           <div>
             <h3 className="mb-3 text-sm font-semibold text-brand-dark">{t("legal")}</h3>
             <ul className="space-y-2 text-sm">
@@ -88,9 +80,8 @@ export function PublicFooter() {
         </div>
       </div>
 
-      {/* Bottom bar */}
       <div className="border-t border-border">
-        <div className="mx-auto max-w-6xl px-4 py-4 md:px-6">
+        <div className="page-container py-4">
           <p className="text-center text-xs text-brand-gray">{t("rights", { year })}</p>
         </div>
       </div>

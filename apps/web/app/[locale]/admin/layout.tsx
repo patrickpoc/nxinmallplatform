@@ -22,8 +22,8 @@ export default async function AdminLayout({
   const t = await getTranslations("admin");
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 md:px-6">
-      <nav className="mb-8 flex flex-wrap gap-2 border-b border-border pb-4 text-sm font-medium">
+    <div className="page-container py-8 md:py-10">
+      <nav className="mb-8 flex gap-2 overflow-x-auto border-b border-border pb-4 text-sm font-medium [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible">
         <AdminNavLink href="/admin/dashboard" label={t("navDashboard")} />
         <AdminNavLink href="/admin/verification" label={t("navVerification")} />
         <AdminNavLink href="/admin/products" label={t("navProducts")} />
