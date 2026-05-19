@@ -1,9 +1,25 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+    "DIRECT_URL",
+    "AUTH_SECRET",
+    "AUTH_URL",
+    "NEXT_PUBLIC_APP_URL",
+    "PRISMA_SKIP_POSTINSTALL_GENERATE",
+    "API_PROXY_TARGET"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "passThroughEnv": [
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "AUTH_SECRET",
+        "AUTH_URL",
+        "NEXT_PUBLIC_APP_URL"
+      ]
     },
     "dev": {
       "dependsOn": ["^build"],

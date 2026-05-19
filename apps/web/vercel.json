@@ -1,5 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd ../.. && pnpm install",
-  "buildCommand": "cd ../.. && pnpm --filter @nxinmall/database exec prisma generate && pnpm exec turbo run build --filter=@nxinmall/web"
+  "installCommand": "cd ../.. && PRISMA_SKIP_POSTINSTALL_GENERATE=true pnpm install",
+  "buildCommand": "cd ../.. && pnpm run vercel-build",
+  "build": {
+    "env": {
+      "PRISMA_SKIP_POSTINSTALL_GENERATE": "true"
+    }
+  }
 }
