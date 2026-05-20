@@ -35,12 +35,13 @@ export function useCurrency(countryCode?: string | null) {
 
   function format(amount: number, currency: CurrencyCode, locale?: string) {
     const fmtLocale = locale ?? (currency === "BRL" ? "pt-BR" : "en-US");
+    const rounded = Math.round(amount * 100) / 100;
     return new Intl.NumberFormat(fmtLocale, {
       style: "currency",
       currency,
       minimumFractionDigits: 2,
-      maximumFractionDigits: 3,
-    }).format(amount);
+      maximumFractionDigits: 2,
+    }).format(rounded);
   }
 
   return {

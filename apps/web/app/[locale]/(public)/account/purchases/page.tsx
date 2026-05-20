@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { SellOnNxinmallCta } from "@/components/account/sell-on-nxinmall-cta";
+import { orderAmount } from "@/lib/account/buyer-stats";
 import { loadOrders, confirmOrder, removeOrder, type SavedOrder } from "@/lib/account/orders-store";
+import type { CurrencyCode } from "@/lib/currency-preference";
+import { useCurrency } from "@/lib/hooks/use-currency";
 
 const LOCALE_MAP: Record<string, string> = { en: "en-US", pt: "pt-BR", zh: "zh-CN" };
 
@@ -17,8 +20,18 @@ export default function PurchasesPage() {
   const t = useTranslations("account");
   const locale = useLocale();
   const { data: session } = useSession();
+  const { format } = useCurrency();
   const userId = session?.user?.id;
   const [orders, setOrders] = useState<SavedOrder[]>([]);
+
+  const formatOrderTotal = (order: SavedOrder) => {
+    const amount =
+      typeof order.totalAmount === "number" && !Number.isNaN(order.totalAmount)
+        ? order.totalAmount
+        : orderAmount(order);
+    const currency = (order.currency === "BRL" ? "BRL" : "USD") as CurrencyCode;
+    return format(amount, currency, locale);
+  };
 
   const refresh = useCallback(() => {
     if (userId) setOrders(loadOrders(userId));
@@ -111,7 +124,9 @@ export default function PurchasesPage() {
                     <td className="whitespace-nowrap px-4 py-3 font-medium text-brand-blue">{order.id}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-brand-gray">{formatDate(order.createdAt)}</td>
                     <td className="px-4 py-3 text-brand-dark">{itemCount(order)}</td>
-                    <td className="whitespace-nowrap px-4 py-3 font-medium text-brand-dark">{order.totalFormatted}</td>
+                    <td className="whitespace-nowrap px-4 py-3 font-medium tabular-nums text-brand-dark">
+                      {formatOrderTotal(order)}
+                    </td>
                     <td className="px-4 py-3">{statusBadge(order.status)}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap items-center gap-2">
@@ -154,7 +169,7 @@ export default function PurchasesPage() {
                     </div>
                     <div>
                       <p className="text-xs text-brand-gray">{t("colTotalValue")}</p>
-                      <p className="font-medium text-brand-dark">{order.totalFormatted}</p>
+                      <p className="font-medium tabular-nums text-brand-dark">{formatOrderTotal(order)}</p>
                     </div>
                   </div>
                   <p className="text-xs text-brand-gray">{itemCount(order)} {t("colItemCount").toLowerCase()}</p>

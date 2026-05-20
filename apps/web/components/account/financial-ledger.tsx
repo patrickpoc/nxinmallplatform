@@ -67,7 +67,9 @@ export function FinancialLedger() {
         <Card className="shadow-card">
           <CardContent className="p-5">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-gray">{t("financialTotalSpent")}</p>
-            <p className="mt-1 text-2xl font-bold text-brand-dark">{fmt(stats.totalSpent, stats.primaryCurrency)}</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-brand-dark sm:text-2xl" title={fmt(stats.totalSpent, stats.primaryCurrency)}>
+              {fmt(stats.totalSpent, stats.primaryCurrency)}
+            </p>
           </CardContent>
         </Card>
         <Card className="shadow-card">
