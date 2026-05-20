@@ -136,6 +136,28 @@ async function seedProductReviews() {
   console.log(
     `[seed] Created ${rows.length} product review(s) for ${withReviews}/${products.length} active products (${withoutReviews} without reviews for empty-state demo).`,
   );
+  await notifyCatalogRevalidate();
+}
+
+/** POST CATALOG_REVALIDATE_URL after review seed (e.g. production /api/catalog/revalidate?secret=...). */
+async function notifyCatalogRevalidate() {
+  const url = process.env.CATALOG_REVALIDATE_URL?.trim();
+  if (!url) {
+    console.log(
+      "[seed] Tip: set CATALOG_REVALIDATE_URL to your app POST /api/catalog/revalidate?secret=... to bust rating cache.",
+    );
+    return;
+  }
+  try {
+    const res = await fetch(url, { method: "POST" });
+    if (!res.ok) {
+      console.warn(`[seed] Catalog revalidate failed: HTTP ${res.status}`);
+      return;
+    }
+    console.log("[seed] Catalog cache revalidated (ratings, home rails, categories).");
+  } catch (error) {
+    console.warn("[seed] Catalog revalidate request failed:", error);
+  }
 }
 
 /** Marks ~12 ACTIVE products as sponsored for the home carousel (idempotent). */

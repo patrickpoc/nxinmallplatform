@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
-import { prisma } from "@nxinmall/database";
+import { prisma, prismaWrite } from "@nxinmall/database";
 import {
   getProductRatingsBatch,
   type ProductRatingAggregate,
@@ -149,11 +149,38 @@ function ratingsCacheKey(productIds: string[]): string {
   return [...productIds].sort().join(",");
 }
 
+/** Thrown inside unstable_cache loader to avoid caching empty ratings when DB has reviews. */
+class SkipRatingsCacheError extends Error {
+  constructor() {
+    super("skip-ratings-cache");
+    this.name = "SkipRatingsCacheError";
+  }
+}
+
 async function loadProductRatingsRecord(
   productIds: string[],
 ): Promise<Record<string, ProductRatingAggregate>> {
   const map = await getProductRatingsBatch(productIds);
-  return Object.fromEntries(map);
+  const record = Object.fromEntries(map);
+  if (productIds.length > 0 && Object.keys(record).length === 0) {
+    const total = await prismaWrite.productReview.count();
+    if (total > 0) {
+      throw new SkipRatingsCacheError();
+    }
+  }
+  return record;
+}
+
+async function loadProductRatingsFresh(
+  productIds: string[],
+): Promise<Map<string, ProductRatingAggregate>> {
+  try {
+    const map = await getProductRatingsBatch(productIds);
+    return map;
+  } catch (error) {
+    console.error("[cached-catalog] product-ratings fresh load failed", error);
+    return new Map();
+  }
 }
 
 export const getCachedProductRatings = cache(
@@ -161,12 +188,28 @@ export const getCachedProductRatings = cache(
     if (productIds.length === 0) return new Map();
 
     const key = ratingsCacheKey(productIds);
-    const record = await unstable_cache(
-      () => loadProductRatingsRecord(productIds),
-      ["product-ratings", key],
-      { revalidate: 180, tags: [CACHE_TAGS.ratings] },
-    )();
 
-    return new Map(Object.entries(record));
+    try {
+      const record = await unstable_cache(
+        () => loadProductRatingsRecord(productIds),
+        ["product-ratings", key],
+        { revalidate: 180, tags: [CACHE_TAGS.ratings] },
+      )();
+
+      if (productIds.length > 0 && Object.keys(record).length === 0) {
+        const total = await prismaWrite.productReview.count();
+        if (total > 0) {
+          return loadProductRatingsFresh(productIds);
+        }
+      }
+
+      return new Map(Object.entries(record));
+    } catch (error) {
+      if (error instanceof SkipRatingsCacheError) {
+        return loadProductRatingsFresh(productIds);
+      }
+      console.error("[cached-catalog] product-ratings cache load failed", error);
+      return loadProductRatingsFresh(productIds);
+    }
   },
 );

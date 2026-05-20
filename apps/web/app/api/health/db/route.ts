@@ -1,4 +1,4 @@
-import { prisma } from "@nxinmall/database";
+import { prisma, prismaWrite } from "@nxinmall/database";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ export async function GET() {
     const [activeProducts, categories, reviews] = await Promise.all([
       prisma.product.count({ where: { status: "ACTIVE" } }),
       prisma.category.count(),
-      prisma.productReview.count().catch(() => -1),
+      prismaWrite.productReview.count().catch(() => -1),
     ]);
 
     return NextResponse.json({

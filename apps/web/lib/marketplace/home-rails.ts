@@ -1,4 +1,4 @@
-import { prisma } from "@nxinmall/database";
+import { prisma, prismaWrite } from "@nxinmall/database";
 import { productListInclude, type ProductListRow } from "@/lib/product-listing";
 
 const RAIL_SIZE = 12;
@@ -25,7 +25,7 @@ async function fetchProductsByIds(ids: string[]): Promise<ProductListRow[]> {
 
 async function fetchTopSellerProducts(): Promise<ProductListRow[]> {
   try {
-    const reviewRank = await prisma.productReview.groupBy({
+    const reviewRank = await prismaWrite.productReview.groupBy({
       by: ["productId"],
       _count: { id: true },
       orderBy: { _count: { id: "desc" } },
@@ -35,8 +35,8 @@ async function fetchTopSellerProducts(): Promise<ProductListRow[]> {
       const ranked = await fetchProductsByIds(reviewRank.map((r) => r.productId));
       if (ranked.length > 0) return ranked;
     }
-  } catch {
-    // fall through
+  } catch (error) {
+    console.error("[home-rails] top sellers review rank failed", error);
   }
 
   try {
