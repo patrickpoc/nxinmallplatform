@@ -3,6 +3,7 @@
 import { prisma, Prisma } from "@nxinmall/database";
 import { productCreateSchema, productVariantSchema } from "@nxinmall/validators";
 import { revalidatePath } from "next/cache";
+import { revalidateCatalogCache } from "@/lib/marketplace/revalidate-catalog";
 import { z } from "zod";
 import type { Session } from "next-auth";
 import { auth } from "@/auth";
@@ -61,6 +62,7 @@ export async function createSellerProduct(input: SellerProductFormInput) {
     },
   });
 
+  revalidateCatalogCache();
   revalidatePath("/seller/products");
 }
 
@@ -119,6 +121,7 @@ export async function updateSellerProduct(productId: string, input: SellerProduc
     }
   });
 
+  revalidateCatalogCache();
   revalidatePath("/seller/products");
   revalidatePath(`/seller/products/${productId}/edit`);
 }

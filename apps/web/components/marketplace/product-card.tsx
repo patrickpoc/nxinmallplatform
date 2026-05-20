@@ -46,7 +46,6 @@ export function ProductCard({ product, className }: ProductCardProps) {
               fill
               className="object-contain p-4"
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-              unoptimized
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-1 text-brand-gray">

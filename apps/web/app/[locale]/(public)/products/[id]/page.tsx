@@ -8,7 +8,8 @@ import { ProductPurchaseCard } from "@/components/marketplace/product-purchase-c
 import { ProductRatingMini } from "@/components/marketplace/product-rating-mini";
 import { ProductReviewsSection } from "@/components/marketplace/product-reviews-section";
 import { CountryDisplay } from "@/components/brand/country-display";
-import { getProductRatingsBatch, getProductReviewSummary } from "@/lib/marketplace/product-reviews";
+import { getCachedProductRatings } from "@/lib/marketplace/cached-catalog";
+import { getProductReviewSummary } from "@/lib/marketplace/product-reviews";
 import { ShareButton } from "@/components/marketplace/share-button";
 import { RailProductCard } from "@/components/marketplace/rail-product-card";
 import { HorizontalRail } from "@/components/marketplace/horizontal-rail";
@@ -107,7 +108,7 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
     relatedProducts = [];
   }
 
-  const relatedRatings = await getProductRatingsBatch(relatedProducts.map((p) => p.id));
+  const relatedRatings = await getCachedProductRatings(relatedProducts.map((p) => p.id));
 
   function labelName(nameJson: unknown): string {
     const o = nameJson as Record<string, string> | null;

@@ -3,6 +3,7 @@
 import { DEMO_PLATFORM_SELLER_EMAIL } from "@nxinmall/constants";
 import { Prisma, prisma } from "@nxinmall/database";
 import { revalidatePath } from "next/cache";
+import { revalidateCatalogCache } from "@/lib/marketplace/revalidate-catalog";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 
@@ -49,6 +50,7 @@ function parseUnit(raw: string): Unit {
 }
 
 function revalidateCatalog(locale: string) {
+  revalidateCatalogCache();
   revalidatePath(`/${locale}`, "layout");
   revalidatePath(`/${locale}/products`, "page");
   revalidatePath(`/${locale}/admin/products`, "page");

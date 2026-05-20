@@ -47,7 +47,6 @@ export function RailProductCard({
               fill
               className="object-contain p-3"
               sizes="240px"
-              unoptimized
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-1 text-brand-gray">

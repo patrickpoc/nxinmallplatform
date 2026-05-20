@@ -159,6 +159,9 @@ model Product {
   docs         ProductDoc[]
   matches      ProductMatch[]
   reviews      ProductReview[]
+
+  @@index([status, createdAt])
+  @@index([status, isSponsored, sponsoredSortOrder])
 }
 
 model ProductReview {

@@ -1,6 +1,6 @@
 import { MarketplaceHome } from "@/components/marketplace/marketplace-home";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export default function Home() {
   return <MarketplaceHome />;

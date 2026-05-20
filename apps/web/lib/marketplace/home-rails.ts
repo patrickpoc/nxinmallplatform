@@ -3,6 +3,12 @@ import { productListInclude, type ProductListRow } from "@/lib/product-listing";
 
 const RAIL_SIZE = 12;
 
+export type HomeRailsData = {
+  topSellers: ProductListRow[];
+  sponsored: ProductListRow[];
+  recentlyAdded: ProductListRow[];
+};
+
 async function fetchProductsByIds(ids: string[]): Promise<ProductListRow[]> {
   if (ids.length === 0) return [];
   try {
@@ -17,60 +23,20 @@ async function fetchProductsByIds(ids: string[]): Promise<ProductListRow[]> {
   }
 }
 
-/** Top sellers: order volume when present, else review count as popularity proxy. */
-export async function fetchTopSellerProducts(): Promise<ProductListRow[]> {
-  const ids: string[] = [];
-
+async function fetchTopSellerProducts(): Promise<ProductListRow[]> {
   try {
-    const grouped = await prisma.orderItem.groupBy({
-      by: ["variantId"],
-      _sum: { qty: true },
-      orderBy: { _sum: { qty: "desc" } },
-      take: RAIL_SIZE * 4,
+    const reviewRank = await prisma.productReview.groupBy({
+      by: ["productId"],
+      _count: { id: true },
+      orderBy: { _count: { id: "desc" } },
+      take: RAIL_SIZE,
     });
-
-    if (grouped.length > 0) {
-      const variants = await prisma.productVariant.findMany({
-        where: { id: { in: grouped.map((g) => g.variantId) } },
-        select: { id: true, productId: true },
-      });
-      const variantToProduct = new Map(variants.map((v) => [v.id, v.productId]));
-      const seen = new Set<string>();
-      for (const row of grouped) {
-        const productId = variantToProduct.get(row.variantId);
-        if (!productId || seen.has(productId)) continue;
-        seen.add(productId);
-        ids.push(productId);
-        if (ids.length >= RAIL_SIZE) break;
-      }
+    if (reviewRank.length > 0) {
+      const ranked = await fetchProductsByIds(reviewRank.map((r) => r.productId));
+      if (ranked.length > 0) return ranked;
     }
   } catch {
-    // fall through to review-based ranking
-  }
-
-  if (ids.length < RAIL_SIZE) {
-    try {
-      const reviewRank = await prisma.productReview.groupBy({
-        by: ["productId"],
-        _count: { id: true },
-        orderBy: { _count: { id: "desc" } },
-        take: RAIL_SIZE * 2,
-      });
-      const seen = new Set(ids);
-      for (const row of reviewRank) {
-        if (seen.has(row.productId)) continue;
-        seen.add(row.productId);
-        ids.push(row.productId);
-        if (ids.length >= RAIL_SIZE) break;
-      }
-    } catch {
-      // ignore
-    }
-  }
-
-  if (ids.length > 0) {
-    const ranked = await fetchProductsByIds(ids.slice(0, RAIL_SIZE));
-    if (ranked.length > 0) return ranked;
+    // fall through
   }
 
   try {
@@ -85,7 +51,7 @@ export async function fetchTopSellerProducts(): Promise<ProductListRow[]> {
   }
 }
 
-export async function fetchSponsoredProducts(): Promise<ProductListRow[]> {
+async function fetchSponsoredProducts(): Promise<ProductListRow[]> {
   try {
     const sponsored = await prisma.product.findMany({
       where: { status: "ACTIVE", isSponsored: true },
@@ -95,7 +61,7 @@ export async function fetchSponsoredProducts(): Promise<ProductListRow[]> {
     });
     if (sponsored.length > 0) return sponsored;
   } catch {
-    // isSponsored column may be missing before db push
+    // isSponsored may be missing before migration
   }
 
   try {
@@ -111,7 +77,7 @@ export async function fetchSponsoredProducts(): Promise<ProductListRow[]> {
   }
 }
 
-export async function fetchRecentlyAddedProducts(): Promise<ProductListRow[]> {
+async function fetchRecentlyAddedProducts(): Promise<ProductListRow[]> {
   try {
     return await prisma.product.findMany({
       where: { status: "ACTIVE" },
@@ -122,4 +88,14 @@ export async function fetchRecentlyAddedProducts(): Promise<ProductListRow[]> {
   } catch {
     return [];
   }
+}
+
+/** Uncached loader; use getCachedHomeRails() in pages. */
+export async function fetchHomeRailsUncached(): Promise<HomeRailsData> {
+  const [topSellers, sponsored, recentlyAdded] = await Promise.all([
+    fetchTopSellerProducts(),
+    fetchSponsoredProducts(),
+    fetchRecentlyAddedProducts(),
+  ]);
+  return { topSellers, sponsored, recentlyAdded };
 }

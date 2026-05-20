@@ -4,7 +4,7 @@ import { PublicFooter } from "@/components/layout/public-footer";
 import { PublicHeader } from "@/components/layout/public-header";
 import { getPublicHeaderCategories } from "@/lib/layout/public-categories";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function PublicLayout({
   children,

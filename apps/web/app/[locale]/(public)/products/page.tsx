@@ -8,7 +8,7 @@ import { AnimatedGrid, AnimatedGridItem } from "@/components/motion/animated-gri
 import { ChevronRight, PackageSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { CartPriceCurrency } from "@/lib/cart/types";
-import { getProductRatingsBatch } from "@/lib/marketplace/product-reviews";
+import { getCachedProductRatings } from "@/lib/marketplace/cached-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -98,7 +98,7 @@ export default async function ProductsPage({ params, searchParams }: { params: {
     });
   }
 
-  const ratingsMap = await getProductRatingsBatch(products.map((p) => p.id));
+  const ratingsMap = await getCachedProductRatings(products.map((p) => p.id));
 
   function toCardData(p: ProductListRow): ProductCardData {
     const loc = locale as "en" | "pt" | "zh";

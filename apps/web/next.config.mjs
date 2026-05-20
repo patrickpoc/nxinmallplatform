@@ -8,6 +8,8 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "flagcdn.com", pathname: "/**" },
+      { protocol: "https", hostname: "picsum.photos", pathname: "/**" },
+      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
     ],
   },
   async rewrites() {

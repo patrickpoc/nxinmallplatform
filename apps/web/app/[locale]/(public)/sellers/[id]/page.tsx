@@ -4,7 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { VerificationBadge } from "@/components/brand/verification-badge";
 import { CountryDisplay } from "@/components/brand/country-display";
-import { getProductRatingsBatch } from "@/lib/marketplace/product-reviews";
+import { getCachedProductRatings } from "@/lib/marketplace/cached-catalog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { productListInclude, type ProductListRow } from "@/lib/product-listing";
@@ -96,7 +96,7 @@ export default async function SellerProfilePage({
     month: "long",
   });
 
-  const productRatings = await getProductRatingsBatch(products.map((p) => p.id));
+  const productRatings = await getCachedProductRatings(products.map((p) => p.id));
 
   function toCardData(p: ProductListRow): ProductCardData {
     const v = p.variants[0];
