@@ -130,9 +130,35 @@ const loadHeaderCategories = unstable_cache(
 /** Cross-request cache (5 min) + per-request dedupe for layout + home. */
 export const getCachedHeaderCategories = cache(async () => loadHeaderCategories());
 
+/** Thrown inside unstable_cache loader to avoid caching empty topSellers when catalog has products. */
+class SkipHomeRailsCacheError extends Error {
+  constructor() {
+    super("skip-home-rails-cache");
+    this.name = "SkipHomeRailsCacheError";
+  }
+}
+
+async function homeRailsLooksSuspiciouslyEmpty(data: HomeRailsData): Promise<boolean> {
+  if (data.topSellers.length > 0) return false;
+  if (data.sponsored.length > 0) return true;
+  try {
+    const activeCount = await prismaWrite.product.count({ where: { status: "ACTIVE" } });
+    return activeCount > 0;
+  } catch {
+    return false;
+  }
+}
+
 async function loadHomeRailsSerialized(): Promise<SerializableHomeRails> {
   const data = await fetchHomeRailsUncached();
+  if (await homeRailsLooksSuspiciouslyEmpty(data)) {
+    throw new SkipHomeRailsCacheError();
+  }
   return serializeHomeRails(data);
+}
+
+async function loadHomeRailsFresh(): Promise<HomeRailsData> {
+  return fetchHomeRailsUncached();
 }
 
 const loadHomeRails = unstable_cache(loadHomeRailsSerialized, ["home-rails"], {
@@ -141,8 +167,20 @@ const loadHomeRails = unstable_cache(loadHomeRailsSerialized, ["home-rails"], {
 });
 
 export const getCachedHomeRails = cache(async (): Promise<HomeRailsData> => {
-  const serialized = await loadHomeRails();
-  return deserializeHomeRails(serialized);
+  try {
+    const serialized = await loadHomeRails();
+    const data = deserializeHomeRails(serialized);
+    if (await homeRailsLooksSuspiciouslyEmpty(data)) {
+      return loadHomeRailsFresh();
+    }
+    return data;
+  } catch (error) {
+    if (error instanceof SkipHomeRailsCacheError) {
+      return loadHomeRailsFresh();
+    }
+    console.error("[cached-catalog] home-rails cache load failed", error);
+    return loadHomeRailsFresh();
+  }
 });
 
 function ratingsCacheKey(productIds: string[]): string {

@@ -9,16 +9,32 @@ export type HomeRailsData = {
   recentlyAdded: ProductListRow[];
 };
 
-async function fetchProductsByIds(ids: string[]): Promise<ProductListRow[]> {
+/** Load ACTIVE products by id (direct connection — avoids pooler failures after login). */
+async function fetchActiveProductsByIds(ids: string[]): Promise<ProductListRow[]> {
   if (ids.length === 0) return [];
   try {
-    const rows = await prisma.product.findMany({
+    const rows = await prismaWrite.product.findMany({
       where: { id: { in: ids }, status: "ACTIVE" },
       include: productListInclude,
     });
     const byId = new Map(rows.map((r) => [r.id, r]));
     return ids.map((id) => byId.get(id)).filter((r): r is ProductListRow => r != null);
-  } catch {
+  } catch (error) {
+    console.error("[home-rails] fetchActiveProductsByIds failed", error);
+    return [];
+  }
+}
+
+async function fetchTopSellerFallback(): Promise<ProductListRow[]> {
+  try {
+    return await prismaWrite.product.findMany({
+      where: { status: "ACTIVE" },
+      take: RAIL_SIZE,
+      orderBy: { updatedAt: "desc" },
+      include: productListInclude,
+    });
+  } catch (error) {
+    console.error("[home-rails] top sellers fallback findMany failed", error);
     return [];
   }
 }
@@ -32,23 +48,19 @@ async function fetchTopSellerProducts(): Promise<ProductListRow[]> {
       take: RAIL_SIZE,
     });
     if (reviewRank.length > 0) {
-      const ranked = await fetchProductsByIds(reviewRank.map((r) => r.productId));
+      const ranked = await fetchActiveProductsByIds(reviewRank.map((r) => r.productId));
       if (ranked.length > 0) return ranked;
+      console.warn(
+        "[home-rails] review rank returned",
+        reviewRank.length,
+        "product id(s) but none resolved as ACTIVE; using fallback",
+      );
     }
   } catch (error) {
     console.error("[home-rails] top sellers review rank failed", error);
   }
 
-  try {
-    return await prisma.product.findMany({
-      where: { status: "ACTIVE" },
-      take: RAIL_SIZE,
-      orderBy: { updatedAt: "desc" },
-      include: productListInclude,
-    });
-  } catch {
-    return [];
-  }
+  return fetchTopSellerFallback();
 }
 
 async function fetchSponsoredProducts(): Promise<ProductListRow[]> {
