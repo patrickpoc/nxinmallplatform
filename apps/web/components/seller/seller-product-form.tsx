@@ -2,7 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productCreateSchema, productVariantSchema } from "@nxinmall/validators";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { useRouter } from "@/i18n/routing";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -26,7 +28,7 @@ type CategoryOption = { id: string; slug: string; name: unknown };
 type Props = {
   categories: CategoryOption[];
   productId?: string;
-  defaultValues?: Partial<FormValues>;
+  defaultValues?: Partial<FormValues> & { imageUrls?: string[] };
 };
 
 function labelName(name: unknown): string {
@@ -36,9 +38,29 @@ function labelName(name: unknown): string {
   return "";
 }
 
+function fieldError(errors: Record<string, unknown> | undefined, path: string): string | undefined {
+  if (!errors) return undefined;
+  const parts = path.split(".");
+  let cur: unknown = errors;
+  for (const p of parts) {
+    if (!cur || typeof cur !== "object") return undefined;
+    cur = (cur as Record<string, unknown>)[p];
+  }
+  if (cur && typeof cur === "object" && "message" in cur) {
+    return String((cur as { message?: unknown }).message);
+  }
+  return undefined;
+}
+
 export function SellerProductForm({ categories, productId, defaultValues }: Props) {
   const t = useTranslations("sellerPortal.products");
   const router = useRouter();
+  const { data: session } = useSession();
+  const [submitting, setSubmitting] = useState(false);
+  const { imageUrls: initialImages, ...formDefaults } = defaultValues ?? {};
+  const [imageUrlRows, setImageUrlRows] = useState<string[]>(
+    initialImages?.length ? initialImages : [""],
+  );
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -55,22 +77,42 @@ export function SellerProductForm({ categories, productId, defaultValues }: Prop
           stockQty: 0,
         },
       ],
-      ...defaultValues,
+      ...formDefaults,
     },
   });
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "variants" });
 
   async function onSubmit(values: FormValues) {
-    const payload = values as SellerProductFormInput;
-    if (productId) {
-      await updateSellerProduct(productId, payload);
-    } else {
-      await createSellerProduct(payload);
+    if ((session?.user?.portalMode ?? "buyer") !== "seller") {
+      form.setError("root", { message: t("errorSellerMode") });
+      return;
     }
-    router.push("/seller/products");
-    router.refresh();
+
+    const payload: SellerProductFormInput = {
+      ...values,
+      imageUrls: imageUrlRows.map((u) => u.trim()).filter(Boolean),
+    };
+
+    setSubmitting(true);
+    try {
+      if (productId) {
+        await updateSellerProduct(productId, payload);
+      } else {
+        await createSellerProduct(payload);
+      }
+      router.push("/seller/products");
+      router.refresh();
+    } catch (err) {
+      form.setError("root", {
+        message: err instanceof Error ? err.message : t("errorSave"),
+      });
+    } finally {
+      setSubmitting(false);
+    }
   }
+
+  const errors = form.formState.errors;
 
   return (
     <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
@@ -78,14 +120,23 @@ export function SellerProductForm({ categories, productId, defaultValues }: Prop
         <div className="space-y-2">
           <Label htmlFor="name-en">{t("nameEn")}</Label>
           <Input id="name-en" {...form.register("name.en")} />
+          {fieldError(errors.name as Record<string, unknown>, "en") ? (
+            <p className="text-sm text-error">{fieldError(errors.name as Record<string, unknown>, "en")}</p>
+          ) : null}
         </div>
         <div className="space-y-2">
           <Label htmlFor="name-pt">{t("namePt")}</Label>
           <Input id="name-pt" {...form.register("name.pt")} />
+          {fieldError(errors.name as Record<string, unknown>, "pt") ? (
+            <p className="text-sm text-error">{fieldError(errors.name as Record<string, unknown>, "pt")}</p>
+          ) : null}
         </div>
         <div className="space-y-2">
           <Label htmlFor="name-zh">{t("nameZh")}</Label>
           <Input id="name-zh" {...form.register("name.zh")} />
+          {fieldError(errors.name as Record<string, unknown>, "zh") ? (
+            <p className="text-sm text-error">{fieldError(errors.name as Record<string, unknown>, "zh")}</p>
+          ) : null}
         </div>
       </div>
 
@@ -103,6 +154,9 @@ export function SellerProductForm({ categories, productId, defaultValues }: Prop
               </option>
             ))}
           </select>
+          {errors.categoryId?.message ? (
+            <p className="text-sm text-error">{String(errors.categoryId.message)}</p>
+          ) : null}
         </div>
         <div className="space-y-2">
           <Label htmlFor="status">{t("status")}</Label>
@@ -116,6 +170,46 @@ export function SellerProductForm({ categories, productId, defaultValues }: Prop
             <option value="PAUSED">{t("statusPaused")}</option>
           </select>
         </div>
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-brand-dark">{t("images")}</h2>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setImageUrlRows((rows) => (rows.length < 10 ? [...rows, ""] : rows))}
+            disabled={imageUrlRows.length >= 10}
+          >
+            {t("addImage")}
+          </Button>
+        </div>
+        <p className="text-sm text-brand-gray">{t("imagesHint")}</p>
+        {imageUrlRows.map((url, index) => (
+          <div key={index} className="flex gap-2">
+            <Input
+              type="url"
+              placeholder="https://..."
+              value={url}
+              onChange={(e) => {
+                const next = [...imageUrlRows];
+                next[index] = e.target.value;
+                setImageUrlRows(next);
+              }}
+            />
+            {imageUrlRows.length > 1 ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setImageUrlRows((rows) => rows.filter((_, i) => i !== index))}
+              >
+                {t("removeImage")}
+              </Button>
+            ) : null}
+          </div>
+        ))}
       </div>
 
       <div className="space-y-4">
@@ -144,10 +238,16 @@ export function SellerProductForm({ categories, productId, defaultValues }: Prop
               <div className="space-y-2">
                 <Label>{t("sku")}</Label>
                 <Input {...form.register(`variants.${index}.sku`)} />
+                {errors.variants?.[index]?.sku?.message ? (
+                  <p className="text-sm text-error">{String(errors.variants[index]?.sku?.message)}</p>
+                ) : null}
               </div>
               <div className="space-y-2">
                 <Label>{t("priceUsd")}</Label>
                 <Input {...form.register(`variants.${index}.priceUsd`)} />
+                {errors.variants?.[index]?.priceUsd?.message ? (
+                  <p className="text-sm text-error">{String(errors.variants[index]?.priceUsd?.message)}</p>
+                ) : null}
               </div>
               <div className="space-y-2">
                 <Label>{t("minOrderQty")}</Label>
@@ -186,12 +286,14 @@ export function SellerProductForm({ categories, productId, defaultValues }: Prop
         ))}
       </div>
 
-      {form.formState.errors.root ? (
-        <p className="text-sm text-error">{String(form.formState.errors.root.message)}</p>
+      {errors.root?.message ? (
+        <p className="text-sm text-error">{String(errors.root.message)}</p>
       ) : null}
 
       <div className="flex gap-2">
-        <Button type="submit">{productId ? t("save") : t("create")}</Button>
+        <Button type="submit" disabled={submitting}>
+          {submitting ? t("saving") : productId ? t("save") : t("create")}
+        </Button>
         <Button type="button" variant="outline" onClick={() => router.push("/seller/products")}>
           {t("cancel")}
         </Button>

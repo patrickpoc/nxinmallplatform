@@ -11,7 +11,9 @@
     "db:generate": "turbo run db:generate",
     "db:migrate": "turbo run db:migrate",
     "db:push": "turbo run db:push",
-    "db:seed": "pnpm --filter @nxinmall/database exec prisma db seed"
+    "db:seed": "pnpm --filter @nxinmall/database exec prisma db seed",
+    "db:seed:reviews": "pnpm --filter @nxinmall/database db:seed:reviews",
+    "db:seed:sponsored": "pnpm --filter @nxinmall/database db:seed:sponsored"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

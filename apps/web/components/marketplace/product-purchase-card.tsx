@@ -9,6 +9,7 @@ import { AskQuotationModal } from "@/components/marketplace/ask-quotation-modal"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@/i18n/routing";
+import { CountryDisplay } from "@/components/brand/country-display";
 import { PRODUCT_PURCHASE_CARD_ASPECT_CLASS } from "@/lib/marketplace/product-media-aspect";
 import type { CartPriceCurrency } from "@/lib/cart/types";
 
@@ -32,6 +33,7 @@ type ProductPurchaseCardProps = {
     sellerUnknown: string;
     sidebarTitle: string;
     sidebarBody: string;
+    quantity: string;
   };
 };
 
@@ -52,8 +54,8 @@ export function ProductPurchaseCard({
 
   return (
     <div className={PRODUCT_PURCHASE_CARD_ASPECT_CLASS}>
-      <Card className="flex h-full min-h-0 flex-col overflow-hidden shadow-card" data-demo-target="purchase-card">
-        <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
+      <Card className="flex flex-col shadow-card" data-demo-target="purchase-card">
+        <CardContent className="flex flex-col gap-4 p-6">
           <div className="flex items-start justify-between gap-2">
             <div className="space-y-1 min-w-0">
               <p className="text-xs font-semibold uppercase tracking-wide text-brand-gray">{labels.fromPrice}</p>
@@ -76,18 +78,24 @@ export function ProductPurchaseCard({
             {companyName ? (
               <>
                 <p className="font-medium text-brand-dark">{companyName}</p>
-                {companyCountry ? <p>{companyCountry}</p> : null}
+                {companyCountry ? (
+                  <CountryDisplay code={companyCountry} locale={locale} className="text-xs" />
+                ) : null}
               </>
             ) : (
               <p>{labels.sellerUnknown}</p>
             )}
           </div>
 
-          <div className="mt-auto space-y-3 [&_button]:w-full sm:[&_button]:w-auto" data-demo-target="add-to-cart">
+          <div className="space-y-3 border-t border-border pt-4" data-demo-target="add-to-cart">
             {variantId ? (
-              <>
-                <QuantitySelector value={qty} onChange={setQty} />
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-medium text-brand-dark">{labels.quantity}</span>
+                  <QuantitySelector value={qty} onChange={setQty} className="shrink-0" />
+                </div>
                 <AddToCartButton
+                  className="w-full"
                   item={{
                     productId,
                     variantId,
@@ -97,7 +105,7 @@ export function ProductPurchaseCard({
                     quantity: qty,
                   }}
                 />
-              </>
+              </div>
             ) : null}
             <AskQuotationModal
               locale={locale}

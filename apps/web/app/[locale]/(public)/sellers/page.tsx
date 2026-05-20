@@ -1,36 +1,13 @@
 import { prisma } from "@nxinmall/database";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { CountryFlag } from "@/components/brand/country-flag";
+import { CountryDisplay } from "@/components/brand/country-display";
 import { VerificationBadge } from "@/components/brand/verification-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star, Package } from "lucide-react";
 import { AnimatedGrid, AnimatedGridItem } from "@/components/motion/animated-grid";
 
 export const dynamic = "force-dynamic";
-
-const COUNTRY_NAMES: Record<string, string> = {
-  BR: "Brazil",
-  CN: "China",
-  US: "United States",
-  AR: "Argentina",
-  IN: "India",
-  AU: "Australia",
-  DE: "Germany",
-  NL: "Netherlands",
-  FR: "France",
-  MX: "Mexico",
-  CO: "Colombia",
-  PY: "Paraguay",
-  UY: "Uruguay",
-  CL: "Chile",
-  ZA: "South Africa",
-  TH: "Thailand",
-  VN: "Vietnam",
-  ID: "Indonesia",
-  MY: "Malaysia",
-  PH: "Philippines",
-};
 
 function seededRandom(seed: string): number {
   let h = 0;
@@ -40,8 +17,9 @@ function seededRandom(seed: string): number {
   return ((h >>> 0) % 1000) / 1000;
 }
 
-export default async function SellersPage() {
+export default async function SellersPage({ params }: { params: { locale: string } }) {
   const t = await getTranslations("sellersPage");
+  const locale = params.locale;
 
   let companies: {
     id: string;
@@ -98,10 +76,7 @@ export default async function SellersPage() {
                     <p className="text-lg font-semibold text-brand-dark">{co.name}</p>
                     <VerificationBadge tier={co.verificationTier} />
                   </div>
-                  <p className="flex items-center gap-2 text-sm text-brand-gray">
-                    <CountryFlag code={co.country} />
-                    <span>{COUNTRY_NAMES[co.country] ?? co.country}</span>
-                  </p>
+                  <CountryDisplay code={co.country} locale={locale} className="text-sm" />
                   <div className="flex items-center gap-4 border-t border-border pt-3 text-sm">
                     <span className="flex items-center gap-1 text-brand-gray">
                       <Package className="h-4 w-4" aria-hidden />

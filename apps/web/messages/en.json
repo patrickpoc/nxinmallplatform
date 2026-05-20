@@ -67,8 +67,9 @@
     "tileCatalogDesc": "Search and filter all products",
     "tileSellers": "Sellers",
     "tileSellersDesc": "Find partners by country",
-    "railNewArrivals": "New arrivals",
-    "railMoreToExplore": "More to explore",
+    "railTopSellers": "Top sellers",
+    "railSponsored": "Sponsored",
+    "sponsoredBadge": "Sponsored",
     "railRecentlyAdded": "Recently added"
   },
   "hero": {
@@ -277,6 +278,8 @@
     "viewSeller": "View seller",
     "sidebarTitle": "Request a quotation",
     "sidebarBody": "Tell the supplier what you need (quantity/specs). You’ll get a response with lead time and terms.",
+    "quantity": "Quantity",
+    "ratingShort": "{rating} ({count})",
     "sellerUnknown": "Seller information not available.",
     "noImage": "No image",
     "shareLink": "Share link",
@@ -285,6 +288,11 @@
     "tabDetails": "Details",
     "tabSpecifications": "Specifications",
     "tabDocuments": "Documents",
+    "tabReviews": "Reviews",
+    "reviewsCount": "{count} reviews",
+    "reviewsBreakdown": "Rating breakdown",
+    "noReviews": "No reviews yet for this product.",
+    "noRatingYet": "No ratings yet",
     "noDescription": "No description provided for this listing yet.",
     "noSpecifications": "No specifications provided for this listing yet.",
     "noDocuments": "No documents uploaded for this listing yet.",
@@ -845,7 +853,17 @@
       "dashboard": "Dashboard",
       "store": "My store",
       "products": "Products",
+      "newProduct": "New product",
       "profile": "Public profile"
+    },
+    "sidebar": {
+      "store": "Your store",
+      "noCompany": "Complete company setup to show store details.",
+      "activeProducts": "Active listings",
+      "openOrders": "Open orders",
+      "revenue": "Revenue (USD)",
+      "uploadLogo": "Upload store logo",
+      "uploadError": "Could not upload image."
     },
     "setupIncompleteTitle": "Complete your store setup",
     "setupIncompleteBody": "Add your company details to unlock full seller tools and verification.",
@@ -901,6 +919,7 @@
       "country": "Country (ISO-2)",
       "type": "Business type",
       "save": "Save store",
+      "logoHint": "Tap the logo to upload a photo from your device (JPEG, PNG, or WebP, max 2MB).",
       "verificationStatus": "Verification status: {status}"
     },
     "profile": {
@@ -937,7 +956,14 @@
       "unit": "Unit",
       "create": "Create product",
       "save": "Save changes",
-      "cancel": "Cancel"
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "images": "Product images",
+      "imagesHint": "Paste public image URLs (first image is the main photo).",
+      "addImage": "Add image URL",
+      "removeImage": "Remove",
+      "errorSave": "Could not save the product. Check all fields and try again.",
+      "errorSellerMode": "Switch to seller mode in the sidebar before creating products."
     }
   }
 }

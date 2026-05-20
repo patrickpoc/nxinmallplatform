@@ -27,6 +27,151 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function seededRandom(seed: string): number {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) {
+    h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
+  }
+  return ((h >>> 0) % 1000) / 1000;
+}
+
+const REVIEW_AUTHORS = [
+  "Ana Costa",
+  "Carlos Mendes",
+  "Li Wei",
+  "Maria Silva",
+  "João Ferreira",
+  "Farm Co-op SP",
+  "Agro Norte Ltd",
+  "Green Valley Trading",
+  "Rural Supply BR",
+  "Harvest Partners",
+];
+
+const REVIEW_BODIES_EN = [
+  "Solid product quality and packaging. Delivery matched the quoted lead time.",
+  "Good value for bulk orders. Would buy again for the next season.",
+  "Responsive seller and clear specs on the datasheet.",
+  "Met our MOQ requirements without issues. Recommended for B2B buyers.",
+  "Consistent batches; minor delay on logistics but overall satisfied.",
+];
+
+const REVIEW_BODIES_PT = [
+  "Qualidade consistente e embalagem adequada. Prazo de entrega conforme combinado.",
+  "Bom custo-benefício em volume. Compraria novamente na próxima safra.",
+  "Vendedor atencioso e ficha técnica clara.",
+  "Atendeu nosso pedido mínimo sem problemas. Recomendo para compradores B2B.",
+  "Lotes uniformes; pequeno atraso logístico, mas experiência positiva no geral.",
+];
+
+/**
+ * Product reviews for PDP / carousels / category cards.
+ * Re-run with refresh: SEED_REFRESH_PRODUCT_REVIEWS=1 pnpm db:seed:reviews
+ * (~90% of ACTIVE products get reviews; ~10% stay empty for "no ratings yet" UI)
+ */
+async function seedProductReviews() {
+  const refresh =
+    process.env.SEED_REFRESH_PRODUCT_REVIEWS === "1" || process.argv.includes("--refresh-reviews");
+  const existing = await prisma.productReview.count();
+
+  if (existing > 0 && !refresh) {
+    console.log(`[seed] Product reviews already present (${existing}); skipping. Set SEED_REFRESH_PRODUCT_REVIEWS=1 to rebuild.`);
+    return;
+  }
+
+  if (refresh && existing > 0) {
+    await prisma.productReview.deleteMany({});
+    console.log(`[seed] Cleared ${existing} existing product review(s) for refresh.`);
+  }
+
+  const products = await prisma.product.findMany({
+    where: { status: "ACTIVE" },
+    select: { id: true },
+  });
+
+  const rows: {
+    productId: string;
+    authorName: string;
+    rating: number;
+    body: string;
+    locale: string;
+    createdAt: Date;
+  }[] = [];
+
+  let withoutReviews = 0;
+  const now = Date.now();
+
+  for (const p of products) {
+    const rng = seededRandom(p.id);
+    if (rng < 0.1) {
+      withoutReviews += 1;
+      continue;
+    }
+    const count = 5 + Math.floor(rng * 8);
+    for (let i = 0; i < count; i++) {
+      const r2 = seededRandom(`${p.id}-${i}`);
+      const locale = r2 < 0.55 ? "pt" : "en";
+      const rating = 3 + Math.floor(r2 * 3);
+      const author = REVIEW_AUTHORS[Math.floor(r2 * REVIEW_AUTHORS.length)]!;
+      const bodyPool = locale === "pt" ? REVIEW_BODIES_PT : REVIEW_BODIES_EN;
+      const body = bodyPool[Math.floor(r2 * bodyPool.length)]!;
+      const daysAgo = Math.floor(r2 * 365);
+      rows.push({
+        productId: p.id,
+        authorName: author,
+        rating,
+        body,
+        locale,
+        createdAt: new Date(now - daysAgo * 86400000),
+      });
+    }
+  }
+
+  const batchSize = 500;
+  for (let i = 0; i < rows.length; i += batchSize) {
+    await prisma.productReview.createMany({ data: rows.slice(i, i + batchSize) });
+  }
+
+  const withReviews = products.length - withoutReviews;
+  console.log(
+    `[seed] Created ${rows.length} product review(s) for ${withReviews}/${products.length} active products (${withoutReviews} without reviews for empty-state demo).`,
+  );
+}
+
+/** Marks ~12 ACTIVE products as sponsored for the home carousel (idempotent). */
+async function seedSponsoredProducts() {
+  const active = await prisma.product.findMany({
+    where: { status: "ACTIVE" },
+    select: { id: true },
+    orderBy: { createdAt: "asc" },
+  });
+  if (active.length === 0) return;
+
+  const picks: string[] = [];
+  for (const p of active) {
+    if (seededRandom(`sponsor-${p.id}`) > 0.82) picks.push(p.id);
+    if (picks.length >= 12) break;
+  }
+  if (picks.length < 12) {
+    for (const p of active) {
+      if (!picks.includes(p.id)) picks.push(p.id);
+      if (picks.length >= 12) break;
+    }
+  }
+
+  await prisma.product.updateMany({
+    where: { isSponsored: true },
+    data: { isSponsored: false, sponsoredSortOrder: null },
+  });
+  for (let i = 0; i < picks.length; i++) {
+    await prisma.product.update({
+      where: { id: picks[i]! },
+      data: { isSponsored: true, sponsoredSortOrder: i },
+    });
+  }
+  console.log(`[seed] Marked ${picks.length} product(s) as sponsored for home carousel.`);
+}
+
 function randomPriceUsd(): Prisma.Decimal {
   const v = 4 + Math.random() * 19995;
   return new Prisma.Decimal(v.toFixed(2));
@@ -133,6 +278,15 @@ async function ensureRandomDemoProductsPerCategory(sellerIds: string[]): Promise
  * Run after migrations: `pnpm db:seed` from repo root.
  */
 async function main() {
+  if (process.argv.includes("--refresh-reviews")) {
+    await seedProductReviews();
+    return;
+  }
+  if (process.argv.includes("--refresh-sponsored")) {
+    await seedSponsoredProducts();
+    return;
+  }
+
   const roots = [
     {
       slug: "agri-inputs",
@@ -410,6 +564,9 @@ async function main() {
   console.log(`[seed] Reassigned ${allProducts.length} product(s) to random sellers.`);
 
   await ensureRandomDemoProductsPerCategory(sellerIds);
+
+  await seedProductReviews();
+  await seedSponsoredProducts();
 
   const cat = await prisma.category.findFirst({ where: { slug: "agri-inputs" } });
   if (cat && (await prisma.priceSignal.count()) === 0) {

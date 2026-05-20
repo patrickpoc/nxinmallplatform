@@ -1,35 +1,26 @@
-import { prisma } from "@nxinmall/database";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { Card, CardContent } from "@/components/ui/card";
-import { productListInclude } from "@/lib/product-listing";
+import type { ProductListRow } from "@/lib/product-listing";
+import {
+  fetchRecentlyAddedProducts,
+  fetchSponsoredProducts,
+  fetchTopSellerProducts,
+} from "@/lib/marketplace/home-rails";
 import { HorizontalRail } from "./horizontal-rail";
 import { RailProductCard } from "./rail-product-card";
-import { Button } from "@/components/ui/button";
 import { PackageSearch, Grid3x3, Users, Sparkles, Tractor, Wheat, Cpu, Wrench, Leaf, ShoppingBag } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 import { HeroBanner } from "./hero-banner";
 import type { CartPriceCurrency } from "@/lib/cart/types";
+import { getProductRatingsBatch } from "@/lib/marketplace/product-reviews";
+import { prisma } from "@nxinmall/database";
 
 export async function MarketplaceHome() {
   const t = await getTranslations("marketplaceHome");
   const locale = await getLocale();
 
   const catLocaleKey = locale as "en" | "pt" | "zh";
-
-  async function fetchProducts(args: { take: number; skip?: number }) {
-    try {
-      return await prisma.product.findMany({
-        where: { status: "ACTIVE" },
-        take: args.take,
-        skip: args.skip ?? 0,
-        orderBy: { createdAt: "desc" },
-        include: productListInclude,
-      });
-    } catch {
-      return [];
-    }
-  }
 
   let categories: { id: string; slug: string; name: unknown }[] = [];
   try {
@@ -42,19 +33,23 @@ export async function MarketplaceHome() {
     categories = [];
   }
 
-  const [railA, railB, railC] = await Promise.all([
-    fetchProducts({ take: 12, skip: 0 }),
-    fetchProducts({ take: 12, skip: 12 }),
-    fetchProducts({ take: 12, skip: 24 }),
+  const [topSellers, sponsored, recentlyAdded] = await Promise.all([
+    fetchTopSellerProducts(),
+    fetchSponsoredProducts(),
+    fetchRecentlyAddedProducts(),
   ]);
+
+  const allRailIds = [...topSellers, ...sponsored, ...recentlyAdded].map((p) => p.id);
+  const ratingsMap = await getProductRatingsBatch(allRailIds);
 
   function labelName(nameJson: unknown): string {
     const o = nameJson as Record<string, string> | null;
     return o?.[catLocaleKey] ?? o?.en ?? "—";
   }
 
-  function toRailCard(p: (typeof railA)[number]) {
+  function toRailCard(p: ProductListRow, options?: { isSponsored?: boolean }) {
     const v = p.variants[0];
+    const rating = ratingsMap.get(p.id);
     return {
       id: p.id,
       name: labelName(p.name),
@@ -63,6 +58,9 @@ export async function MarketplaceHome() {
       priceCurrency: ((v?.priceCurrency as string) ?? "USD") as CartPriceCurrency,
       variantId: v?.id,
       unit: v?.unit,
+      ratingAverage: rating?.average,
+      reviewCount: rating?.count,
+      isSponsored: options?.isSponsored,
     };
   }
 
@@ -79,12 +77,10 @@ export async function MarketplaceHome() {
 
   return (
     <div className="bg-white">
-      {/* Hero banner */}
       <FadeIn>
         <HeroBanner categories={categories} />
       </FadeIn>
 
-      {/* Categories strip */}
       <FadeIn delay={0.1}>
       <section className="border-b border-border py-6">
         <div className="page-container">
@@ -105,40 +101,38 @@ export async function MarketplaceHome() {
       </section>
       </FadeIn>
 
-      {/* Rail A: New Arrivals */}
       <FadeIn delay={0.15}>
       <section className="border-b border-border bg-surface-light/40 py-10">
         <div className="page-container">
-          <HorizontalRail title={t("railNewArrivals")} scrollPrevLabel={t("carouselPrev")} scrollNextLabel={t("carouselNext")}>
-            {railA.map((p) => <RailProductCard key={p.id} product={toRailCard(p)} />)}
+          <HorizontalRail title={t("railTopSellers")} scrollPrevLabel={t("carouselPrev")} scrollNextLabel={t("carouselNext")}>
+            {topSellers.map((p) => <RailProductCard key={p.id} product={toRailCard(p)} />)}
           </HorizontalRail>
         </div>
       </section>
       </FadeIn>
 
-      {/* Rail B: More to Explore */}
       <FadeIn delay={0.2}>
       <section className="border-b border-border py-10">
         <div className="page-container">
-          <HorizontalRail title={t("railMoreToExplore")} scrollPrevLabel={t("carouselPrev")} scrollNextLabel={t("carouselNext")}>
-            {railB.map((p) => <RailProductCard key={p.id} product={toRailCard(p)} />)}
+          <HorizontalRail title={t("railSponsored")} scrollPrevLabel={t("carouselPrev")} scrollNextLabel={t("carouselNext")}>
+            {sponsored.map((p) => (
+              <RailProductCard key={p.id} product={toRailCard(p, { isSponsored: true })} sponsoredBadgeLabel={t("sponsoredBadge")} />
+            ))}
           </HorizontalRail>
         </div>
       </section>
       </FadeIn>
 
-      {/* Rail C: Recently Added */}
       <FadeIn delay={0.25}>
       <section className="border-b border-border bg-surface-light/40 py-10">
         <div className="page-container">
           <HorizontalRail title={t("railRecentlyAdded")} scrollPrevLabel={t("carouselPrev")} scrollNextLabel={t("carouselNext")}>
-            {railC.map((p) => <RailProductCard key={p.id} product={toRailCard(p)} />)}
+            {recentlyAdded.map((p) => <RailProductCard key={p.id} product={toRailCard(p)} />)}
           </HorizontalRail>
         </div>
       </section>
       </FadeIn>
 
-      {/* Quick links */}
       <FadeIn delay={0.3}>
       <section className="mx-auto max-w-6xl space-y-4 px-4 py-10 md:px-6">
         <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-brand-gray">{t("quickLinks")}</h2>

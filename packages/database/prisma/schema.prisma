@@ -92,6 +92,7 @@ model Company {
   type                String
   verificationStatus  CompanyVerificationStatus @default(PENDING)
   verificationTier    VerificationTier         @default(UNVERIFIED)
+  logoUrl             String?
   userId              String                   @unique
   user                User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   addresses           Address[]
@@ -147,6 +148,9 @@ model Product {
   name        Json
   description Json?
   status      ProductStatus @default(DRAFT)
+  /** Home carousel: sponsored listings (paid placement). */
+  isSponsored       Boolean   @default(false)
+  sponsoredSortOrder Int?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -154,6 +158,20 @@ model Product {
   images       ProductImage[]
   docs         ProductDoc[]
   matches      ProductMatch[]
+  reviews      ProductReview[]
+}
+
+model ProductReview {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  authorName String
+  rating     Int
+  body       String   @db.Text
+  locale     String   @default("en")
+  createdAt  DateTime @default(now())
+
+  @@index([productId])
 }
 
 model ProductVariant {

@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { VerificationBadge } from "@/components/brand/verification-badge";
-import { CountryFlag } from "@/components/brand/country-flag";
+import { CountryDisplay } from "@/components/brand/country-display";
+import { getProductRatingsBatch } from "@/lib/marketplace/product-reviews";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { productListInclude, type ProductListRow } from "@/lib/product-listing";
@@ -95,8 +96,11 @@ export default async function SellerProfilePage({
     month: "long",
   });
 
+  const productRatings = await getProductRatingsBatch(products.map((p) => p.id));
+
   function toCardData(p: ProductListRow): ProductCardData {
     const v = p.variants[0];
+    const rating = productRatings.get(p.id);
     return {
       id: p.id,
       name: catLabel(p.name),
@@ -105,6 +109,8 @@ export default async function SellerProfilePage({
       priceCurrency: ((v?.priceCurrency as string) ?? "USD") as CartPriceCurrency,
       variantId: v?.id,
       unit: v?.unit,
+      ratingAverage: rating?.average,
+      reviewCount: rating?.count,
     };
   }
 
@@ -142,8 +148,7 @@ export default async function SellerProfilePage({
               <div className="space-y-2 border-t border-border pt-4 text-sm">
                 <p className="flex items-center gap-2 text-brand-gray">
                   <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-                  <CountryFlag code={company.country} />
-                  <span>{company.country}</span>
+                  <CountryDisplay code={company.country} locale={locale} />
                 </p>
                 <Button variant="outline" size="sm" className="btn-press w-full gap-2" asChild>
                   <a href={`mailto:${company.user.email}`}>

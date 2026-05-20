@@ -72,14 +72,15 @@ export const onboardingDocumentsStepSchema = z.object({
 });
 
 export const onboardingInterestsStepSchema = z.object({
-  categoryIds: z.array(z.string().uuid()).max(50).default([]),
+  categoryIds: z.array(z.string().cuid()).max(50).default([]),
 });
 
 export const productCreateSchema = z.object({
   name: multilingualStringSchema,
   description: multilingualStringSchema.optional(),
-  categoryId: z.string().uuid(),
+  categoryId: z.string().cuid(),
   status: z.enum(["DRAFT", "ACTIVE", "PAUSED"]).default("DRAFT"),
+  imageUrls: z.array(z.string().url()).max(10).optional(),
 });
 
 export const productVariantSchema = z.object({
@@ -93,7 +94,7 @@ export const productVariantSchema = z.object({
 
 export const rfqCreateSchema = z.object({
   title: z.string().min(3).max(200),
-  categoryId: z.string().uuid(),
+  categoryId: z.string().cuid(),
   description: z.string().min(10).max(10000),
   quantity: z.number().positive(),
   unit: z.enum(["KG", "TON", "UNIT", "BOX", "PALLET"]),

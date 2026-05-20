@@ -173,7 +173,6 @@ export function BuyerDashboard() {
         )}
       </div>
 
-      <SellOnNxinmallCta variant="card" />
       <SellOnNxinmallCta />
     </div>
   );

@@ -21,7 +21,7 @@ export default async function EditProductPage({
   const [product, categories] = await Promise.all([
     prisma.product.findFirst({
       where: { id: params.id, sellerId: session.user.id },
-      include: { variants: true },
+      include: { variants: true, images: { orderBy: { sortOrder: "asc" } } },
     }),
     listSellerCategories(),
   ]);
@@ -51,6 +51,10 @@ export default async function EditProductPage({
             unit: v.unit as "KG" | "TON" | "UNIT" | "BOX" | "PALLET",
             stockQty: v.stockQty,
           })),
+          imageUrls:
+            product.images.length > 0
+              ? product.images.map((i) => i.url)
+              : [""],
         }}
       />
     </div>

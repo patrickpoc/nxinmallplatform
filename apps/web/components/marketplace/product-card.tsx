@@ -7,6 +7,7 @@ import { Link } from "@/i18n/routing";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { ToggleWishlistButton } from "@/components/wishlist/toggle-wishlist-button";
 import { PriceDisplay } from "@/components/brand/price-display";
+import { ProductRatingMini } from "@/components/marketplace/product-rating-mini";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CartPriceCurrency } from "@/lib/cart/types";
 
@@ -18,6 +19,8 @@ export type ProductCardData = {
   priceCurrency: CartPriceCurrency;
   variantId?: string;
   unit?: string;
+  ratingAverage?: number;
+  reviewCount?: number;
 };
 
 type ProductCardProps = {
@@ -30,7 +33,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const tp = useTranslations("product");
   const locale = useLocale();
 
-  const { id, name, imageUrl, priceAmount, priceCurrency, variantId, unit } = product;
+  const { id, name, imageUrl, priceAmount, priceCurrency, variantId, unit, ratingAverage, reviewCount } = product;
 
   return (
     <Card className={`group h-full overflow-hidden shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${className ?? ""}`}>
@@ -51,6 +54,13 @@ export function ProductCard({ product, className }: ProductCardProps) {
               <span className="text-xs">{tp("noImage")}</span>
             </div>
           )}
+          <div className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)]">
+            <ProductRatingMini
+              average={ratingAverage}
+              reviewCount={reviewCount ?? 0}
+              variant="overlay"
+            />
+          </div>
         </div>
       </Link>
       <CardContent className="space-y-3 p-5">

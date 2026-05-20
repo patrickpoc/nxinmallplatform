@@ -65,8 +65,9 @@
     "tileCatalogDesc": "搜索并筛选",
     "tileSellers": "供应商",
     "tileSellersDesc": "按国家查找伙伴",
-    "railNewArrivals": "新品上架",
-    "railMoreToExplore": "更多精选",
+    "railTopSellers": "热销榜",
+    "railSponsored": "赞助推广",
+    "sponsoredBadge": "赞助",
     "railRecentlyAdded": "最近添加"
   },
   "hero": {
@@ -264,6 +265,8 @@
     "viewSeller": "查看供应商",
     "sidebarTitle": "发起询价",
     "sidebarBody": "告诉供应商你的需求（数量/规格）。对方会回复交期与条款。",
+    "quantity": "数量",
+    "ratingShort": "{rating}（{count}）",
     "sellerUnknown": "暂无供应商信息。",
     "noImage": "暂无图片",
     "shareLink": "分享链接",
@@ -272,6 +275,11 @@
     "tabDetails": "详情",
     "tabSpecifications": "规格参数",
     "tabDocuments": "文件",
+    "tabReviews": "评价",
+    "reviewsCount": "{count} 条评价",
+    "reviewsBreakdown": "评分分布",
+    "noReviews": "该商品暂无评价。",
+    "noRatingYet": "暂无评价",
     "noDescription": "该商品暂无描述。",
     "noSpecifications": "该商品暂无规格参数。",
     "noDocuments": "该商品暂无文件。",
@@ -825,7 +833,17 @@
       "dashboard": "面板",
       "store": "我的店铺",
       "products": "产品",
+      "newProduct": "新建产品",
       "profile": "公开资料"
+    },
+    "sidebar": {
+      "store": "您的店铺",
+      "noCompany": "完成公司资料后即可显示店铺信息。",
+      "activeProducts": "在售商品",
+      "openOrders": "待处理订单",
+      "revenue": "收入 (USD)",
+      "uploadLogo": "上传店铺标志",
+      "uploadError": "无法上传图片。"
     },
     "setupIncompleteTitle": "完成店铺入驻",
     "setupIncompleteBody": "填写企业信息以启用完整卖家工具和审核流程。",
@@ -881,6 +899,7 @@
       "country": "国家 (ISO-2)",
       "type": "业务类型",
       "save": "保存店铺",
+      "logoHint": "点击标志从设备上传图片（JPEG、PNG 或 WebP，最大 2MB）。",
       "verificationStatus": "认证状态：{status}"
     },
     "profile": {
@@ -917,7 +936,14 @@
       "unit": "单位",
       "create": "创建产品",
       "save": "保存",
-      "cancel": "取消"
+      "saving": "保存中…",
+      "cancel": "取消",
+      "images": "产品图片",
+      "imagesHint": "粘贴公开图片 URL（第一张为主图）。",
+      "addImage": "添加图片 URL",
+      "removeImage": "移除",
+      "errorSave": "无法保存产品，请检查字段后重试。",
+      "errorSellerMode": "请先在侧边栏切换到卖家模式再创建产品。"
     }
   }
 }

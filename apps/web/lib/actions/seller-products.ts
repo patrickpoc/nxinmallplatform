@@ -27,6 +27,8 @@ export async function createSellerProduct(input: SellerProductFormInput) {
   }
   const d = parsed.data;
 
+  const imageUrls = (d.imageUrls ?? []).map((u) => u.trim()).filter(Boolean);
+
   await prisma.product.create({
     data: {
       sellerId,
@@ -38,12 +40,24 @@ export async function createSellerProduct(input: SellerProductFormInput) {
         create: d.variants.map((v) => ({
           sku: v.sku,
           priceUsd: new Prisma.Decimal(v.priceUsd),
+          priceAmount: new Prisma.Decimal(v.priceUsd),
+          priceCurrency: "USD",
           minOrderQty: v.minOrderQty,
           unit: v.unit,
           stockQty: v.stockQty,
           attributes: v.attributes !== undefined ? (v.attributes as Prisma.InputJsonValue) : undefined,
         })),
       },
+      images:
+        imageUrls.length > 0
+          ? {
+              create: imageUrls.map((url, i) => ({
+                url,
+                isPrimary: i === 0,
+                sortOrder: i,
+              })),
+            }
+          : undefined,
     },
   });
 
@@ -64,6 +78,8 @@ export async function updateSellerProduct(productId: string, input: SellerProduc
   });
   if (!existing) throw new Error("Product not found");
 
+  const imageUrls = (d.imageUrls ?? []).map((u) => u.trim()).filter(Boolean);
+
   await prisma.$transaction(async (tx) => {
     await tx.product.update({
       where: { id: productId },
@@ -80,12 +96,27 @@ export async function updateSellerProduct(productId: string, input: SellerProduc
         productId,
         sku: v.sku,
         priceUsd: new Prisma.Decimal(v.priceUsd),
+        priceAmount: new Prisma.Decimal(v.priceUsd),
+        priceCurrency: "USD" as const,
         minOrderQty: v.minOrderQty,
         unit: v.unit,
         stockQty: v.stockQty,
         attributes: v.attributes !== undefined ? (v.attributes as Prisma.InputJsonValue) : undefined,
       })),
     });
+    if (d.imageUrls !== undefined) {
+      await tx.productImage.deleteMany({ where: { productId } });
+      if (imageUrls.length > 0) {
+        await tx.productImage.createMany({
+          data: imageUrls.map((url, i) => ({
+            productId,
+            url,
+            isPrimary: i === 0,
+            sortOrder: i,
+          })),
+        });
+      }
+    }
   });
 
   revalidatePath("/seller/products");

@@ -7,6 +7,7 @@ import { Link } from "@/i18n/routing";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { ToggleWishlistButton } from "@/components/wishlist/toggle-wishlist-button";
 import { PriceDisplay } from "@/components/brand/price-display";
+import { ProductRatingMini } from "@/components/marketplace/product-rating-mini";
 import type { CartPriceCurrency } from "@/lib/cart/types";
 
 export type RailProductCardData = {
@@ -17,12 +18,23 @@ export type RailProductCardData = {
   priceCurrency: CartPriceCurrency;
   variantId?: string;
   unit?: string;
+  ratingAverage?: number;
+  reviewCount?: number;
+  isSponsored?: boolean;
 };
 
-export function RailProductCard({ product }: { product: RailProductCardData }) {
+export function RailProductCard({
+  product,
+  sponsoredBadgeLabel,
+}: {
+  product: RailProductCardData;
+  sponsoredBadgeLabel?: string;
+}) {
   const t = useTranslations("product");
   const locale = useLocale();
-  const { id, name, imageUrl, priceAmount, priceCurrency, variantId, unit } = product;
+  const { id, name, imageUrl, priceAmount, priceCurrency, variantId, unit, ratingAverage, reviewCount, isSponsored } =
+    product;
+  const showSponsoredBadge = isSponsored && sponsoredBadgeLabel;
 
   return (
     <div className="w-[min(85vw,240px)] shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-white shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-blue hover:shadow-md sm:w-[240px]">
@@ -43,6 +55,18 @@ export function RailProductCard({ product }: { product: RailProductCardData }) {
               <span className="text-xs">{t("noImage")}</span>
             </div>
           )}
+          {showSponsoredBadge ? (
+            <span className="absolute right-2 top-2 rounded-md bg-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+              {sponsoredBadgeLabel}
+            </span>
+          ) : null}
+          <div className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)]">
+            <ProductRatingMini
+              average={ratingAverage}
+              reviewCount={reviewCount ?? 0}
+              variant="overlay"
+            />
+          </div>
         </div>
       </Link>
       <div className="space-y-2 border-t border-border p-3">

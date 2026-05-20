@@ -5,6 +5,10 @@ import { VerificationBadge } from "@/components/brand/verification-badge";
 import { ProductBreadcrumbs } from "@/components/marketplace/product-breadcrumbs";
 import { ProductGallery } from "@/components/marketplace/product-gallery";
 import { ProductPurchaseCard } from "@/components/marketplace/product-purchase-card";
+import { ProductRatingMini } from "@/components/marketplace/product-rating-mini";
+import { ProductReviewsSection } from "@/components/marketplace/product-reviews-section";
+import { CountryDisplay } from "@/components/brand/country-display";
+import { getProductRatingsBatch, getProductReviewSummary } from "@/lib/marketplace/product-reviews";
 import { ShareButton } from "@/components/marketplace/share-button";
 import { RailProductCard } from "@/components/marketplace/rail-product-card";
 import { HorizontalRail } from "@/components/marketplace/horizontal-rail";
@@ -52,6 +56,13 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
     notFound();
   }
 
+  let reviewSummary;
+  try {
+    reviewSummary = await getProductReviewSummary(product.id);
+  } catch {
+    reviewSummary = { average: 0, count: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, reviews: [] };
+  }
+
   const localeKey = params.locale as "en" | "pt" | "zh";
   const nameObj = product.name as { en?: string; pt?: string; zh?: string };
   const name = nameObj?.[localeKey] ?? nameObj?.en ?? "Product";
@@ -96,6 +107,8 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
     relatedProducts = [];
   }
 
+  const relatedRatings = await getProductRatingsBatch(relatedProducts.map((p) => p.id));
+
   function labelName(nameJson: unknown): string {
     const o = nameJson as Record<string, string> | null;
     return o?.[localeKey] ?? o?.en ?? "—";
@@ -117,13 +130,21 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
       <div className="space-y-6" data-demo-target="pdp-main">
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-4">
-          <h1 className="heading-page min-w-0 flex-1 truncate sm:whitespace-normal">{name}</h1>
+          <div className="min-w-0 flex-1 space-y-2">
+            <h1 className="heading-page truncate sm:whitespace-normal">{name}</h1>
+            <ProductRatingMini
+              average={reviewSummary.average}
+              reviewCount={reviewSummary.count}
+              className="text-sm"
+            />
+          </div>
           <ShareButton />
         </div>
         {product.seller.company ? (
           <div className="flex flex-wrap items-center gap-2 text-sm text-brand-gray">
-            <span>{product.seller.company.name}</span>
+            <span className="font-medium text-brand-dark">{product.seller.company.name}</span>
             <VerificationBadge tier={product.seller.company.verificationTier} />
+            <CountryDisplay code={product.seller.company.country} locale={params.locale} />
           </div>
         ) : null}
       </div>
@@ -153,6 +174,7 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
                 sellerUnknown: t("sellerUnknown"),
                 sidebarTitle: t("sidebarTitle"),
                 sidebarBody: t("sidebarBody"),
+                quantity: t("quantity"),
               }}
             />
           </aside>
@@ -168,6 +190,10 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
             <TabsTrigger value="details">{t("tabDetails")}</TabsTrigger>
             <TabsTrigger value="specs">{t("tabSpecifications")}</TabsTrigger>
             <TabsTrigger value="docs">{t("tabDocuments")}</TabsTrigger>
+            <TabsTrigger value="reviews">
+              {t("tabReviews")}
+              {reviewSummary.count > 0 ? ` (${reviewSummary.count})` : ""}
+            </TabsTrigger>
           </TabsList>
           </div>
           <TabsContent value="details">
@@ -223,6 +249,13 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
               </CardContent>
             </Card>
           </TabsContent>
+          <TabsContent value="reviews">
+            <Card className="shadow-card">
+              <CardContent className="p-6">
+                <ProductReviewsSection summary={reviewSummary} locale={params.locale} />
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -235,6 +268,7 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
           >
             {relatedProducts.map((p) => {
               const v = p.variants[0];
+              const rating = relatedRatings.get(p.id);
               return (
                 <RailProductCard
                   key={p.id}
@@ -246,6 +280,8 @@ export default async function ProductDetailPage({ params }: { params: { locale: 
                     priceCurrency: ((v?.priceCurrency as string) ?? "USD") as CartPriceCurrency,
                     variantId: v?.id,
                     unit: v?.unit,
+                    ratingAverage: rating?.average,
+                    reviewCount: rating?.count,
                   }}
                 />
               );

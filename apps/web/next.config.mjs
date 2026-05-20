@@ -5,6 +5,11 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@nxinmall/database", "@nxinmall/constants", "@nxinmall/types", "@nxinmall/validators"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "flagcdn.com", pathname: "/**" },
+    ],
+  },
   async rewrites() {
     // Sem API_PROXY_TARGET (ex.: só web na Vercel), rotas em app/api/v1/* respondem no próprio Next.js.
     const api = process.env.API_PROXY_TARGET?.trim();

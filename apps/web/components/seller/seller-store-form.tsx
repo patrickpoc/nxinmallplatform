@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SellerLogoUpload } from "@/components/seller/seller-logo-upload";
 import { updateSellerStore } from "@/lib/actions/seller-store";
 
 const schema = z.object({
@@ -21,9 +22,10 @@ type FormValues = z.infer<typeof schema>;
 type Props = {
   defaultValues: FormValues;
   verificationStatus?: string;
+  logoUrl?: string | null;
 };
 
-export function SellerStoreForm({ defaultValues, verificationStatus }: Props) {
+export function SellerStoreForm({ defaultValues, verificationStatus, logoUrl }: Props) {
   const t = useTranslations("sellerPortal.store");
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -46,6 +48,10 @@ export function SellerStoreForm({ defaultValues, verificationStatus }: Props) {
           {t("verificationStatus", { status: verificationStatus })}
         </p>
       ) : null}
+      <div className="flex items-center gap-4">
+        <SellerLogoUpload logoUrl={logoUrl ?? null} companyName={defaultValues.name} />
+        <p className="text-sm text-brand-gray">{t("logoHint")}</p>
+      </div>
       <div className="space-y-2">
         <Label htmlFor="name">{t("name")}</Label>
         <Input id="name" {...form.register("name")} />

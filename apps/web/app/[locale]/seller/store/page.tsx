@@ -19,6 +19,7 @@ export default async function SellerStorePage({ params }: { params: { locale: st
       <p className="text-sm text-brand-gray">{t("subtitle")}</p>
       <SellerStoreForm
         verificationStatus={company.verificationStatus}
+        logoUrl={company.logoUrl}
         defaultValues={{
           name: company.name,
           legalName: company.legalName ?? "",

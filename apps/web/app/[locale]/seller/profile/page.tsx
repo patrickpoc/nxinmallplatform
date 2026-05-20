@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CountryDisplay } from "@/components/brand/country-display";
 import { VerificationBadge } from "@/components/brand/verification-badge";
 import { redirect } from "next/navigation";
 
@@ -30,9 +31,7 @@ export default async function SellerProfilePage({ params }: { params: { locale: 
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <VerificationBadge tier={company.verificationTier} />
-          <p className="text-brand-gray">
-            {t("country")}: {company.country}
-          </p>
+          <CountryDisplay code={company.country} locale={params.locale} />
           <p className="text-brand-gray">
             {t("type")}: {company.type}
           </p>

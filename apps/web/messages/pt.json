@@ -65,8 +65,9 @@
     "tileCatalogDesc": "Buscar e filtrar todos os produtos",
     "tileSellers": "Fornecedores",
     "tileSellersDesc": "Parceiros por país",
-    "railNewArrivals": "Novidades",
-    "railMoreToExplore": "Mais para explorar",
+    "railTopSellers": "Mais vendidos",
+    "railSponsored": "Patrocinados",
+    "sponsoredBadge": "Patrocinado",
     "railRecentlyAdded": "Recém adicionados"
   },
   "hero": {
@@ -264,6 +265,8 @@
     "viewSeller": "Ver fornecedor",
     "sidebarTitle": "Peça uma cotação",
     "sidebarBody": "Diga ao fornecedor o que você precisa (quantidade/especificações). Você receberá prazos e condições.",
+    "quantity": "Quantidade",
+    "ratingShort": "{rating} ({count})",
     "sellerUnknown": "Informações do fornecedor indisponíveis.",
     "noImage": "Sem imagem",
     "shareLink": "Compartilhar link",
@@ -272,6 +275,11 @@
     "tabDetails": "Detalhes",
     "tabSpecifications": "Especificações",
     "tabDocuments": "Documentos",
+    "tabReviews": "Avaliações",
+    "reviewsCount": "{count} avaliações",
+    "reviewsBreakdown": "Distribuição das notas",
+    "noReviews": "Ainda não há avaliações para este produto.",
+    "noRatingYet": "Sem avaliações ainda",
     "noDescription": "Este anúncio ainda não possui descrição.",
     "noSpecifications": "Este anúncio ainda não possui especificações.",
     "noDocuments": "Nenhum documento foi enviado para este anúncio.",
@@ -825,7 +833,17 @@
       "dashboard": "Painel",
       "store": "Minha loja",
       "products": "Produtos",
+      "newProduct": "Novo produto",
       "profile": "Perfil público"
+    },
+    "sidebar": {
+      "store": "Sua loja",
+      "noCompany": "Conclua o cadastro da empresa para ver os dados da loja.",
+      "activeProducts": "Anúncios ativos",
+      "openOrders": "Pedidos abertos",
+      "revenue": "Receita (USD)",
+      "uploadLogo": "Enviar logo da loja",
+      "uploadError": "Não foi possível enviar a imagem."
     },
     "setupIncompleteTitle": "Conclua o cadastro da loja",
     "setupIncompleteBody": "Informe os dados da empresa para liberar as ferramentas de vendedor e a verificação.",
@@ -881,6 +899,7 @@
       "country": "País (ISO-2)",
       "type": "Tipo de negócio",
       "save": "Salvar loja",
+      "logoHint": "Toque no logo para enviar uma foto do dispositivo (JPEG, PNG ou WebP, máx. 2MB).",
       "verificationStatus": "Status de verificação: {status}"
     },
     "profile": {
@@ -917,7 +936,14 @@
       "unit": "Unidade",
       "create": "Criar produto",
       "save": "Salvar",
-      "cancel": "Cancelar"
+      "saving": "Salvando…",
+      "cancel": "Cancelar",
+      "images": "Imagens do produto",
+      "imagesHint": "Cole URLs públicas de imagens (a primeira é a foto principal).",
+      "addImage": "Adicionar URL",
+      "removeImage": "Remover",
+      "errorSave": "Não foi possível salvar o produto. Verifique os campos e tente novamente.",
+      "errorSellerMode": "Ative o modo vendedor na barra lateral antes de criar produtos."
     }
   }
 }

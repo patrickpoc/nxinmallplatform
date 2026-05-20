@@ -18,6 +18,8 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:reviews": "tsx prisma/seed.ts --refresh-reviews",
+    "db:seed:sponsored": "tsx prisma/seed.ts --refresh-sponsored",
     "type-check": "tsc --noEmit",
     "lint": "echo skip"
   },
