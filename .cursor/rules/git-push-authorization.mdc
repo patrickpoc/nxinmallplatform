@@ -1,0 +1,13 @@
+---
+description: Require explicit user approval before any git push to remote
+alwaysApply: true
+---
+
+# Git push — authorization required
+
+Before running `git push` (to any remote or branch):
+
+1. **Ask the user explicitly** for authorization to push, unless they already wrote clear approval in the same message (e.g. "pode dar push", "push autorizado", "sim, envie ao GitHub").
+2. **Do not push** after commit only, deploy instructions, or assumed consent from earlier turns.
+3. You may `git commit` locally when appropriate without push approval, unless the user restricts commits too.
+4. After push is approved, run push once and report the commit range and remote URL.

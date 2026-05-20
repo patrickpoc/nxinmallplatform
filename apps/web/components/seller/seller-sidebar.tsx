@@ -80,7 +80,7 @@ function SidebarIdentity({ ctx }: { ctx: SellerSidebarContext }) {
         <div className="col-span-2">
           <dt className="text-brand-gray">{t("sidebar.revenue")}</dt>
           <dd className="mt-0.5 font-semibold tabular-nums text-brand-dark">
-            ${ctx.metrics.revenueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${ctx.metrics.revenueUsd.toLocaleString(undefined, { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 3 })}
           </dd>
         </div>
       </dl>

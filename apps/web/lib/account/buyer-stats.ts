@@ -1,4 +1,5 @@
 import type { SavedOrder } from "@/lib/account/orders-store";
+import { roundMoney } from "@/lib/money-format";
 
 export type BuyerPurchaseStats = {
   totalOrders: number;
@@ -37,7 +38,7 @@ export function computeBuyerStats(orders: SavedOrder[]): BuyerPurchaseStats {
     if (order.status === "pending") pendingCount += 1;
     else approvedCount += 1;
     totalUnits += order.items.reduce((s, i) => s + i.quantity, 0);
-    const amount = Math.round(orderAmount(order) * 100) / 100;
+    const amount = roundMoney(orderAmount(order));
     totalSpent += amount;
     const method = order.payment?.type ?? "unknown";
     const prev = paymentMap.get(method) ?? { count: 0, total: 0 };
@@ -49,7 +50,7 @@ export function computeBuyerStats(orders: SavedOrder[]): BuyerPurchaseStats {
     pendingCount,
     approvedCount,
     totalUnits,
-    totalSpent: Math.round(totalSpent * 100) / 100,
+    totalSpent: roundMoney(totalSpent),
     primaryCurrency,
     byPayment: [...paymentMap.entries()].map(([method, v]) => ({ method, ...v })),
   };

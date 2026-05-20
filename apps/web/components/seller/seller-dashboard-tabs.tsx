@@ -16,6 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { SellerDashboardData } from "@/lib/seller/seller-dashboard-data";
+import { moneyFormatOptions, roundMoney } from "@/lib/money-format";
 
 const LOCALE_MAP: Record<string, string> = { en: "en-US", pt: "pt-BR", zh: "zh-CN" };
 
@@ -34,8 +35,8 @@ export function SellerDashboardTabs({ data, showSetupBanner }: Props) {
     new Intl.NumberFormat(LOCALE_MAP[locale] ?? "en-US", {
       style: "currency",
       currency: "USD",
-      maximumFractionDigits: 2,
-    }).format(n);
+      ...moneyFormatOptions(),
+    }).format(roundMoney(n));
 
   const fmtDate = (d: Date) =>
     d.toLocaleDateString(LOCALE_MAP[locale] ?? "en-US", {

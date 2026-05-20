@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { CurrencyCode } from "@/lib/currency-preference";
+import { moneyFormatOptions, roundMoney } from "@/lib/money-format";
 
 type ExchangePayload = { rates: { USD: number; BRL: number }; fetchedAt: string };
 
@@ -35,12 +36,11 @@ export function useCurrency(countryCode?: string | null) {
 
   function format(amount: number, currency: CurrencyCode, locale?: string) {
     const fmtLocale = locale ?? (currency === "BRL" ? "pt-BR" : "en-US");
-    const rounded = Math.round(amount * 100) / 100;
+    const rounded = roundMoney(amount);
     return new Intl.NumberFormat(fmtLocale, {
       style: "currency",
       currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      ...moneyFormatOptions(),
     }).format(rounded);
   }
 

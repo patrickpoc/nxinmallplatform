@@ -6,6 +6,7 @@ import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { SellerDashboardData } from "@/lib/seller/seller-dashboard-data";
+import { moneyFormatOptions, roundMoney } from "@/lib/money-format";
 
 const LOCALE_MAP: Record<string, string> = { en: "en-US", pt: "pt-BR", zh: "zh-CN" };
 
@@ -22,8 +23,8 @@ export function SellerAccountDashboard({ data }: Props) {
     new Intl.NumberFormat(LOCALE_MAP[locale] ?? "en-US", {
       style: "currency",
       currency: "USD",
-      maximumFractionDigits: 2,
-    }).format(n);
+      ...moneyFormatOptions(),
+    }).format(roundMoney(n));
 
   const fmtDate = (d: Date) =>
     d.toLocaleDateString(LOCALE_MAP[locale] ?? "en-US", {
