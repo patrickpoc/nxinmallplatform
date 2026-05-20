@@ -6,8 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Check, Clock, Package, ShoppingCart, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@/i18n/routing";
+import { BuyerKpiCard } from "@/components/account/buyer-kpi-card";
 import { SellOnNxinmallCta } from "@/components/account/sell-on-nxinmall-cta";
 import { computeBuyerStats, orderAmount } from "@/lib/account/buyer-stats";
 import { loadOrders, type SavedOrder } from "@/lib/account/orders-store";
@@ -61,6 +61,8 @@ export function BuyerDashboard() {
   const fmtMoney = (amount: number, currency: CurrencyCode = displayCurrency) =>
     format(amount, currency, locale);
 
+  const totalSpentFormatted = fmtMoney(stats.totalSpent);
+
   const formatOrderTotal = (order: SavedOrder) => {
     const amount =
       typeof order.totalAmount === "number" && !Number.isNaN(order.totalAmount)
@@ -78,64 +80,36 @@ export function BuyerDashboard() {
         <p className="text-sm text-brand-gray">{t("buyerDashboardSubtitle")}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4" data-demo-target="dashboard-kpis">
-        <Card className="shadow-card">
-          <CardContent className="flex min-w-0 items-center gap-3 p-4 sm:gap-4 sm:p-5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 sm:h-11 sm:w-11">
-              <ShoppingCart className="h-5 w-5 text-blue-600" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-brand-gray sm:text-xs">
-                {t("buyerKpiOrders")}
-              </p>
-              <p className="text-xl font-bold tabular-nums text-brand-dark sm:text-2xl">{stats.totalOrders}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card">
-          <CardContent className="flex min-w-0 items-center gap-3 p-4 sm:gap-4 sm:p-5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-100 sm:h-11 sm:w-11">
-              <Wallet className="h-5 w-5 text-green-600" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-brand-gray sm:text-xs">
-                {t("buyerKpiSpent")}
-              </p>
-              <p
-                className="text-base font-bold tabular-nums leading-tight text-brand-dark sm:text-lg xl:text-2xl"
-                title={fmtMoney(stats.totalSpent)}
-              >
-                {fmtMoney(stats.totalSpent)}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card">
-          <CardContent className="flex min-w-0 items-center gap-3 p-4 sm:gap-4 sm:p-5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 sm:h-11 sm:w-11">
-              <Clock className="h-5 w-5 text-amber-600" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-brand-gray sm:text-xs">
-                {t("buyerKpiPending")}
-              </p>
-              <p className="text-xl font-bold tabular-nums text-brand-dark sm:text-2xl">{stats.pendingCount}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card">
-          <CardContent className="flex min-w-0 items-center gap-3 p-4 sm:gap-4 sm:p-5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-mid sm:h-11 sm:w-11">
-              <Package className="h-5 w-5 text-brand-blue" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-brand-gray sm:text-xs">
-                {t("buyerKpiUnits")}
-              </p>
-              <p className="text-xl font-bold tabular-nums text-brand-dark sm:text-2xl">{stats.totalUnits}</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div
+        className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 min-[400px]:gap-4 xl:grid-cols-4"
+        data-demo-target="dashboard-kpis"
+      >
+        <BuyerKpiCard
+          label={t("buyerKpiOrders")}
+          value={stats.totalOrders}
+          icon={<ShoppingCart className="h-5 w-5 text-blue-600" />}
+          iconClassName="bg-blue-100"
+        />
+        <BuyerKpiCard
+          label={t("buyerKpiSpent")}
+          value={totalSpentFormatted}
+          valueTitle={totalSpentFormatted}
+          icon={<Wallet className="h-5 w-5 text-green-600" />}
+          iconClassName="bg-green-100"
+          className="min-[400px]:col-span-2 xl:col-span-1"
+        />
+        <BuyerKpiCard
+          label={t("buyerKpiPending")}
+          value={stats.pendingCount}
+          icon={<Clock className="h-5 w-5 text-amber-600" />}
+          iconClassName="bg-amber-100"
+        />
+        <BuyerKpiCard
+          label={t("buyerKpiUnits")}
+          value={stats.totalUnits}
+          icon={<Package className="h-5 w-5 text-brand-blue" />}
+          iconClassName="bg-surface-mid"
+        />
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -170,10 +144,7 @@ export function BuyerDashboard() {
         ) : (
           <div className="space-y-2">
             {recent.map((order) => (
-              <div
-                key={order.id}
-                className="rounded-lg border border-border bg-white px-4 py-3"
-              >
+              <div key={order.id} className="rounded-lg border border-border bg-white px-4 py-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                   <div className="min-w-0 flex-1">
                     <p className="break-all text-sm font-medium text-brand-blue">{order.id}</p>
@@ -184,7 +155,7 @@ export function BuyerDashboard() {
                   </div>
                   <div className="flex shrink-0 flex-row items-center justify-between gap-3 border-t border-border pt-3 sm:flex-col sm:items-end sm:border-0 sm:pt-0">
                     <span
-                      className="whitespace-nowrap text-base font-semibold tabular-nums text-brand-dark"
+                      className="max-w-full overflow-x-auto whitespace-nowrap text-base font-semibold tabular-nums text-brand-dark [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       title={formatOrderTotal(order)}
                     >
                       {formatOrderTotal(order)}

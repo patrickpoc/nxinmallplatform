@@ -3,10 +3,11 @@
 import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, Clock, CreditCard, QrCode, Barcode } from "lucide-react";
+import { Check, Clock, CreditCard, QrCode, Barcode, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@/i18n/routing";
+import { BuyerKpiCard } from "@/components/account/buyer-kpi-card";
 import { SellOnNxinmallCta } from "@/components/account/sell-on-nxinmall-cta";
 import { buildBuyerLedger, computeBuyerStats } from "@/lib/account/buyer-stats";
 import { loadOrders } from "@/lib/account/orders-store";
@@ -63,27 +64,29 @@ export function FinancialLedger() {
         <p className="text-sm text-brand-gray">{t("financialBuyerSubtitle")}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="shadow-card">
-          <CardContent className="p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-gray">{t("financialTotalSpent")}</p>
-            <p className="mt-1 text-xl font-bold tabular-nums text-brand-dark sm:text-2xl" title={fmt(stats.totalSpent, stats.primaryCurrency)}>
-              {fmt(stats.totalSpent, stats.primaryCurrency)}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card">
-          <CardContent className="p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-gray">{t("financialPending")}</p>
-            <p className="mt-1 text-2xl font-bold text-amber-700">{stats.pendingCount}</p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card">
-          <CardContent className="p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-gray">{t("financialCompleted")}</p>
-            <p className="mt-1 text-2xl font-bold text-green-700">{stats.approvedCount}</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 min-[400px]:gap-4 lg:grid-cols-3">
+        <BuyerKpiCard
+          label={t("financialTotalSpent")}
+          value={fmt(stats.totalSpent, stats.primaryCurrency)}
+          valueTitle={fmt(stats.totalSpent, stats.primaryCurrency)}
+          icon={<Wallet className="h-5 w-5 text-green-600" />}
+          iconClassName="bg-green-100"
+          className="min-[400px]:col-span-2 lg:col-span-1"
+        />
+        <BuyerKpiCard
+          label={t("financialPending")}
+          value={stats.pendingCount}
+          icon={<Clock className="h-5 w-5 text-amber-600" />}
+          iconClassName="bg-amber-100"
+          valueClassName="text-amber-700"
+        />
+        <BuyerKpiCard
+          label={t("financialCompleted")}
+          value={stats.approvedCount}
+          icon={<Check className="h-5 w-5 text-green-600" />}
+          iconClassName="bg-green-50"
+          valueClassName="text-green-700"
+        />
       </div>
 
       {stats.byPayment.length > 0 ? (
