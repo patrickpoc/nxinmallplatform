@@ -16,6 +16,9 @@ export type SavedOrder = {
   freight: FreightOption;
   payment: PaymentMethod;
   totalFormatted: string;
+  /** Numeric total for dashboards (optional on legacy orders). */
+  totalAmount?: number;
+  currency?: string;
   status: "pending" | "approved";
 };
 

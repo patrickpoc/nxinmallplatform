@@ -13,32 +13,34 @@ describe("isSamePathSubSteps", () => {
   };
 
   it("treats home overlay steps on / as same-path (desktop)", () => {
-    const steps = getDemoSteps("guest", "desktop");
+    const steps = getDemoSteps("buyer", "guest", "desktop");
     const search = steps.find((s) => s.id === "search")!;
     const categoryNav = steps.find((s) => s.id === "category-nav")!;
     expect(isSamePathSubSteps(search, categoryNav, bootstrap)).toBe(true);
   });
 
   it("treats home overlay steps on / as same-path (mobile)", () => {
-    const steps = getDemoSteps("guest", "mobile");
+    const steps = getDemoSteps("buyer", "guest", "mobile");
     const search = steps.find((s) => s.id === "search")!;
     const categoryNav = steps.find((s) => s.id === "category-nav")!;
     expect(isSamePathSubSteps(search, categoryNav, bootstrap)).toBe(true);
   });
 
   it("mobile guest flow is shorter than desktop", () => {
-    expect(getDemoSteps("guest", "mobile").length).toBeLessThan(getDemoSteps("guest", "desktop").length);
+    expect(getDemoSteps("buyer", "guest", "mobile").length).toBeLessThan(
+      getDemoSteps("buyer", "guest", "desktop").length,
+    );
   });
 
   it("treats checkout sub-steps as same-path", () => {
-    const steps = getDemoSteps("authenticated");
+    const steps = getDemoSteps("buyer", "authenticated");
     const address = steps.find((s) => s.id === "checkout-address")!;
     const freight = steps.find((s) => s.id === "checkout-freight")!;
     expect(isSamePathSubSteps(address, freight, bootstrap)).toBe(true);
   });
 
   it("treats seller profile phases as same-path", () => {
-    const steps = getDemoSteps("guest");
+    const steps = getDemoSteps("buyer", "guest");
     const overview = steps.find((s) => s.id === "seller-overview")!;
     const categories = steps.find((s) => s.id === "seller-categories")!;
     expect(isSamePathSubSteps(overview, categories, bootstrap)).toBe(true);

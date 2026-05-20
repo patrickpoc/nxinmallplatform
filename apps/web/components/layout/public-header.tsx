@@ -203,18 +203,15 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
                     <Link href="/account/purchases">{t("myPurchases")}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  {session.user.role === "SELLER" && (
+                  {session.user.role === "SELLER" && (session.user.portalMode ?? "buyer") === "buyer" ? (
                     <>
                       <DropdownMenuLabel className="text-xs font-semibold text-brand-gray">{t("sectionSell")}</DropdownMenuLabel>
                       <DropdownMenuItem asChild>
-                        <Link href="/account/sales">{t("mySales")}</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/account/listings">{t("myListings")}</Link>
+                        <Link href="/seller/dashboard">{t("sellerPortal")}</Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
-                  )}
+                  ) : null}
                   <DropdownMenuLabel className="text-xs font-semibold text-brand-gray">{t("sectionAccount")}</DropdownMenuLabel>
                   <DropdownMenuItem asChild>
                     <Link href="/account/personal">{t("myData")}</Link>
@@ -434,16 +431,10 @@ export function PublicHeader({ categories }: PublicHeaderProps) {
                     <Link href="/account/addresses" className="block rounded-md px-3 py-2.5 hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
                       {t("addresses")}
                     </Link>
-                    {session.user.role === "SELLER" ? (
-                      <>
-                        <p className="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wide text-brand-gray">{t("sectionSell")}</p>
-                        <Link href="/account/sales" className="block rounded-md px-3 py-2.5 hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
-                          {t("mySales")}
-                        </Link>
-                        <Link href="/account/listings" className="block rounded-md px-3 py-2.5 hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
-                          {t("myListings")}
-                        </Link>
-                      </>
+                    {session.user.role === "SELLER" && (session.user.portalMode ?? "buyer") === "buyer" ? (
+                      <Link href="/seller/dashboard" className="block rounded-md px-3 py-2.5 hover:bg-surface-light" onClick={() => setMobileOpen(false)}>
+                        {t("sellerPortal")}
+                      </Link>
                     ) : null}
                     <button
                       type="button"

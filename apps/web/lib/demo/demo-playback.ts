@@ -36,7 +36,7 @@ function baseAutoAdvanceDelay(
   surface: DemoSurface,
 ): number {
   const mobile = surface === "mobile";
-  if (step.onEnter === "signInDemo") return mobile ? 6500 : 9000;
+  if (step.onEnter === "signInDemo" || step.onEnter === "signInDemoSeller") return mobile ? 6500 : 9000;
   if (step.onEnter === "confirmCheckout") return mobile ? 6200 : 8500;
   if (step.onEnter === "prefillCheckout" || step.onEnter === "seedCart") return mobile ? 5500 : 7500;
   if (samePathAsPrevious) return mobile ? 3900 : 5200;

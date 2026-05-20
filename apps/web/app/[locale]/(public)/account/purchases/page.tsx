@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { SellOnNxinmallCta } from "@/components/account/sell-on-nxinmall-cta";
 import { loadOrders, confirmOrder, removeOrder, type SavedOrder } from "@/lib/account/orders-store";
 
 const LOCALE_MAP: Record<string, string> = { en: "en-US", pt: "pt-BR", zh: "zh-CN" };
@@ -179,6 +180,8 @@ export default function PurchasesPage() {
           </div>
         </>
       )}
+
+      <SellOnNxinmallCta />
     </div>
   );
 }

@@ -50,6 +50,7 @@ describe("shouldSkipScrollReveal", () => {
 
   it("allows reveal for welcome only; skips categories, sellers and pdp", () => {
     expect(shouldSkipScrollReveal("welcome")).toBe(false);
+    expect(shouldSkipScrollReveal("welcome", "mobile")).toBe(true);
     expect(shouldSkipScrollReveal("categories")).toBe(true);
     expect(shouldSkipScrollReveal("sellers")).toBe(true);
     expect(shouldSkipScrollReveal("pdp")).toBe(true);

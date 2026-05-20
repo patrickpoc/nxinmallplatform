@@ -758,7 +758,7 @@ export function CheckoutPageClient() {
     }));
   }, [userId]);
 
-  const { total, fmt, isLoading } = useTotals(lines, selectedFreight, payment);
+  const { total, fmt, isLoading, displayCurrency } = useTotals(lines, selectedFreight, payment);
   const totalFormatted = isLoading ? "…" : fmt(total);
 
   const doConfirm = useCallback(() => {
@@ -779,6 +779,8 @@ export function CheckoutPageClient() {
         freight: selectedFreight,
         payment,
         totalFormatted: isLoading ? "…" : fmt(total),
+        totalAmount: total,
+        currency: displayCurrency,
         status: "pending",
       });
     }
@@ -786,7 +788,7 @@ export function CheckoutPageClient() {
     setSavedPayment(payment);
     clear();
     setDone(true);
-  }, [address, clear, fmt, isLoading, lines, payment, selectedFreight, total, userId]);
+  }, [address, clear, displayCurrency, fmt, isLoading, lines, payment, selectedFreight, total, userId]);
 
   useEffect(() => {
     if (!demo?.isActive) {

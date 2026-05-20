@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { getDemoSteps, type DemoFlow } from "@/lib/demo/demo-steps";
+import { getDemoSteps, type DemoFlow, type DemoPersona } from "@/lib/demo/demo-steps";
 import type { DemoSurface } from "@/lib/demo/demo-surface";
 
 function walkSourceFiles(dir: string, acc: string[] = []): string[] {
@@ -24,6 +24,7 @@ export type DemoTargetAuditIssue = {
 
 export function collectDemoTargetAuditIssues(
   sourceRoot: string,
+  personas: DemoPersona[] = ["buyer", "seller"],
   flows: DemoFlow[] = ["guest", "authenticated"],
   surfaces: DemoSurface[] = ["desktop", "mobile"],
 ): DemoTargetAuditIssue[] {
@@ -32,22 +33,25 @@ export function collectDemoTargetAuditIssues(
   const issues: DemoTargetAuditIssue[] = [];
   const seen = new Set<string>();
 
-  for (const flow of flows) {
-    for (const surface of surfaces) {
-    for (const step of getDemoSteps(flow, surface)) {
-      const key = `${flow}:${surface}:${step.id}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
+  for (const persona of personas) {
+    const flowsToRun: DemoFlow[] = persona === "seller" ? ["guest"] : flows;
+    for (const flow of flowsToRun) {
+      for (const surface of surfaces) {
+        for (const step of getDemoSteps(persona, flow, surface)) {
+          const key = `${persona}:${flow}:${surface}:${step.id}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
 
-      if (!step.target) {
-        issues.push({ stepId: step.id, reason: "missing_target" });
-        continue;
+          if (!step.target) {
+            issues.push({ stepId: step.id, reason: "missing_target" });
+            continue;
+          }
+          const marker = `data-demo-target="${step.target}"`;
+          if (!source.includes(marker)) {
+            issues.push({ stepId: step.id, target: step.target, reason: "missing_dom_marker" });
+          }
+        }
       }
-      const marker = `data-demo-target="${step.target}"`;
-      if (!source.includes(marker)) {
-        issues.push({ stepId: step.id, target: step.target, reason: "missing_dom_marker" });
-      }
-    }
     }
   }
 

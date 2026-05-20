@@ -5,9 +5,8 @@ import {
   LayoutDashboard,
   MapPin,
   Menu,
-  Package,
-  ShoppingBag,
   ShoppingCart,
+  Store,
   User,
   X,
 } from "lucide-react";
@@ -31,10 +30,12 @@ const ITEMS = [
   { key: "dashboard", icon: LayoutDashboard, href: "/account/dashboard" as const, roles: ["BUYER", "SELLER"] },
   { key: "personal", icon: User, href: "/account/personal" as const, roles: ["BUYER", "SELLER"] },
   { key: "financial", icon: DollarSign, href: "/account/financial" as const, roles: ["BUYER", "SELLER"] },
-  { key: "listings", icon: ShoppingBag, href: "/account/listings" as const, roles: ["SELLER"] },
   { key: "addresses", icon: MapPin, href: "/account/addresses" as const, roles: ["BUYER", "SELLER"] },
-  { key: "purchases", icon: ShoppingCart, href: "/account/purchases" as const, roles: ["BUYER", "SELLER"] },
-  { key: "sales", icon: Package, href: "/account/sales" as const, roles: ["SELLER"] },
+  { key: "purchases", icon: ShoppingCart, href: "/account/purchases" as const, roles: ["BUYER"] },
+] as const;
+
+const SELLER_ITEMS = [
+  { key: "company", icon: Store, href: "/account/company" as const },
 ] as const;
 
 function NavItems({
@@ -52,28 +53,41 @@ function NavItems({
 }) {
   return (
     <nav className="space-y-1">
-      {ITEMS.filter((item) => (item.roles as readonly string[]).includes(role)).map((item) => {
-        const fullHref = `/${locale}${item.href}`;
-        const active = pathname === fullHref || pathname.startsWith(fullHref + "/");
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.key}
-            href={item.href}
-            onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-              active
-                ? "bg-brand-blue/10 text-brand-blue"
-                : "text-brand-gray hover:bg-surface-light hover:text-brand-dark",
-            )}
-          >
-            <Icon className="h-[18px] w-[18px] shrink-0" />
-            {t(`sidebar.${item.key}`)}
-          </Link>
-        );
-      })}
+      {ITEMS.filter((item) => (item.roles as readonly string[]).includes(role)).map((item) =>
+        renderNavLink(item, pathname, locale, t, onNavigate),
+      )}
+      {role === "SELLER"
+        ? SELLER_ITEMS.map((item) => renderNavLink({ ...item, roles: ["SELLER"] }, pathname, locale, t, onNavigate))
+        : null}
     </nav>
+  );
+}
+
+function renderNavLink(
+  item: { key: string; icon: typeof LayoutDashboard; href: string; roles?: readonly string[] },
+  pathname: string,
+  locale: string,
+  t: (k: string) => string,
+  onNavigate?: () => void,
+) {
+  const fullHref = `/${locale}${item.href}`;
+  const active = pathname === fullHref || pathname.startsWith(fullHref + "/");
+  const Icon = item.icon;
+  return (
+    <Link
+      key={item.key}
+      href={item.href as "/account/company"}
+      onClick={onNavigate}
+      className={cn(
+        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+        active
+          ? "bg-brand-blue/10 text-brand-blue"
+          : "text-brand-gray hover:bg-surface-light hover:text-brand-dark",
+      )}
+    >
+      <Icon className="h-[18px] w-[18px] shrink-0" />
+      {t(`sidebar.${item.key}`)}
+    </Link>
   );
 }
 

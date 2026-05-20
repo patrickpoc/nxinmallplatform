@@ -16,7 +16,8 @@ export function DemoFloatingPanel() {
   const [fadeOut, setFadeOut] = useState(false);
   const farewellEndRef = useRef<(() => void) | null>(null);
 
-  const isFinishStep = demo?.currentStep.id === "finish";
+  const isFinishStep =
+    demo?.currentStep.id === "finish" || demo?.currentStep.id === "seller-finish";
 
   const dismissFarewell = useCallback(() => {
     setFadeOut(true);
@@ -63,7 +64,13 @@ export function DemoFloatingPanel() {
   const total = tour.totalSteps;
   const progress = Math.round((current / total) * 100);
   const flowLabel =
-    tour.flow === "authenticated" ? t("flowAuthenticated") : t("flowGuest");
+    tour.persona === "seller"
+      ? tour.flow === "authenticated"
+        ? t("flowSeller")
+        : t("flowSellerGuest")
+      : tour.flow === "authenticated"
+        ? t("flowAuthenticated")
+        : t("flowGuest");
   const modeLabel = tour.playbackMode === "auto" ? t("modeAutoBadge") : t("modeManualBadge");
   const farewellSeconds = Math.ceil(farewellRemainingMs / 1000);
   const farewellProgress =
@@ -141,7 +148,7 @@ export function DemoFloatingPanel() {
             variant="outline"
             size="sm"
             className="btn-press w-full"
-            onClick={() => void tour.startDemo(tour.playbackMode)}
+            onClick={() => void tour.startDemo(tour.playbackMode, tour.persona ?? "buyer")}
           >
             {t("restartTour")}
           </Button>

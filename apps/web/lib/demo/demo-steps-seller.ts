@@ -1,0 +1,70 @@
+import type { DemoStep } from "@/lib/demo/demo-steps";
+
+/** Desktop seller persona tour — uses seeded demo-seller@nxinmall.local (company APPROVED). */
+export const DEMO_STEPS_SELLER: DemoStep[] = [
+  {
+    id: "seller-welcome",
+    path: "/",
+    pageNameKey: "steps.sellerWelcome.pageName",
+    titleKey: "steps.sellerWelcome.title",
+    bodyKey: "steps.sellerWelcome.body",
+    target: "hero",
+  },
+  {
+    id: "seller-sign-in",
+    path: "/",
+    pageNameKey: "steps.sellerSignIn.pageName",
+    titleKey: "steps.sellerSignIn.title",
+    bodyKey: "steps.sellerSignIn.body",
+    target: "profile-menu-trigger",
+    onEnter: "signInDemoSeller",
+  },
+  {
+    id: "seller-account-dashboard",
+    path: "/account/dashboard",
+    pageNameKey: "steps.sellerAccountDashboard.pageName",
+    titleKey: "steps.sellerAccountDashboard.title",
+    bodyKey: "steps.sellerAccountDashboard.body",
+    target: "seller-account-dashboard",
+  },
+  {
+    id: "seller-company",
+    path: "/account/company",
+    pageNameKey: "steps.sellerCompany.pageName",
+    titleKey: "steps.sellerCompany.title",
+    bodyKey: "steps.sellerCompany.body",
+    target: "seller-company-status",
+  },
+  {
+    id: "seller-portal-dashboard",
+    path: "/seller/dashboard",
+    pageNameKey: "steps.sellerPortalDashboard.pageName",
+    titleKey: "steps.sellerPortalDashboard.title",
+    bodyKey: "steps.sellerPortalDashboard.body",
+    target: "seller-dashboard-overview",
+  },
+  {
+    id: "seller-store",
+    path: "/seller/store",
+    pageNameKey: "steps.sellerStore.pageName",
+    titleKey: "steps.sellerStore.title",
+    bodyKey: "steps.sellerStore.body",
+    target: "seller-store-form",
+  },
+  {
+    id: "seller-products",
+    path: "/seller/products",
+    pageNameKey: "steps.sellerProducts.pageName",
+    titleKey: "steps.sellerProducts.title",
+    bodyKey: "steps.sellerProducts.body",
+    target: "seller-products-list",
+  },
+  {
+    id: "seller-finish",
+    path: "/",
+    pageNameKey: "steps.sellerFinish.pageName",
+    titleKey: "steps.sellerFinish.title",
+    bodyKey: "steps.sellerFinish.body",
+    target: "hero",
+  },
+];

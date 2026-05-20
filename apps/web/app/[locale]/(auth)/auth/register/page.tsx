@@ -36,7 +36,7 @@ export default function RegisterPage() {
   const searchParams = useSearchParams();
   const demo = useDemoTourOptional();
   const roleParam = searchParams.get("role");
-  const callbackUrl = `/${locale}/account/personal`;
+  const defaultBuyerCallback = `/${locale}/account/personal`;
   const [error, setError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -109,17 +109,22 @@ export default function RegisterPage() {
         setError(json.error?.message ?? t("registerError"));
         return;
       }
+      const postRegisterUrl =
+        values.role === "SELLER"
+          ? `/${locale}/account/company/setup`
+          : defaultBuyerCallback;
+
       const sign = await signIn("credentials", {
         email: values.email,
         password: values.password,
         redirect: false,
-        callbackUrl,
+        callbackUrl: postRegisterUrl,
       });
       if (sign?.error) {
         setError(t("signInAfterRegisterError"));
         return;
       }
-      router.push(callbackUrl);
+      router.push(postRegisterUrl);
       router.refresh();
     } catch {
       setError(t("registerError"));
@@ -137,13 +142,13 @@ export default function RegisterPage() {
         email: "demo-buyer@nxinmall.local",
         password: "demo",
         redirect: false,
-        callbackUrl,
+        callbackUrl: defaultBuyerCallback,
       });
       if (res?.error) {
         setError(t("demoUnavailable"));
         return;
       }
-      router.push(callbackUrl);
+      router.push(defaultBuyerCallback);
       router.refresh();
     } catch {
       setError(t("demoUnavailable"));
@@ -234,8 +239,13 @@ export default function RegisterPage() {
                   {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              <p className="text-xs text-brand-gray">{t("passwordRules")}</p>
               {form.formState.errors.password ? (
-                <p className="text-xs text-error">{t("passwordRequired")}</p>
+                <p className="text-xs text-error">
+                  {form.formState.errors.password.type === "too_small"
+                    ? t("passwordRules")
+                    : t("passwordRequired")}
+                </p>
               ) : null}
             </div>
             <div className="space-y-2">
@@ -268,6 +278,9 @@ export default function RegisterPage() {
 
           <div className="space-y-2" data-demo-target="register-role">
             <Label>{t("role")}</Label>
+            {form.watch("role") === "SELLER" ? (
+              <p className="text-xs text-brand-gray">{t("sellerRegisterHint")}</p>
+            ) : null}
             <div className="flex gap-6 text-sm">
               <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-4 py-2.5 transition-colors has-[:checked]:border-brand-blue has-[:checked]:bg-brand-blue-50">
                 <input

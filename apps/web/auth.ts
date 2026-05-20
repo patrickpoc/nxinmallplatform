@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
+import { defaultPortalModeForRole, parsePortalMode } from "@/lib/portal/portal-mode";
 
 /**
  * NextAuth configuration (v5 beta) merged with the domain `User` model in Prisma.
@@ -58,7 +59,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       : []),
   ],
   callbacks: {
-    async jwt({ token, user, trigger, account }) {
+    async jwt({ token, user, trigger, account, session: triggerSession }) {
       if (user?.id) {
         token.sub = user.id;
         const role = (user as { role?: string }).role;
@@ -68,16 +69,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
           token.role = dbUser?.role ?? "BUYER";
         }
+        token.portalMode = defaultPortalModeForRole(token.role as string);
       }
       if (account && token.sub && !token.role) {
         const dbUser = await prisma.user.findUnique({ where: { id: token.sub } });
         token.role = dbUser?.role ?? "BUYER";
+        token.portalMode = defaultPortalModeForRole(token.role as string | undefined);
       }
       if (trigger === "update" && token.sub) {
         const dbUser = await prisma.user.findUnique({ where: { id: token.sub } });
         if (dbUser) {
           token.role = dbUser.role;
         }
+        const patch = triggerSession as { portalMode?: string; role?: string } | undefined;
+        if (patch?.portalMode) {
+          token.portalMode = parsePortalMode(patch.portalMode);
+        }
+        if (patch?.role) {
+          token.role = patch.role;
+        }
+      }
+      if (!token.portalMode) {
+        token.portalMode = defaultPortalModeForRole(token.role as string | undefined);
       }
       return token;
     },
@@ -85,6 +98,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = token.sub ?? "";
         session.user.role = (token.role as string) ?? "BUYER";
+        session.user.portalMode = parsePortalMode(token.portalMode);
+        session.portalMode = session.user.portalMode;
       }
       return session;
     },

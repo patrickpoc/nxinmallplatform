@@ -2,15 +2,20 @@ import type { DemoSurface } from "@/lib/demo/demo-surface";
 import {
   DEMO_STEPS_MOBILE_AUTHENTICATED,
   DEMO_STEPS_MOBILE_GUEST,
+  DEMO_STEPS_MOBILE_SELLER,
   MOBILE_HOME_OVERLAY_STEP_IDS,
 } from "@/lib/demo/demo-steps-mobile";
+import { DEMO_STEPS_SELLER } from "@/lib/demo/demo-steps-seller";
 
 export type { DemoSurface } from "@/lib/demo/demo-surface";
 
 export type DemoFlow = "guest" | "authenticated";
 
+export type DemoPersona = "buyer" | "seller";
+
 export type DemoOnEnter =
   | "signInDemo"
+  | "signInDemoSeller"
   | "seedCart"
   | "prefillCheckout"
   | "confirmCheckout"
@@ -31,6 +36,8 @@ export type DemoStep = {
   path: string;
   titleKey: string;
   bodyKey: string;
+  /** Short label for the current page (pocket UI); defaults from titleKey → `.pageName` */
+  pageNameKey?: string;
   target?: string;
   checkoutSubStep?: 1 | 2 | 3 | 4;
   checkoutDone?: boolean;
@@ -336,7 +343,14 @@ export const DEMO_STEPS = DEMO_STEPS_GUEST;
 
 export const DEMO_STORAGE_KEY = "nxinmall:demo";
 
-export function getDemoSteps(flow: DemoFlow, surface: DemoSurface = "desktop"): DemoStep[] {
+export function getDemoSteps(
+  persona: DemoPersona,
+  flow: DemoFlow,
+  surface: DemoSurface = "desktop",
+): DemoStep[] {
+  if (persona === "seller") {
+    return surface === "mobile" ? DEMO_STEPS_MOBILE_SELLER : DEMO_STEPS_SELLER;
+  }
   if (surface === "mobile") {
     return flow === "authenticated" ? DEMO_STEPS_MOBILE_AUTHENTICATED : DEMO_STEPS_MOBILE_GUEST;
   }

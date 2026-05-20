@@ -13,7 +13,7 @@ import {
 import { useSession } from "next-auth/react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/routing";
-import { signInDemoBuyer } from "@/lib/demo/demo-auth";
+import { signInDemoBuyer, signInDemoSeller } from "@/lib/demo/demo-auth";
 import type { RegisterPrefillHandler } from "@/lib/demo/demo-register-prefill";
 import {
   DEMO_STORAGE_KEY,
@@ -23,6 +23,7 @@ import {
   resolveStepPath,
   type DemoBootstrap,
   type DemoFlow,
+  type DemoPersona,
   type DemoStep,
 } from "@/lib/demo/demo-steps";
 import type { CartLine } from "@/lib/cart/types";
@@ -39,7 +40,7 @@ import {
 } from "@/lib/demo/demo-scroll";
 import { detectDemoSurface, type DemoSurface } from "@/lib/demo/demo-surface";
 
-export type { DemoPlaybackMode, DemoScrollSpeed, DemoSurface };
+export type { DemoPlaybackMode, DemoPersona, DemoScrollSpeed, DemoSurface };
 
 export type CheckoutDemoHandlers = {
   setStep: (step: 1 | 2 | 3 | 4) => void;
@@ -51,6 +52,7 @@ export type CheckoutDemoHandlers = {
 type DemoPersisted = {
   active: boolean;
   stepIndex: number;
+  persona: DemoPersona;
   flow: DemoFlow;
   playbackMode: DemoPlaybackMode;
   surface: DemoSurface;
@@ -58,6 +60,7 @@ type DemoPersisted = {
 
 type DemoContextValue = {
   isActive: boolean;
+  persona: DemoPersona | null;
   flow: DemoFlow | null;
   stepIndex: number;
   totalSteps: number;
@@ -80,7 +83,7 @@ type DemoContextValue = {
   surface: DemoSurface;
   pocketExpanded: boolean;
   setPocketExpanded: (expanded: boolean) => void;
-  startDemo: (mode?: DemoPlaybackMode) => Promise<void>;
+  startDemo: (mode?: DemoPlaybackMode, persona?: DemoPersona) => Promise<void>;
   exitDemo: () => void;
   goNext: () => Promise<void>;
   goPrev: () => Promise<void>;
@@ -105,15 +108,17 @@ function loadPersisted(): DemoPersisted | null {
     const raw = sessionStorage.getItem(DEMO_STORAGE_KEY);
     if (!raw) return null;
     const p = JSON.parse(raw) as DemoPersisted & {
+      persona?: DemoPersona;
       flow?: DemoFlow;
       playbackMode?: DemoPlaybackMode;
       surface?: DemoSurface;
     };
     if (!p.active || typeof p.stepIndex !== "number") return null;
+    const persona = p.persona === "seller" ? "seller" : "buyer";
     const flow = p.flow === "authenticated" ? "authenticated" : "guest";
     const playbackMode = p.playbackMode === "auto" ? "auto" : "manual";
     const surface = p.surface === "mobile" ? "mobile" : "desktop";
-    return { active: p.active, stepIndex: p.stepIndex, flow, playbackMode, surface };
+    return { active: p.active, stepIndex: p.stepIndex, persona, flow, playbackMode, surface };
   } catch {
     return null;
   }
@@ -136,6 +141,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   const { data: session, status: sessionStatus, update: updateSession } = useSession();
 
   const [isActive, setIsActive] = useState(false);
+  const [persona, setPersona] = useState<DemoPersona | null>(null);
   const [flow, setFlow] = useState<DemoFlow | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [bootstrap, setBootstrap] = useState<DemoBootstrap | null>(null);
@@ -163,15 +169,25 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   const isLoggedIn = !!session?.user;
 
   const activeSteps = useMemo(
-    () => (flow ? getDemoSteps(flow, surface) : getDemoSteps("guest", surface)),
-    [flow, surface],
+    () =>
+      flow && persona
+        ? getDemoSteps(persona, flow, surface)
+        : getDemoSteps("buyer", "guest", surface),
+    [flow, persona, surface],
   );
 
   const saveStep = useCallback(
-    (index: number, currentFlow: DemoFlow, mode: DemoPlaybackMode, currentSurface: DemoSurface) => {
+    (
+      index: number,
+      currentPersona: DemoPersona,
+      currentFlow: DemoFlow,
+      mode: DemoPlaybackMode,
+      currentSurface: DemoSurface,
+    ) => {
       savePersisted({
         active: true,
         stepIndex: index,
+        persona: currentPersona,
         flow: currentFlow,
         playbackMode: mode,
         surface: currentSurface,
@@ -236,6 +252,13 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       if (step.onEnter === "signInDemo" && !session?.user) {
         const res = await signInDemoBuyer(`/${locale}/account/personal`);
         if (!res?.error) await updateSession();
+      }
+
+      if (step.onEnter === "signInDemoSeller") {
+        const res = await signInDemoSeller(`/${locale}/seller/dashboard`);
+        if (!res?.error) {
+          await updateSession({ portalMode: "seller", role: "SELLER" });
+        }
       }
 
       if (step.onEnter === "seedCart" && bootstrap && cartSeederRef.current) {
@@ -316,11 +339,12 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   const navigateToStep = useCallback(
     async (
       index: number,
+      currentPersona: DemoPersona,
       currentFlow: DemoFlow,
       data?: DemoBootstrap | null,
       modeOverride?: DemoPlaybackMode,
     ) => {
-      const steps = getDemoSteps(currentFlow, surface);
+      const steps = getDemoSteps(currentPersona, currentFlow, surface);
       const b = data ?? bootstrap;
       const step = steps[index];
       if (!step) return;
@@ -332,10 +356,17 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       try {
         beginStepTransition();
         setStepIndex(index);
-        saveStep(index, currentFlow, mode, surface);
+        saveStep(index, currentPersona, currentFlow, mode, surface);
 
         const path = resolveStepPath(step, b);
-        if (path.startsWith("/account") && !session?.user) {
+        if (
+          currentPersona === "seller" &&
+          (path.startsWith("/account") || path.startsWith("/seller")) &&
+          !session?.user
+        ) {
+          const res = await signInDemoSeller(`/${locale}/seller/dashboard`);
+          if (!res?.error) await updateSession({ portalMode: "seller", role: "SELLER" });
+        } else if (path.startsWith("/account") && !session?.user) {
           const res = await signInDemoBuyer(`/${locale}/account/personal`);
           if (!res?.error) await updateSession();
         }
@@ -347,12 +378,16 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
         await new Promise((r) => setTimeout(r, 150));
         setIsTransitioning(false);
         await runOnEnter(step, steps);
+        if (surface === "mobile") {
+          setIsResolvingTarget(false);
+          markStepReady();
+        }
       } finally {
         navigatingRef.current = false;
         setIsNavigating(false);
       }
     },
-    [beginStepTransition, bootstrap, locale, playbackMode, router, runOnEnter, saveStep, session?.user, surface, updateSession],
+    [beginStepTransition, bootstrap, locale, markStepReady, playbackMode, router, runOnEnter, saveStep, session?.user, surface, updateSession],
   );
 
   const resolveFlow = useCallback((): DemoFlow => {
@@ -361,11 +396,12 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   }, [session?.user, sessionStatus]);
 
   const startDemo = useCallback(
-    async (mode: DemoPlaybackMode = "manual") => {
+    async (mode: DemoPlaybackMode = "manual", chosenPersona: DemoPersona = "buyer") => {
       const chosenFlow = resolveFlow();
       const chosenSurface = detectDemoSurface();
       const b = await fetchBootstrap();
       setBootstrap(b);
+      setPersona(chosenPersona);
       setFlow(chosenFlow);
       setSurface(chosenSurface);
       setPocketExpanded(false);
@@ -376,13 +412,14 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       setCheckoutStepState(1);
       setStepIndex(0);
       prevStepRef.current = null;
-      await navigateToStep(0, chosenFlow, b);
+      await navigateToStep(0, chosenPersona, chosenFlow, b);
     },
     [fetchBootstrap, navigateToStep, resolveFlow],
   );
 
   const exitDemo = useCallback(() => {
     setIsActive(false);
+    setPersona(null);
     setFlow(null);
     setStepIndex(0);
     setStepReady(false);
@@ -400,10 +437,10 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   const setPlaybackMode = useCallback((mode: DemoPlaybackMode) => {
     setPlaybackModeState(mode);
     if (mode === "auto") setAutoPaused(false);
-    if (isActive && flow) {
-      saveStep(stepIndex, flow, mode, surface);
+    if (isActive && flow && persona) {
+      saveStep(stepIndex, persona, flow, mode, surface);
     }
-  }, [flow, isActive, saveStep, stepIndex, surface]);
+  }, [flow, isActive, persona, saveStep, stepIndex, surface]);
 
   const pauseAuto = useCallback(() => setAutoPaused(true), []);
   const resumeAuto = useCallback(() => setAutoPaused(false), []);
@@ -414,13 +451,13 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const goNext = useCallback(async () => {
-    if (!flow || navigatingRef.current) return;
+    if (!flow || !persona || navigatingRef.current) return;
     if (!autoAdvancingRef.current) {
       setAutoPaused(true);
     }
     autoAdvancingRef.current = false;
 
-    const steps = getDemoSteps(flow, surface);
+    const steps = getDemoSteps(persona, flow, surface);
     const step = steps[stepIndex];
     if (!step) return;
 
@@ -440,20 +477,24 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       beginStepTransition();
       prevStepRef.current = step;
       setStepIndex(nextIndex);
-      saveStep(nextIndex, flow, playbackMode, surface);
+      saveStep(nextIndex, persona, flow, playbackMode, surface);
       if (next.checkoutSubStep) applyCheckoutSubStep(next.checkoutSubStep);
       await runOnEnter(next, steps);
+      if (surface === "mobile") {
+        setIsResolvingTarget(false);
+        markStepReady();
+      }
       return;
     }
 
     prevStepRef.current = step;
-    await navigateToStep(nextIndex, flow);
-  }, [applyCheckoutSubStep, beginStepTransition, bootstrap, exitDemo, flow, navigateToStep, playbackMode, runOnEnter, saveStep, stepIndex, surface]);
+    await navigateToStep(nextIndex, persona, flow);
+  }, [applyCheckoutSubStep, beginStepTransition, bootstrap, exitDemo, flow, markStepReady, navigateToStep, persona, playbackMode, runOnEnter, saveStep, stepIndex, surface]);
 
   const goPrev = useCallback(async () => {
-    if (!flow || stepIndex <= 0) return;
+    if (!flow || !persona || stepIndex <= 0) return;
 
-    const steps = getDemoSteps(flow, surface);
+    const steps = getDemoSteps(persona, flow, surface);
     const step = steps[stepIndex];
     const prev = steps[stepIndex - 1];
     if (!step || !prev) return;
@@ -464,12 +505,16 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       setAutoPaused(true);
       prevStepRef.current = step;
       setStepIndex(prevIndex);
-      saveStep(prevIndex, flow, playbackMode, surface);
+      saveStep(prevIndex, persona, flow, playbackMode, surface);
       if (prev.checkoutSubStep) applyCheckoutSubStep(prev.checkoutSubStep);
       if (prev.onEnter === "prefillRegister" && prev.registerPhase && registerPrefillRef.current) {
         registerPrefillRef.current(prev.registerPhase);
       }
       await runOnEnter(prev, steps);
+      if (surface === "mobile") {
+        setIsResolvingTarget(false);
+        markStepReady();
+      }
       return;
     }
 
@@ -477,8 +522,8 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
 
     setAutoPaused(true);
     prevStepRef.current = step;
-    await navigateToStep(stepIndex - 1, flow);
-  }, [applyCheckoutSubStep, beginStepTransition, bootstrap, flow, navigateToStep, playbackMode, runOnEnter, saveStep, stepIndex, surface]);
+    await navigateToStep(stepIndex - 1, persona, flow);
+  }, [applyCheckoutSubStep, beginStepTransition, bootstrap, flow, markStepReady, navigateToStep, persona, playbackMode, runOnEnter, saveStep, stepIndex, surface]);
 
   useEffect(() => {
     const persisted = loadPersisted();
@@ -487,41 +532,46 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     void (async () => {
       const b = await fetchBootstrap();
       setBootstrap(b);
+      setPersona(persisted.persona);
       setFlow(persisted.flow);
       setSurface(persisted.surface);
       setPlaybackModeState(persisted.playbackMode);
       setIsActive(true);
       setStepIndex(persisted.stepIndex);
-      const steps = getDemoSteps(persisted.flow, persisted.surface);
+      const steps = getDemoSteps(persisted.persona, persisted.flow, persisted.surface);
       const step = steps[persisted.stepIndex];
       if (step?.checkoutSubStep) applyCheckoutSubStep(step.checkoutSubStep);
     })();
   }, [applyCheckoutSubStep, fetchBootstrap]);
 
   useEffect(() => {
-    if (!isActive || navigatingRef.current || !bootstrap || !flow) return;
-    const steps = getDemoSteps(flow, surface);
+    if (!isActive || navigatingRef.current || !bootstrap || !flow || !persona) return;
+    const steps = getDemoSteps(persona, flow, surface);
     const idx = findStepIndexByPathname(pathname, steps, bootstrap, stepIndex);
     if (idx >= 0 && idx !== stepIndex) {
       beginStepTransition();
       setStepIndex(idx);
-      saveStep(idx, flow, playbackMode, surface);
+      saveStep(idx, persona, flow, playbackMode, surface);
       const step = steps[idx];
       if (step?.checkoutSubStep) applyCheckoutSubStep(step.checkoutSubStep);
       if (step?.registerPhase && registerPrefillRef.current) {
         registerPrefillRef.current(step.registerPhase);
       }
+      if (surface === "mobile") {
+        setIsResolvingTarget(false);
+        markStepReady();
+      }
     }
-  }, [pathname, isActive, bootstrap, flow, stepIndex, applyCheckoutSubStep, beginStepTransition, playbackMode, saveStep, surface]);
+  }, [pathname, isActive, bootstrap, flow, persona, stepIndex, applyCheckoutSubStep, beginStepTransition, markStepReady, playbackMode, saveStep, surface]);
 
   useEffect(() => {
-    if (!isActive || playbackMode !== "auto" || autoPaused || !stepReady || !flow) return;
+    if (!isActive || playbackMode !== "auto" || autoPaused || !stepReady || !flow || !persona) return;
 
-    const steps = getDemoSteps(flow, surface);
+    const steps = getDemoSteps(persona, flow, surface);
     const step = steps[stepIndex];
     const previous = prevStepRef.current;
     if (!step) return;
-    if (step.id === "finish") return;
+    if (step.id === "finish" || step.id === "seller-finish") return;
 
     const samePath = previous ? isSamePathSubSteps(previous, step, bootstrap) : false;
     const delay = getAutoAdvanceDelay(step, samePath, scrollSpeed, surface);
@@ -532,22 +582,22 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     }, delay);
 
     return () => window.clearTimeout(timer);
-  }, [autoPaused, bootstrap, flow, goNext, isActive, playbackMode, scrollSpeed, stepIndex, stepReady, surface]);
+  }, [autoPaused, bootstrap, flow, goNext, isActive, persona, playbackMode, scrollSpeed, stepIndex, stepReady, surface]);
 
   useEffect(() => {
-    if (!isActive || !flow) return;
-    const steps = getDemoSteps(flow, surface);
+    if (!isActive || !flow || !persona) return;
+    const steps = getDemoSteps(persona, flow, surface);
     const step = steps[stepIndex];
     if (step?.checkoutSubStep) {
       applyCheckoutSubStep(step.checkoutSubStep);
     }
-  }, [isActive, flow, stepIndex, applyCheckoutSubStep]);
+  }, [isActive, flow, persona, stepIndex, applyCheckoutSubStep]);
 
   const registerCheckoutHandlers = useCallback(
     (handlers: CheckoutDemoHandlers | null) => {
       checkoutHandlersRef.current = handlers;
-      if (handlers && isActive && flow) {
-        const steps = getDemoSteps(flow, surface);
+      if (handlers && isActive && flow && persona) {
+        const steps = getDemoSteps(persona, flow, surface);
         const step = steps[stepIndex];
         if (step?.checkoutSubStep) handlers.setStep(step.checkoutSubStep);
         if (step?.onEnter === "prefillCheckout") handlers.prefill();
@@ -565,12 +615,12 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
 
   const registerPrefillHandler = useCallback((handler: RegisterPrefillHandler | null) => {
     registerPrefillRef.current = handler;
-    if (handler && isActive && flow) {
-      const steps = getDemoSteps(flow, surface);
+    if (handler && isActive && flow && persona) {
+      const steps = getDemoSteps(persona, flow, surface);
       const step = steps[stepIndex];
       if (step?.registerPhase) handler(step.registerPhase);
     }
-  }, [isActive, flow, stepIndex]);
+  }, [isActive, flow, persona, stepIndex, surface]);
 
   const registerHeaderHandlers = useCallback((handlers: HeaderDemoHandlers | null) => {
     headerHandlersRef.current = handlers;
@@ -581,6 +631,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   const value = useMemo<DemoContextValue>(
     () => ({
       isActive,
+      persona,
       flow,
       stepIndex,
       totalSteps: activeSteps.length,
@@ -621,6 +672,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     }),
     [
       isActive,
+      persona,
       flow,
       stepIndex,
       activeSteps,

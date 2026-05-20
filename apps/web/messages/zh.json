@@ -30,6 +30,7 @@
     "currencyLabel": "货币",
     "exchangeRate": "USD 1 = BRL {rate}",
     "signOut": "退出",
+    "sellerPortal": "卖家中心",
     "myData": "我的信息",
     "myPurchases": "我的采购",
     "mySales": "我的销售",
@@ -345,6 +346,8 @@
     "demoUnavailable": "演示账户不可用。请先运行数据库种子。",
     "emailRequired": "请输入有效的电子邮件地址。",
     "passwordRequired": "密码为必填项。",
+    "passwordRules": "至少 8 个字符。",
+    "sellerRegisterHint": "注册后须完成卖家资料审核，才能使用卖家中心。",
     "passwordMismatch": "两次密码不一致。",
     "termsRequired": "您必须接受条款才能继续。"
   },
@@ -353,15 +356,25 @@
     "sidebar": {
       "dashboard": "控制台",
       "personal": "个人信息",
-      "financial": "财务",
+      "financial": "付款记录",
       "listings": "商品管理",
       "addresses": "地址与发票信息",
       "purchases": "我的采购",
-      "sales": "我的销售"
+      "sales": "我的销售",
+      "company": "我的店铺"
     },
     "dashboardTitle": "控制台",
     "dashboardWelcome": "欢迎回来",
     "dashboardSubtitle": "账户概览",
+    "buyerDashboardTitle": "我的采购",
+    "buyerDashboardWelcome": "欢迎回来",
+    "buyerDashboardSubtitle": "跟踪订单、付款和采购活动。",
+    "buyerKpiOrders": "订单数",
+    "buyerKpiSpent": "总支出",
+    "buyerKpiPending": "待付款",
+    "buyerKpiUnits": "采购数量",
+    "viewAllPurchases": "查看全部",
+    "financialNavBuyer": "付款记录",
     "browseProducts": "浏览产品",
     "dashboardSales": "销售",
     "dashboardPurchases": "采购",
@@ -393,10 +406,27 @@
       "retailer": "零售商"
     },
     "financialTitle": "转账记录",
+    "financialBuyerTitle": "付款与支出",
+    "financialBuyerSubtitle": "您在 NxinMall 的 B2B 采购付款记录。",
+    "financialBuyerEmpty": "暂无付款。完成结账后将显示在此。",
+    "financialTotalSpent": "总支出",
+    "financialPending": "待确认",
+    "financialCompleted": "已确认付款",
+    "financialByMethod": "按支付方式",
+    "financialOrderCount": "{count} 笔订单",
     "financialEmpty": "暂无转账记录。",
     "colDate": "日期",
     "colValue": "金额",
+    "colOrder": "订单",
+    "colPayment": "支付方式",
+    "colStatus": "状态",
     "colSaleItem": "销售商品",
+    "paymentType": {
+      "pix": "PIX",
+      "boleto": "汇票",
+      "credit_card": "信用卡",
+      "unknown": "其他"
+    },
     "listingsTitle": "我的商品",
     "listingsSubtitle": "商品管理",
     "listingsEmpty": "暂无商品。",
@@ -446,17 +476,77 @@
     "removePurchaseConfirm": "从历史记录中删除此采购？",
     "removePurchaseSuccess": "采购已删除。",
     "salesTitle": "我的销售",
-    "salesEmpty": "暂无销售记录。"
+    "salesEmpty": "暂无销售记录。",
+    "sellCtaTitle": "在 NxinMall 销售",
+    "sellCtaBody": "发布产品、触达 B2B 买家，并在卖家中心管理订单。",
+    "sellCtaLink": "开始店铺入驻",
+    "sellCardTitle": "成为卖家",
+    "sellCardBody": "注册企业后即可发布产品并接收全球买家的询价。",
+    "sellCardLink": "开始店铺注册",
+    "companyTitle": "我的企业",
+    "companySubtitle": "店铺验证状态与后续步骤。",
+    "companyName": "企业名称",
+    "companyCountry": "国家",
+    "companyType": "业务类型",
+    "companyVerification": "验证状态",
+    "companyStatusPending": "审核中",
+    "companyStatusApproved": "已通过",
+    "companyStatusRejected": "已拒绝",
+    "companyNextSteps": "审核期间，您可以在卖家中心准备商品目录。",
+    "companyEditStore": "编辑店铺",
+    "companyOpenPortal": "打开卖家中心",
+    "companyNoCompany": "您尚未注册企业。",
+    "companySetupLink": "完成店铺入驻",
+    "sellerDashboardTitle": "销售概览",
+    "sellerDashboardSubtitle": "作为卖家跟踪收入、订单和目录表现。",
+    "sellerKpiRevenue": "收入",
+    "sellerKpiOrders": "订单",
+    "sellerKpiUnits": "售出数量",
+    "sellerKpiListings": "在售商品",
+    "sellerOpenPortal": "打开卖家中心",
+    "sellerManageProducts": "管理产品",
+    "sellerRecentSales": "最近销售",
+    "sellerRecentSalesEmpty": "暂无销售。",
+    "sellerOrderItems": "件"
   },
   "onboarding": {
     "title": "企业入驻",
+    "sellerTitle": "店铺注册",
+    "sellerSubtitle": "设置企业信息以在 NxinMall 销售，之后可随时修改。",
+    "stepProgress": "第 {current} 步，共 {total} 步",
     "step1": "企业基本信息",
-    "step2": "地址与联系方式",
+    "step2": "地址",
     "step3": "资质文件",
-    "step4": "关注品类",
+    "step4": "品类",
     "step5": "确认提交",
     "next": "下一步",
-    "submit": "提交审核"
+    "back": "上一步",
+    "submit": "提交审核",
+    "submitting": "提交中…",
+    "success": "店铺已提交！正在跳转到卖家中心…",
+    "errorValidation": "请检查标红的字段。",
+    "errorUNAUTHORIZED": "请先登录。",
+    "errorVALIDATION": "数据无效，请检查表单。",
+    "errorSERVER": "出错了，请重试。",
+    "fieldName": "商号",
+    "fieldLegalName": "法定名称（可选）",
+    "fieldCompanyCountry": "企业国家（ISO）",
+    "fieldType": "业务类型",
+    "fieldStreet": "街道",
+    "fieldCity": "城市",
+    "fieldState": "省/州",
+    "fieldPostalCode": "邮编",
+    "fieldAddressCountry": "地址国家（ISO）",
+    "fieldTradeLicense": "营业执照链接（可选）",
+    "fieldTaxId": "税号文件链接（可选）",
+    "documentsHint": "请先上传文件再粘贴 HTTPS 链接，或留空。",
+    "categoriesHint": "选择计划销售的品类（可选）。",
+    "categoriesEmpty": "暂无可用品类。",
+    "categoriesSelected": "项已选",
+    "reviewTitle": "确认信息",
+    "reviewNote": "提交后，账户将切换为卖家模式，验证结果待定。",
+    "gateTitle": "须完成卖家资料",
+    "gateBody": "请完成下方店铺注册，以启用 NxinMall 卖家中心。"
   },
   "admin": {
     "verificationTitle": "审核队列",
@@ -503,10 +593,19 @@
     "exit": "退出演示",
     "flowGuest": "演示 · 访客",
     "flowAuthenticated": "演示 · 已登录",
+    "flowSeller": "演示 · 卖家",
+    "flowSellerGuest": "演示 · 卖家 · 访客",
     "flowMobile": "演示 · 手机版",
+    "personaLabel": "导览类型",
+    "personaBuyerTitle": "买家导览",
+    "personaBuyerDescription": "发现商品、注册并完成采购流程。",
+    "personaSellerTitle": "卖家导览",
+    "personaSellerDescription": "以演示供应商登录，管理企业、店铺与商品目录。",
     "pocket": {
       "expand": "展开详情",
-      "collapse": "收起详情"
+      "collapse": "收起详情",
+      "showMore": "更多",
+      "showLess": "收起"
     },
     "registerBanner": "演示模式 — 虚构数据",
     "startDialogTitle": "开始演示",
@@ -535,22 +634,27 @@
     "speed20": "2x",
     "steps": {
       "welcome": {
+        "pageName": "首页",
         "title": "欢迎来到 NxinMall",
         "body": "B2B 农业电商平台。本演示将带您完成浏览、注册和下单全流程。"
       },
       "search": {
+        "pageName": "首页",
         "title": "全局搜索",
         "body": "使用搜索栏在全站查找产品、分类和供应商。"
       },
       "categoryNav": {
+        "pageName": "首页",
         "title": "全部分类",
         "body": "打开侧边面板，在首页即可按农业产业链分类浏览。"
       },
       "localeSettings": {
+        "pageName": "菜单",
         "title": "语言与货币",
         "body": "切换界面语言和价格显示货币，适配您的地区。"
       },
       "profileMenu": {
+        "pageName": "菜单",
         "title": "账户菜单",
         "body": "登录后可访问个人资料、地址、订单和供应商后台。"
       },
@@ -559,6 +663,7 @@
         "body": "按投入品、设备、种子、饲料、科技和服务浏览。"
       },
       "products": {
+        "pageName": "目录",
         "title": "产品目录",
         "body": "按分类筛选，按价格或上新排序，比较多家供应商报价。"
       },
@@ -579,10 +684,12 @@
         "body": "浏览已发布的产品目录。下一步将打开该供应商的一件商品详情。"
       },
       "pdp": {
+        "pageName": "产品",
         "title": "产品详情",
         "body": "查看图片、规格、所选货币价格及卖家信息。"
       },
       "addCart": {
+        "pageName": "产品",
         "title": "购物车与收藏",
         "body": "设置数量、加入购物车并收藏以便稍后比较。"
       },
@@ -591,6 +698,7 @@
         "body": "收藏的产品保存在此，方便随时购买。"
       },
       "cart": {
+        "pageName": "购物车",
         "title": "购物车",
         "body": "结账前核对商品、数量和预估总额。"
       },
@@ -627,22 +735,27 @@
         "body": "保存用于运费计算和订单确认的收货地址。"
       },
       "checkoutAddress": {
+        "pageName": "结账",
         "title": "结账 — 地址",
         "body": "填写或确认收货地址。邮编可自动填充城市和街道。"
       },
       "checkoutFreight": {
+        "pageName": "结账",
         "title": "结账 — 运费",
         "body": "选择承运商或卖家安排运费（模拟价格与时效）。"
       },
       "checkoutPayment": {
+        "pageName": "结账",
         "title": "结账 — 支付",
         "body": "汇票、PIX 和信用卡（模拟折扣）。选择 B2B 支付方式。"
       },
       "checkoutReview": {
+        "pageName": "结账",
         "title": "结账 — 确认",
         "body": "核对商品、地址、运费和支付。下一步将模拟确认订单。"
       },
       "checkoutDone": {
+        "pageName": "结账",
         "title": "订单已提交",
         "body": "查看支付说明（汇票、PIX 或卡），演示中订单为待支付状态。"
       },
@@ -655,9 +768,156 @@
         "body": "最近采购摘要及继续购物的快捷入口。"
       },
       "finish": {
+        "pageName": "首页",
         "title": "演示结束",
         "body": "您已完成 NxinMall 全流程。可自由探索或从页眉重新开始演示。"
+      },
+      "sellerWelcome": {
+        "pageName": "首页",
+        "title": "卖家市场",
+        "body": "NxinMall 连接农业供应商与 B2B 买家。本导览展示已认证卖家如何运营业务。"
+      },
+      "sellerSignIn": {
+        "pageName": "首页",
+        "title": "演示卖家账号",
+        "body": "将自动以演示供应商身份登录，便于浏览卖家仪表盘与门户。"
+      },
+      "sellerAccountDashboard": {
+        "pageName": "账户",
+        "title": "卖家账户概览",
+        "body": "账户仪表盘展示销售 KPI，并提供门户与商品管理快捷入口。"
+      },
+      "sellerCompany": {
+        "pageName": "企业",
+        "title": "企业认证",
+        "body": "企业资料与认证状态需通过审核，买家才能大规模与您交易。"
+      },
+      "sellerPortalDashboard": {
+        "pageName": "卖家门户",
+        "title": "门户仪表盘",
+        "body": "在卖家门户概览中跟踪收入、订单与目录表现。"
+      },
+      "sellerStore": {
+        "pageName": "店铺",
+        "title": "店铺资料",
+        "body": "保持对外店名、法人信息与国家/地区信息准确，方便买家浏览目录。"
+      },
+      "sellerProducts": {
+        "pageName": "商品",
+        "title": "商品目录",
+        "body": "发布并维护 SKU、价格与 B2B 上架状态。"
+      },
+      "sellerFinish": {
+        "pageName": "首页",
+        "title": "卖家演示完成",
+        "body": "您已走完卖家全流程。可自由探索或从页眉重新开始演示。"
       }
+    }
+  },
+  "sellerPortal": {
+    "title": "卖家中心",
+    "startSelling": "开始销售",
+    "sellerMode": "卖家模式",
+    "backToMarketplace": "返回商城",
+    "nav": {
+      "menu": "菜单",
+      "close": "关闭",
+      "dashboard": "面板",
+      "store": "我的店铺",
+      "products": "产品",
+      "profile": "公开资料"
+    },
+    "setupIncompleteTitle": "完成店铺入驻",
+    "setupIncompleteBody": "填写企业信息以启用完整卖家工具和审核流程。",
+    "setupIncompleteLink": "继续入驻",
+    "dashboard": {
+      "title": "卖家面板",
+      "subtitle": "销售业绩、目录健康与订单跟踪。",
+      "tabOverview": "销售概览",
+      "tabProducts": "已上架产品",
+      "productsCard": "在售商品",
+      "manageProducts": "管理产品",
+      "storeCard": "店铺",
+      "verification": "认证",
+      "editStore": "编辑店铺",
+      "storeStatus": "店铺",
+      "metricRevenue": "营收",
+      "metricRevenueHint": "订单金额 (USD)",
+      "metricOrders": "订单",
+      "metricOrdersHint": "{pending} 进行中 · {done} 已完成",
+      "metricUnitsSold": "售出数量",
+      "metricUnitsSoldHint": "订单行项目",
+      "metricAvgOrder": "平均订单",
+      "metricAvgOrderHint": "营收 ÷ 订单数",
+      "metricListings": "上架数",
+      "metricListingsHint": "{active} 在售 · {draft} 草稿",
+      "metricStock": "库存单位",
+      "metricStockHint": "{variants} 个 SKU",
+      "metricCatalogValue": "目录价值",
+      "metricCatalogValueHint": "价格 × 库存 (USD)",
+      "recentSales": "最近销售",
+      "noSalesYet": "暂无平台订单。指标仍反映实时目录。",
+      "colOrder": "订单",
+      "colDate": "日期",
+      "colItems": "商品",
+      "colTotal": "合计",
+      "colStatus": "状态",
+      "productsTabTitle": "已注册产品",
+      "productsTabSubtitle": "完整目录、库存与价格一览。",
+      "newProduct": "新产品",
+      "colProduct": "产品",
+      "colVariants": "规格",
+      "colFromPrice": "起价 (USD)",
+      "colStock": "库存",
+      "colActions": "操作",
+      "noProducts": "暂无产品。创建第一个商品。",
+      "edit": "编辑"
+    },
+    "store": {
+      "title": "我的店铺",
+      "subtitle": "在公开卖家资料中显示的公司信息。",
+      "name": "店铺名称",
+      "legalName": "法定名称",
+      "country": "国家 (ISO-2)",
+      "type": "业务类型",
+      "save": "保存店铺",
+      "verificationStatus": "认证状态：{status}"
+    },
+    "profile": {
+      "title": "公开资料",
+      "subtitle": "买家在商城中看到的公司信息。",
+      "country": "国家",
+      "type": "类型",
+      "viewPublic": "查看公开资料"
+    },
+    "products": {
+      "listTitle": "我的产品",
+      "listSubtitle": "创建和管理目录商品。",
+      "newProduct": "新产品",
+      "createTitle": "创建产品",
+      "createSubtitle": "添加至少一个规格变体。",
+      "editTitle": "编辑产品",
+      "edit": "编辑",
+      "actions": "操作",
+      "nameEn": "名称 (EN)",
+      "namePt": "名称 (PT)",
+      "nameZh": "名称 (ZH)",
+      "category": "分类",
+      "status": "状态",
+      "statusDraft": "草稿",
+      "statusActive": "上架",
+      "statusPaused": "暂停",
+      "variants": "规格",
+      "addVariant": "添加规格",
+      "removeVariant": "移除规格",
+      "sku": "SKU",
+      "priceUsd": "价格 (USD)",
+      "minOrderQty": "最小订购量",
+      "stockQty": "库存",
+      "unit": "单位",
+      "create": "创建产品",
+      "save": "保存",
+      "cancel": "取消"
     }
   }
 }

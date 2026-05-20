@@ -1,6 +1,7 @@
 import { prisma } from "@nxinmall/database";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { StatusPill } from "@/components/brand/status-pill";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export const dynamic = "force-dynamic";
 
 export default async function SellerProductsPage({ params }: { params: { locale: string } }) {
+  const t = await getTranslations("sellerPortal.products");
   const session = await auth();
   if (!session?.user) {
     redirect(`/${params.locale}/auth/login`);
@@ -21,18 +23,22 @@ export default async function SellerProductsPage({ params }: { params: { locale:
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-brand-dark">My products</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-brand-dark">{t("listTitle")}</h1>
+          <p className="text-sm text-brand-gray">{t("listSubtitle")}</p>
+        </div>
         <Button asChild>
-          <Link href="/seller/products/new">New product</Link>
+          <Link href="/seller/products/new">{t("newProduct")}</Link>
         </Button>
       </div>
-      <Table>
+      <Table data-demo-target="seller-products-list">
         <TableHeader>
           <TableRow>
-            <TableHead>Name (EN)</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>From price</TableHead>
+            <TableHead>{t("nameEn")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
+            <TableHead>{t("priceUsd")}</TableHead>
+            <TableHead className="text-right">{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -43,6 +49,11 @@ export default async function SellerProductsPage({ params }: { params: { locale:
                 <StatusPill status={p.status} />
               </TableCell>
               <TableCell className="font-mono text-xs">{p.variants[0]?.priceUsd?.toString() ?? "—"}</TableCell>
+              <TableCell className="text-right">
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/seller/products/${p.id}/edit`}>{t("edit")}</Link>
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -48,6 +48,7 @@ export function DemoStartButton({ variant = "header", className, onStarted }: De
         type="button"
         variant="secondary"
         size="sm"
+        data-demo-target="demo-start-button"
         className={className ?? "hidden md:inline-flex"}
         onClick={openDialog}
         disabled={demo.isActive}

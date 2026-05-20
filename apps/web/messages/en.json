@@ -32,6 +32,7 @@
     "currencyLabel": "Currency",
     "exchangeRate": "USD 1 = BRL {rate}",
     "signOut": "Sign out",
+    "sellerPortal": "Seller portal",
     "myData": "My data",
     "myPurchases": "My purchases",
     "mySales": "My sales",
@@ -365,23 +366,25 @@
     "demoUnavailable": "Demo account unavailable. Run the database seed first.",
     "emailRequired": "Please enter a valid email address.",
     "passwordRequired": "Password is required.",
+    "passwordRules": "Use at least 8 characters.",
+    "sellerRegisterHint": "After sign-up you must complete your seller profile before accessing the seller portal.",
     "passwordMismatch": "Passwords do not match.",
     "termsRequired": "You must accept the terms to continue."
   },
   "account": {
     "title": "My account",
-    "sidebar": {
-      "dashboard": "Dashboard",
-      "personal": "Personal data",
-      "financial": "Financial",
-      "listings": "Listings",
-      "addresses": "Address & tax data",
-      "purchases": "Purchases",
-      "sales": "Sales"
-    },
     "dashboardTitle": "Dashboard",
     "dashboardWelcome": "Welcome back",
     "dashboardSubtitle": "Account summary",
+    "buyerDashboardTitle": "My purchases",
+    "buyerDashboardWelcome": "Welcome back",
+    "buyerDashboardSubtitle": "Track orders, payments, and shopping activity.",
+    "buyerKpiOrders": "Orders placed",
+    "buyerKpiSpent": "Total spent",
+    "buyerKpiPending": "Pending payment",
+    "buyerKpiUnits": "Units purchased",
+    "viewAllPurchases": "View all",
+    "financialNavBuyer": "Payment history",
     "browseProducts": "Browse products",
     "dashboardSales": "Sales",
     "dashboardPurchases": "Purchases",
@@ -413,10 +416,27 @@
       "retailer": "Retailer"
     },
     "financialTitle": "Transfers",
+    "financialBuyerTitle": "Payments & spending",
+    "financialBuyerSubtitle": "Payment history and totals from your B2B purchases on NxinMall.",
+    "financialBuyerEmpty": "No payments yet. Complete a checkout to see transactions here.",
+    "financialTotalSpent": "Total spent",
+    "financialPending": "Awaiting confirmation",
+    "financialCompleted": "Confirmed payments",
+    "financialByMethod": "By payment method",
+    "financialOrderCount": "{count} orders",
     "financialEmpty": "No transfers yet.",
     "colDate": "Date",
-    "colValue": "Value",
+    "colValue": "Amount",
+    "colOrder": "Order",
+    "colPayment": "Payment",
+    "colStatus": "Status",
     "colSaleItem": "Sale item",
+    "paymentType": {
+      "pix": "PIX",
+      "boleto": "Bank slip",
+      "credit_card": "Credit card",
+      "unknown": "Other"
+    },
     "listingsTitle": "My listings",
     "listingsSubtitle": "Listing management",
     "listingsEmpty": "No listings yet.",
@@ -466,17 +486,87 @@
     "removePurchaseConfirm": "Remove this purchase from your history?",
     "removePurchaseSuccess": "Purchase removed.",
     "salesTitle": "My sales",
-    "salesEmpty": "No sales yet."
+    "salesEmpty": "No sales yet.",
+    "sellCtaTitle": "Sell on NxinMall",
+    "sellCtaBody": "List products, reach B2B buyers, and manage orders from your seller portal.",
+    "sellCtaLink": "Start store setup",
+    "sellCardTitle": "Become a seller",
+    "sellCardBody": "Register your company to publish products and receive quotes from buyers worldwide.",
+    "sellCardLink": "Start store registration",
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "personal": "Personal data",
+      "financial": "Payments",
+      "listings": "Listings",
+      "addresses": "Address & tax data",
+      "purchases": "Purchases",
+      "sales": "Sales",
+      "company": "My store"
+    },
+    "companyTitle": "My company",
+    "companySubtitle": "Verification status and next steps for your store.",
+    "companyName": "Company name",
+    "companyCountry": "Country",
+    "companyType": "Business type",
+    "companyVerification": "Verification",
+    "companyStatusPending": "Pending review",
+    "companyStatusApproved": "Approved",
+    "companyStatusRejected": "Rejected",
+    "companyNextSteps": "While we review your documents, you can prepare your catalog in the seller portal.",
+    "companyEditStore": "Edit store",
+    "companyOpenPortal": "Open seller portal",
+    "companyNoCompany": "You have not registered a company yet.",
+    "companySetupLink": "Complete store setup",
+    "sellerDashboardTitle": "Sales overview",
+    "sellerDashboardSubtitle": "Track revenue, orders, and catalog performance as a seller.",
+    "sellerKpiRevenue": "Revenue",
+    "sellerKpiOrders": "Orders",
+    "sellerKpiUnits": "Units sold",
+    "sellerKpiListings": "Active listings",
+    "sellerOpenPortal": "Open seller portal",
+    "sellerManageProducts": "Manage products",
+    "sellerRecentSales": "Recent sales",
+    "sellerRecentSalesEmpty": "No sales yet.",
+    "sellerOrderItems": "items"
   },
   "onboarding": {
     "title": "Company onboarding",
+    "sellerTitle": "Store registration",
+    "sellerSubtitle": "Set up your company to sell on NxinMall. All fields can be updated later.",
+    "stepProgress": "Step {current} of {total}",
     "step1": "Company basics",
-    "step2": "Address & contact",
+    "step2": "Address",
     "step3": "Documents",
-    "step4": "Interests",
+    "step4": "Categories",
     "step5": "Review",
     "next": "Continue",
-    "submit": "Submit for verification"
+    "back": "Back",
+    "submit": "Submit for verification",
+    "submitting": "Submitting…",
+    "success": "Store submitted! Redirecting to seller portal…",
+    "errorValidation": "Please check the highlighted fields.",
+    "errorUNAUTHORIZED": "Sign in to continue.",
+    "errorVALIDATION": "Invalid data. Please review the form.",
+    "errorSERVER": "Something went wrong. Try again.",
+    "fieldName": "Trade name",
+    "fieldLegalName": "Legal name (optional)",
+    "fieldCompanyCountry": "Company country (ISO)",
+    "fieldType": "Business type",
+    "fieldStreet": "Street",
+    "fieldCity": "City",
+    "fieldState": "State / region",
+    "fieldPostalCode": "Postal code",
+    "fieldAddressCountry": "Address country (ISO)",
+    "fieldTradeLicense": "Trade license URL (optional)",
+    "fieldTaxId": "Tax ID document URL (optional)",
+    "documentsHint": "Upload files elsewhere and paste secure HTTPS links, or leave blank.",
+    "categoriesHint": "Select categories you plan to sell in (optional).",
+    "categoriesEmpty": "No categories available yet.",
+    "categoriesSelected": "selected",
+    "reviewTitle": "Review your information",
+    "reviewNote": "After submission, your account will switch to seller mode while verification is pending.",
+    "gateTitle": "Seller profile required",
+    "gateBody": "Complete your store registration below to unlock the NxinMall seller portal."
   },
   "admin": {
     "verificationTitle": "Verification queue",
@@ -523,10 +613,19 @@
     "exit": "Exit demo",
     "flowGuest": "Demo · Guest",
     "flowAuthenticated": "Demo · Signed in",
+    "flowSeller": "Demo · Seller",
+    "flowSellerGuest": "Demo · Seller · Guest",
     "flowMobile": "Demo · Mobile",
+    "personaLabel": "Tour type",
+    "personaBuyerTitle": "Buyer tour",
+    "personaBuyerDescription": "Discover products, register, and complete a purchase.",
+    "personaSellerTitle": "Seller tour",
+    "personaSellerDescription": "Sign in as a demo supplier, manage your company, store, and catalog.",
     "pocket": {
       "expand": "Show details",
-      "collapse": "Hide details"
+      "collapse": "Hide details",
+      "showMore": "More",
+      "showLess": "Less"
     },
     "registerBanner": "Demo mode — fictional data",
     "startDialogTitle": "Start demonstration",
@@ -555,22 +654,27 @@
     "speed20": "2x",
     "steps": {
       "welcome": {
+        "pageName": "Home",
         "title": "Welcome to NxinMall",
         "body": "A B2B ag marketplace. This tour walks through discovery, sign-up, and completing a purchase."
       },
       "search": {
+        "pageName": "Home",
         "title": "Global search",
         "body": "Use the search bar to find products, categories, and suppliers across the catalog."
       },
       "categoryNav": {
+        "pageName": "Home",
         "title": "All categories",
         "body": "Open the side panel to browse agribusiness segments without leaving the home page."
       },
       "localeSettings": {
+        "pageName": "Menu",
         "title": "Language and currency",
         "body": "Change the interface language and the currency used to display prices for your region."
       },
       "profileMenu": {
+        "pageName": "Menu",
         "title": "Account menu",
         "body": "Access personal details, addresses, orders, and the supplier dashboard when signed in."
       },
@@ -579,6 +683,7 @@
         "body": "Browse inputs, equipment, seeds, feed, technology, and services by segment."
       },
       "products": {
+        "pageName": "Catalog",
         "title": "Product catalog",
         "body": "Filter by category, sort by price or newest, and compare offers from multiple suppliers."
       },
@@ -599,10 +704,12 @@
         "body": "Browse their published catalog. Next we open a product from this supplier in detail."
       },
       "pdp": {
+        "pageName": "Product",
         "title": "Product page",
         "body": "View images, specs, price in your currency, and seller information."
       },
       "addCart": {
+        "pageName": "Product",
         "title": "Cart and favorites",
         "body": "Set quantity, add to cart, and save to favorites to compare later."
       },
@@ -611,6 +718,7 @@
         "body": "Saved products stay here for quick access when you are ready to buy."
       },
       "cart": {
+        "pageName": "Cart",
         "title": "Shopping cart",
         "body": "Review items, quantities, and estimated total before checkout."
       },
@@ -647,22 +755,27 @@
         "body": "Save the delivery address used for freight quotes and order confirmation."
       },
       "checkoutAddress": {
+        "pageName": "Checkout",
         "title": "Checkout — address",
         "body": "Enter or confirm the delivery address. ZIP helps auto-fill city and street."
       },
       "checkoutFreight": {
+        "pageName": "Checkout",
         "title": "Checkout — freight",
         "body": "Pick a carrier or seller-arranged freight with simulated cost and lead time."
       },
       "checkoutPayment": {
+        "pageName": "Checkout",
         "title": "Checkout — payment",
         "body": "Boleto, PIX, and card with simulated discounts. Choose your B2B payment method."
       },
       "checkoutReview": {
+        "pageName": "Checkout",
         "title": "Checkout — review",
         "body": "Verify items, address, freight, and payment. Next we simulate order confirmation."
       },
       "checkoutDone": {
+        "pageName": "Checkout",
         "title": "Order placed",
         "body": "See payment instructions (boleto, PIX, or card) while the order stays pending in the demo."
       },
@@ -675,9 +788,156 @@
         "body": "Summary of recent purchases and shortcuts to keep shopping."
       },
       "finish": {
+        "pageName": "Home",
         "title": "Demo complete",
         "body": "You completed the full NxinMall flow. Explore freely or restart the tour from the header."
+      },
+      "sellerWelcome": {
+        "pageName": "Home",
+        "title": "Seller marketplace",
+        "body": "NxinMall connects ag suppliers with B2B buyers. This tour shows how a verified seller runs their business."
+      },
+      "sellerSignIn": {
+        "pageName": "Home",
+        "title": "Demo seller account",
+        "body": "We sign you in automatically as the demo supplier so you can explore the seller dashboard and portal."
+      },
+      "sellerAccountDashboard": {
+        "pageName": "Account",
+        "title": "Seller account overview",
+        "body": "Your account dashboard highlights sales KPIs and shortcuts to the seller portal and product management."
+      },
+      "sellerCompany": {
+        "pageName": "Company",
+        "title": "Company verification",
+        "body": "Your business profile and verification status must be approved before buyers can trade with you at scale."
+      },
+      "sellerPortalDashboard": {
+        "pageName": "Seller portal",
+        "title": "Portal dashboard",
+        "body": "Track revenue, orders, and catalog performance from the seller portal overview."
+      },
+      "sellerStore": {
+        "pageName": "Store",
+        "title": "Store profile",
+        "body": "Keep your public store name, legal details, and country up to date for buyers browsing your catalog."
+      },
+      "sellerProducts": {
+        "pageName": "Products",
+        "title": "Product catalog",
+        "body": "Publish and maintain SKUs, pricing, and listing status for your B2B offers."
+      },
+      "sellerFinish": {
+        "pageName": "Home",
+        "title": "Seller demo complete",
+        "body": "You toured the seller journey end to end. Explore freely or restart the tour from the header."
       }
+    }
+  },
+  "sellerPortal": {
+    "title": "Seller portal",
+    "startSelling": "Start selling",
+    "sellerMode": "Seller mode",
+    "backToMarketplace": "Back to marketplace",
+    "nav": {
+      "menu": "Menu",
+      "close": "Close",
+      "dashboard": "Dashboard",
+      "store": "My store",
+      "products": "Products",
+      "profile": "Public profile"
+    },
+    "setupIncompleteTitle": "Complete your store setup",
+    "setupIncompleteBody": "Add your company details to unlock full seller tools and verification.",
+    "setupIncompleteLink": "Continue setup",
+    "dashboard": {
+      "title": "Seller dashboard",
+      "subtitle": "Sales performance, catalog health, and order tracking.",
+      "tabOverview": "Sales overview",
+      "tabProducts": "Listed products",
+      "productsCard": "Active listings",
+      "manageProducts": "Manage products",
+      "storeCard": "Store",
+      "verification": "Verification",
+      "editStore": "Edit store",
+      "storeStatus": "Store",
+      "metricRevenue": "Revenue",
+      "metricRevenueHint": "Confirmed order value (USD)",
+      "metricOrders": "Orders",
+      "metricOrdersHint": "{pending} open · {done} completed",
+      "metricUnitsSold": "Units sold",
+      "metricUnitsSoldHint": "Line items across orders",
+      "metricAvgOrder": "Avg. order",
+      "metricAvgOrderHint": "Revenue ÷ order count",
+      "metricListings": "Listings",
+      "metricListingsHint": "{active} active · {draft} draft",
+      "metricStock": "Units in stock",
+      "metricStockHint": "{variants} SKUs",
+      "metricCatalogValue": "Catalog value",
+      "metricCatalogValueHint": "Price × stock (USD)",
+      "recentSales": "Recent sales",
+      "noSalesYet": "No platform orders yet. Metrics still reflect your live catalog.",
+      "colOrder": "Order",
+      "colDate": "Date",
+      "colItems": "Items",
+      "colTotal": "Total",
+      "colStatus": "Status",
+      "productsTabTitle": "Registered products",
+      "productsTabSubtitle": "Full catalog with stock and pricing at a glance.",
+      "newProduct": "New product",
+      "colProduct": "Product",
+      "colVariants": "Variants",
+      "colFromPrice": "From (USD)",
+      "colStock": "Stock",
+      "colActions": "Actions",
+      "noProducts": "No products yet. Create your first listing.",
+      "edit": "Edit"
+    },
+    "store": {
+      "title": "My store",
+      "subtitle": "Company details shown on your public seller profile.",
+      "name": "Store name",
+      "legalName": "Legal name",
+      "country": "Country (ISO-2)",
+      "type": "Business type",
+      "save": "Save store",
+      "verificationStatus": "Verification status: {status}"
+    },
+    "profile": {
+      "title": "Public profile",
+      "subtitle": "Preview how buyers see your company on the marketplace.",
+      "country": "Country",
+      "type": "Business type",
+      "viewPublic": "View public profile"
+    },
+    "products": {
+      "listTitle": "My products",
+      "listSubtitle": "Create and manage catalog items for your store.",
+      "newProduct": "New product",
+      "createTitle": "Create product",
+      "createSubtitle": "Add a listing with at least one variant.",
+      "editTitle": "Edit product",
+      "edit": "Edit",
+      "actions": "Actions",
+      "nameEn": "Name (EN)",
+      "namePt": "Name (PT)",
+      "nameZh": "Name (ZH)",
+      "category": "Category",
+      "status": "Status",
+      "statusDraft": "Draft",
+      "statusActive": "Active",
+      "statusPaused": "Paused",
+      "variants": "Variants",
+      "addVariant": "Add variant",
+      "removeVariant": "Remove variant",
+      "sku": "SKU",
+      "priceUsd": "Price (USD)",
+      "minOrderQty": "Min. order qty",
+      "stockQty": "Stock",
+      "unit": "Unit",
+      "create": "Create product",
+      "save": "Save changes",
+      "cancel": "Cancel"
     }
   }
 }

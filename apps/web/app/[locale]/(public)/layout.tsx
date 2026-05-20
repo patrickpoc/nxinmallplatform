@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { setRequestLocale } from "next-intl/server";
-import { prisma } from "@nxinmall/database";
 import { PublicFooter } from "@/components/layout/public-footer";
 import { PublicHeader } from "@/components/layout/public-header";
+import { getPublicHeaderCategories } from "@/lib/layout/public-categories";
 
 export default async function PublicLayout({
   children,
@@ -12,24 +12,7 @@ export default async function PublicLayout({
   params: { locale: string };
 }) {
   setRequestLocale(params.locale);
-  let categories: { id: string; slug: string; name: unknown; children?: { id: string; slug: string; name: unknown }[] }[] = [];
-  try {
-    categories = await prisma.category.findMany({
-      where: { parentId: null },
-      orderBy: { slug: "asc" },
-      select: {
-        id: true,
-        slug: true,
-        name: true,
-        children: {
-          select: { id: true, slug: true, name: true },
-          orderBy: { slug: "asc" },
-        },
-      },
-    });
-  } catch {
-    categories = [];
-  }
+  const categories = await getPublicHeaderCategories();
 
   return (
     <div className="flex min-h-screen flex-col">

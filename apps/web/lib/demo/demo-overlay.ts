@@ -26,7 +26,7 @@ export const AMBIENT_ONLY_STEP_IDS = new Set([
 ]);
 
 /** Steps with no overlay at all (fully clear page). */
-export const NO_VEIL_STEP_IDS = new Set(["finish"]);
+export const NO_VEIL_STEP_IDS = new Set(["finish", "seller-finish"]);
 
 export function isNoVeilStep(stepId: string): boolean {
   return NO_VEIL_STEP_IDS.has(stepId);
@@ -61,6 +61,7 @@ const STEP_MEASURE_PADDING: Record<string, number> = {
   "profile-menu": 10,
   "seller-overview": 6,
   finish: 12,
+  "seller-finish": 12,
   hero: 12,
 };
 

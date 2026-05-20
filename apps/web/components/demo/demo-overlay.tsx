@@ -328,7 +328,7 @@ export function DemoOverlay() {
 
         demo.markStepReady();
 
-        if (!shouldSkipScrollReveal(stepId) && !shouldRevealBeforeActive(stepId)) {
+        if (!shouldSkipScrollReveal(stepId, tourSurface) && !shouldRevealBeforeActive(stepId)) {
 
           void scrollToRevealElement(el, speed, {
 
@@ -455,6 +455,8 @@ export function DemoOverlay() {
 
 
   if (!demo?.isActive) return null;
+
+  if (tourSurface === "mobile") return null;
 
   if (stepId && isNoVeilStep(stepId)) return null;
 

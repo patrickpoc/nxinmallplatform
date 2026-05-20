@@ -241,6 +241,7 @@ async function main() {
     },
   });
 
+  // Demo seller tour: demo-seller@nxinmall.local / demo (role SELLER, company APPROVED)
   const sellerProfiles = [
     { email: "demo-seller@nxinmall.local",     name: "NxinMall Demo Store",     company: "NxinMall Demo Store",      legalName: "NxinMall Comércio Ltda",         cnpj: "12.345.678/0001-90", country: "BR" },
     { email: "agrobrasil@nxinmall.local",      name: "AgroBrasil",              company: "AgroBrasil Ltda",          legalName: "AgroBrasil Comércio Ltda",       cnpj: "23.456.789/0001-01", country: "BR" },

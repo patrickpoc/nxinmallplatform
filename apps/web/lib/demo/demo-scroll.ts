@@ -59,9 +59,11 @@ export const NO_SCROLL_REVEAL_STEP_IDS = new Set([
   "locale-settings",
   "profile-menu",
   "finish",
+  "seller-finish",
 ]);
 
-export function shouldSkipScrollReveal(stepId: string): boolean {
+export function shouldSkipScrollReveal(stepId: string, surface: DemoSurface = "desktop"): boolean {
+  if (surface === "mobile") return true;
   return NO_SCROLL_REVEAL_STEP_IDS.has(stepId);
 }
 
@@ -95,7 +97,7 @@ export function getDemoViewportBottomMargin(
   pocketExpanded = false,
 ): number {
   if (surface === "mobile") {
-    return pocketExpanded ? 128 : 64;
+    return pocketExpanded ? 180 : 120;
   }
   return DEMO_VIEWPORT_BOTTOM_MARGIN;
 }
