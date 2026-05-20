@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { DollarSign, Package, ShoppingBag, TrendingUp } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { KpiCard } from "@/components/account/buyer-kpi-card";
 import type { SellerDashboardData } from "@/lib/seller/seller-dashboard-data";
 import { moneyFormatOptions, roundMoney } from "@/lib/money-format";
 
@@ -40,19 +40,24 @@ export function SellerAccountDashboard({ data }: Props) {
         <p className="text-sm text-brand-gray">{t("sellerDashboardSubtitle")}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 min-[400px]:gap-4 lg:grid-cols-4">
         <KpiCard
           icon={<DollarSign className="h-5 w-5 text-green-600" />}
+          iconClassName="bg-green-100"
           label={t("sellerKpiRevenue")}
           value={fmtUsd(metrics.revenueUsd)}
+          valueTitle={fmtUsd(metrics.revenueUsd)}
+          className="min-[400px]:col-span-2 lg:col-span-1"
         />
         <KpiCard
           icon={<ShoppingBag className="h-5 w-5 text-brand-blue" />}
+          iconClassName="bg-blue-100"
           label={t("sellerKpiOrders")}
           value={String(metrics.ordersCount)}
         />
         <KpiCard
           icon={<TrendingUp className="h-5 w-5 text-brand-blue" />}
+          iconClassName="bg-blue-100"
           label={t("sellerKpiUnits")}
           value={String(metrics.unitsSold)}
         />
@@ -101,27 +106,5 @@ export function SellerAccountDashboard({ data }: Props) {
         )}
       </div>
     </div>
-  );
-}
-
-function KpiCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <Card className="shadow-card">
-      <CardContent className="flex items-center gap-4 p-5">
-        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-surface-light">{icon}</div>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-brand-gray">{label}</p>
-          <p className="text-2xl font-bold text-brand-dark">{value}</p>
-        </div>
-      </CardContent>
-    </Card>
   );
 }

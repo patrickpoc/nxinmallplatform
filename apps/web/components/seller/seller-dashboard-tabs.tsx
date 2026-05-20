@@ -12,6 +12,7 @@ import {
 import { Link } from "@/i18n/routing";
 import { StatusPill } from "@/components/brand/status-pill";
 import { Button } from "@/components/ui/button";
+import { KpiCard } from "@/components/account/buyer-kpi-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -62,15 +63,19 @@ export function SellerDashboardTabs({ data, showSetupBanner }: Props) {
       </TabsList>
 
       <TabsContent value="overview" className="space-y-6">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricCard
+        <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 min-[400px]:gap-4 xl:grid-cols-4">
+          <KpiCard
             icon={<DollarSign className="h-5 w-5 text-green-600" />}
+            iconClassName="bg-green-100"
             label={t("metricRevenue")}
             value={fmtUsd(metrics.revenueUsd)}
+            valueTitle={fmtUsd(metrics.revenueUsd)}
             hint={t("metricRevenueHint")}
+            className="min-[400px]:col-span-2 xl:col-span-1"
           />
-          <MetricCard
+          <KpiCard
             icon={<ShoppingBag className="h-5 w-5 text-brand-blue" />}
+            iconClassName="bg-blue-100"
             label={t("metricOrders")}
             value={String(metrics.ordersCount)}
             hint={t("metricOrdersHint", {
@@ -78,22 +83,25 @@ export function SellerDashboardTabs({ data, showSetupBanner }: Props) {
               done: String(metrics.completedOrders),
             })}
           />
-          <MetricCard
+          <KpiCard
             icon={<TrendingUp className="h-5 w-5 text-brand-blue" />}
+            iconClassName="bg-blue-100"
             label={t("metricUnitsSold")}
             value={String(metrics.unitsSold)}
             hint={t("metricUnitsSoldHint")}
           />
-          <MetricCard
+          <KpiCard
             icon={<BarChart3 className="h-5 w-5 text-brand-blue" />}
+            iconClassName="bg-surface-light"
             label={t("metricAvgOrder")}
             value={metrics.ordersCount > 0 ? fmtUsd(metrics.avgOrderUsd) : "—"}
+            valueTitle={metrics.ordersCount > 0 ? fmtUsd(metrics.avgOrderUsd) : undefined}
             hint={t("metricAvgOrderHint")}
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <MetricCard
+        <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 min-[400px]:gap-4 xl:grid-cols-4">
+          <KpiCard
             icon={<Package className="h-5 w-5 text-brand-gray" />}
             label={t("metricListings")}
             value={String(metrics.totalProducts)}
@@ -101,24 +109,23 @@ export function SellerDashboardTabs({ data, showSetupBanner }: Props) {
               active: String(metrics.activeProducts),
               draft: String(metrics.draftProducts),
             })}
-            compact
           />
-          <MetricCard
+          <KpiCard
             icon={<Boxes className="h-5 w-5 text-brand-gray" />}
             label={t("metricStock")}
             value={String(metrics.unitsInStock)}
             hint={t("metricStockHint", { variants: String(metrics.totalVariants) })}
-            compact
           />
-          <MetricCard
+          <KpiCard
             icon={<DollarSign className="h-5 w-5 text-brand-gray" />}
             label={t("metricCatalogValue")}
             value={fmtUsd(metrics.catalogValueUsd)}
+            valueTitle={fmtUsd(metrics.catalogValueUsd)}
             hint={t("metricCatalogValueHint")}
-            compact
+            className="min-[400px]:col-span-2 xl:col-span-2"
           />
-          <Card>
-            <CardContent className="flex flex-col justify-center gap-2 p-5">
+          <Card className="overflow-hidden min-[400px]:col-span-2 xl:col-span-2">
+            <CardContent className="flex min-w-0 flex-col justify-center gap-2 p-4 sm:p-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-brand-gray">{t("storeStatus")}</p>
               <p className="font-medium text-brand-dark">{data.companyName ?? "—"}</p>
               <p className="text-xs text-brand-gray">
@@ -226,35 +233,4 @@ export function SellerDashboardTabs({ data, showSetupBanner }: Props) {
       </TabsContent>
     </Tabs>
   );
-}
-
-function MetricCard({
-  icon,
-  label,
-  value,
-  hint,
-  compact,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  hint: string;
-  compact?: boolean;
-}) {
-  return (
-    <Card className={compact ? "" : "shadow-card"}>
-      <CardContent className={cnMetric(compact)}>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-light">{icon}</div>
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wide text-brand-gray">{label}</p>
-          <p className={compact ? "text-xl font-bold text-brand-dark" : "text-2xl font-bold text-brand-dark"}>{value}</p>
-          <p className="mt-0.5 text-xs text-brand-gray">{hint}</p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function cnMetric(compact?: boolean) {
-  return compact ? "flex items-start gap-3 p-4" : "flex items-center gap-4 p-5";
 }
