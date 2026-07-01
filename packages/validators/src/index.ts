@@ -198,6 +198,10 @@ export const fairProductVariantSchema = z.object({
   ),
   variantLabel: z.string().max(100).optional(),
   variantImageUrl: z.union([z.string().url("URL de imagem inválida"), z.literal("")]).optional(),
+  variantImageUrls: z
+    .array(z.union([z.string().url("URL de imagem inválida"), z.literal("")]))
+    .max(5)
+    .optional(),
   attributes: z.record(z.string(), z.unknown()).optional(),
 });
 

@@ -7,9 +7,11 @@ import { ProductGallery } from "@/components/marketplace/product-gallery";
 import { FairPurchaseCard } from "@/components/fair/fair-purchase-card";
 import {
   buildFairCartItemName,
+  buildFairDisplayGallery,
   fairVariantsUseOwnImages,
   getFairVariantImageUrl,
   getFairVariantLabel,
+  getSharedGalleryUrls,
   type FairVariantDisplayInput,
 } from "@/lib/fair/fair-variant-display";
 import { cn } from "@/lib/utils";
@@ -51,15 +53,15 @@ export function FairProductDetailClient({
     sortedVariants.find((v) => v.id === selectedVariantId) ?? sortedVariants[0] ?? null;
 
   const useVariantImages = fairVariantsUseOwnImages(sortedVariants);
-  const fallbackGalleryUrl = galleryImages[0]?.url;
+  const sharedGalleryUrls = useMemo(() => getSharedGalleryUrls(galleryImages), [galleryImages]);
+  const fallbackGalleryUrl = sharedGalleryUrls[0];
 
   const displayImages = useMemo(() => {
     if (useVariantImages && selectedVariant) {
-      const url = getFairVariantImageUrl(selectedVariant, fallbackGalleryUrl);
-      return url ? [{ url }] : [];
+      return buildFairDisplayGallery(selectedVariant, sharedGalleryUrls).map((url) => ({ url }));
     }
     return galleryImages;
-  }, [useVariantImages, selectedVariant, fallbackGalleryUrl, galleryImages]);
+  }, [useVariantImages, selectedVariant, sharedGalleryUrls, galleryImages]);
 
   const [galleryIndex, setGalleryIndex] = useState(0);
 

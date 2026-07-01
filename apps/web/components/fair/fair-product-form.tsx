@@ -6,7 +6,7 @@ import { fairProductCreateSchema } from "@nxinmall/validators";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
-import { useFieldArray, useForm, type FieldErrors } from "react-hook-form";
+import { useFieldArray, useForm, type FieldErrors, type UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -91,6 +91,67 @@ function descriptionImageDefault(defaultValues?: Partial<FormValues>) {
   return defaultValues?.images?.find((img) => img.kind === "DESCRIPTION")?.url ?? "";
 }
 
+function VariantExtraImagesFields({
+  variantIndex,
+  form,
+  t,
+}: {
+  variantIndex: number;
+  form: UseFormReturn<FormValues>;
+  t: ReturnType<typeof useTranslations<"fairVendor">>;
+}) {
+  const extraImages = form.watch(`variants.${variantIndex}.variantImageUrls`) ?? [];
+
+  function setExtraImages(urls: string[]) {
+    form.setValue(`variants.${variantIndex}.variantImageUrls`, urls, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  }
+
+  function updateImage(imageIndex: number, url: string) {
+    const next = [...extraImages];
+    next[imageIndex] = url;
+    setExtraImages(next);
+  }
+
+  function addImage() {
+    if (extraImages.length >= 5) return;
+    setExtraImages([...extraImages, ""]);
+  }
+
+  function removeImage(imageIndex: number) {
+    setExtraImages(extraImages.filter((_, i) => i !== imageIndex));
+  }
+
+  return (
+    <div className="space-y-2 sm:col-span-2">
+      <div>
+        <Label>{t("variantExtraImages")}</Label>
+        <p className="mt-1 text-xs text-brand-gray">{t("variantExtraImagesHint")}</p>
+      </div>
+      {extraImages.map((url, imageIndex) => (
+        <div key={`${variantIndex}-extra-${imageIndex}`} className="space-y-2 rounded-md border border-border p-3">
+          <ImageUrlOrUploadField
+            label={t("imageUrl")}
+            purpose="product"
+            value={url ?? ""}
+            onChange={(nextUrl) => updateImage(imageIndex, nextUrl)}
+          />
+          <Button type="button" variant="ghost" size="sm" onClick={() => removeImage(imageIndex)}>
+            {t("remove")}
+          </Button>
+        </div>
+      ))}
+      {extraImages.length < 5 ? (
+        <Button type="button" variant="outline" size="sm" onClick={addImage}>
+          {t("addVariantImage")}
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
 export function FairProductForm({ categories, productId, defaultValues }: Props) {
   const t = useTranslations("fairVendor");
   const router = useRouter();
@@ -118,6 +179,7 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
           stockQty: 0,
           variantLabel: "",
           variantImageUrl: "",
+          variantImageUrls: [],
         },
       ],
       ...defaultValues,
@@ -302,6 +364,7 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
                 stockQty: 0,
                 variantLabel: "",
                 variantImageUrl: "",
+                variantImageUrls: [],
               })
             }
           >
@@ -316,10 +379,6 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
               errors.variants?.[index] ? "border-destructive/50 bg-destructive/5" : "border-border",
             )}
           >
-            <input
-              type="hidden"
-              {...form.register(`variants.${index}.minOrderQty`, { valueAsNumber: true })}
-            />
             {multiVariant ? (
               <>
                 <div className="space-y-2 sm:col-span-2">
@@ -350,6 +409,11 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
                     error={errors.variants?.[index]?.variantImageUrl?.message}
                   />
                 </div>
+                <VariantExtraImagesFields
+                  variantIndex={index}
+                  form={form}
+                  t={t}
+                />
               </>
             ) : null}
             <div className="space-y-2">
@@ -396,6 +460,21 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
               ) : null}
             </div>
             <div className="space-y-2">
+              <Label>{t("minOrderQty")}</Label>
+              <Input
+                type="number"
+                min={1}
+                className={invalidClass(Boolean(errors.variants?.[index]?.minOrderQty?.message))}
+                {...form.register(`variants.${index}.minOrderQty`, { valueAsNumber: true })}
+              />
+              <p className="text-xs text-brand-gray">{t("minOrderQtyHint")}</p>
+              {errors.variants?.[index]?.minOrderQty?.message ? (
+                <p className="text-sm text-destructive">
+                  {errors.variants[index]?.minOrderQty?.message}
+                </p>
+              ) : null}
+            </div>
+            <div className="space-y-2">
               <Label>{t("unit")}</Label>
               <select
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -418,7 +497,10 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
 
       <div className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="font-semibold">{t("images")}</h2>
+          <div>
+            <h2 className="font-semibold">{t("sharedImages")}</h2>
+            <p className="mt-1 text-xs text-brand-gray">{t("sharedImagesHint")}</p>
+          </div>
           <Button
             type="button"
             variant="outline"
@@ -446,9 +528,12 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
               }
               error={errors.images?.[index]?.url?.message}
             />
-            <label className="flex items-center gap-2">
-              <input type="checkbox" {...form.register(`images.${index}.isPrimary`)} />
-              <span className="text-sm">{t("imagePrimary")}</span>
+            <label className="flex flex-col gap-1">
+              <span className="flex items-center gap-2">
+                <input type="checkbox" {...form.register(`images.${index}.isPrimary`)} />
+                <span className="text-sm">{t("imagePrimary")}</span>
+              </span>
+              <span className="pl-6 text-xs text-brand-gray">{t("imagePrimaryHint")}</span>
             </label>
             {imageFields.length > 1 ? (
               <Button type="button" variant="ghost" size="sm" onClick={() => removeImage(index)}>

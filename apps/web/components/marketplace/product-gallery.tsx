@@ -44,8 +44,17 @@ export function ProductGallery({
   }, [index, urls.length, setIndex]);
   const [zoomed, setZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const [zoomEnabled, setZoomEnabled] = useState(false);
   const imgRef = useRef<HTMLDivElement>(null);
   const current = urls.length > 0 ? urls[Math.min(index, urls.length - 1)]! : null;
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setZoomEnabled(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   const prev = useCallback(() => {
     if (urls.length === 0) return;
@@ -66,7 +75,7 @@ export function ProductGallery({
   );
 
   function handleMouseMove(e: React.MouseEvent) {
-    if (!imgRef.current) return;
+    if (!zoomEnabled || !imgRef.current) return;
     const rect = imgRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -77,11 +86,14 @@ export function ProductGallery({
     <div className="space-y-3">
       <div
         ref={imgRef}
-        className="relative cursor-zoom-in overflow-hidden rounded-xl border border-border bg-white shadow-card"
+        className={cn(
+          "relative overflow-hidden rounded-xl border border-border bg-white shadow-card",
+          zoomEnabled && "cursor-zoom-in",
+        )}
         tabIndex={0}
         onKeyDown={handleKeyDown}
-        onMouseEnter={() => setZoomed(true)}
-        onMouseLeave={() => setZoomed(false)}
+        onMouseEnter={() => zoomEnabled && setZoomed(true)}
+        onMouseLeave={() => zoomEnabled && setZoomed(false)}
         onMouseMove={handleMouseMove}
         role="region"
         aria-roledescription="Image gallery"
@@ -95,9 +107,9 @@ export function ProductGallery({
               fill
               className={cn(
                 "object-contain p-6 transition-transform duration-200",
-                zoomed && "scale-[2]",
+                zoomed && zoomEnabled && "scale-[2]",
               )}
-              style={zoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
+              style={zoomed && zoomEnabled ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
               sizes="(max-width: 1023px) 100vw, (max-width: 1152px) 46vw, 560px"
               unoptimized
             />

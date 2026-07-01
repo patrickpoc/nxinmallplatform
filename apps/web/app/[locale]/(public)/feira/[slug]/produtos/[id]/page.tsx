@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { FairProductDetailClient } from "@/components/fair/fair-product-detail-client";
+import { FairSpecValue, fairSpecKeyLabel } from "@/components/fair/fair-spec-value";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,16 +11,6 @@ import { getFairBoothBySlug } from "@/lib/fair/fair-booth";
 import type { CartPriceCurrency } from "@/lib/cart/types";
 
 export const dynamic = "force-dynamic";
-
-function titleCase(s: string): string {
-  return s.replace(/[_-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function formatSpecValue(v: unknown): string {
-  if (typeof v === "string") return v;
-  if (typeof v === "number" || typeof v === "boolean") return String(v);
-  return JSON.stringify(v);
-}
 
 export default async function FairProductPage({
   params,
@@ -132,8 +123,16 @@ export default async function FairProductPage({
                   <TableBody>
                     {specEntries.map(([k, v]) => (
                       <TableRow key={k}>
-                        <TableCell className="font-medium text-brand-dark">{titleCase(k)}</TableCell>
-                        <TableCell>{formatSpecValue(v)}</TableCell>
+                        <TableCell className="font-medium text-brand-dark">
+                          {fairSpecKeyLabel(k, {
+                            variantLabel: t("specVariantLabel"),
+                            image: t("specImage"),
+                            images: t("specImages"),
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          <FairSpecValue specKey={k} value={v} />
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

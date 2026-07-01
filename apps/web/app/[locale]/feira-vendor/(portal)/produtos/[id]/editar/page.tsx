@@ -48,7 +48,7 @@ export default async function FairVendorEditProductPage({
           categoryId: product.categoryId,
           status: product.status as "DRAFT" | "ACTIVE" | "PAUSED",
           variants: product.variants.map((v) => {
-            const attrs = (v.attributes as { label?: string; imageUrl?: string } | null) ?? {};
+            const attrs = (v.attributes as { label?: string; imageUrl?: string; imageUrls?: string[] } | null) ?? {};
             return {
               sku: v.sku,
               priceAmount: Number(v.priceAmount).toFixed(2),
@@ -57,6 +57,7 @@ export default async function FairVendorEditProductPage({
               stockQty: v.stockQty,
               variantLabel: attrs.label ?? "",
               variantImageUrl: attrs.imageUrl ?? "",
+              variantImageUrls: attrs.imageUrls ?? [],
             };
           }),
           images:
