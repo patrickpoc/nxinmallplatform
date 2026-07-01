@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, LogOut, UserCircle } from "lucide-react";
+import { ChevronDown, Loader2, LogOut, UserCircle } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/routing";
@@ -38,7 +38,11 @@ export function FairBoothAuthMenu({ slug }: { slug: string }) {
   const loginHref = `/auth/login?callbackUrl=${encodeURIComponent(pathname || "/")}`;
 
   if (status === "loading") {
-    return <div className="h-9 w-16 shrink-0" aria-hidden />;
+    return (
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center" aria-busy="true" aria-label={t("myAccount")}>
+        <Loader2 className="h-4 w-4 animate-spin text-brand-gray" />
+      </div>
+    );
   }
 
   if (!session?.user) {

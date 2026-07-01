@@ -1133,6 +1133,7 @@
     "allCategories": "All",
     "noProducts": "No products available.",
     "addToCart": "Add",
+    "addToCartSuccess": "Added to cart",
     "cart": "Cart",
     "cartPreviewTitle": "Your cart",
     "cartPreviewHint": "Review items and quantities before checkout.",

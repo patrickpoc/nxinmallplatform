@@ -122,6 +122,8 @@ export default async function FairBoothPage({
                   priceAmount: v ? Number(v.priceAmount) : 0,
                   priceCurrency: (v?.priceCurrency as CartPriceCurrency) ?? "BRL",
                   variantId: v?.id,
+                  minOrderQty: v?.minOrderQty ?? 1,
+                  stockQty: v?.stockQty,
                 }}
               />
             );

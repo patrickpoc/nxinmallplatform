@@ -1113,6 +1113,7 @@
     "allCategories": "Todos",
     "noProducts": "Nenhum produto disponível.",
     "addToCart": "Adicionar",
+    "addToCartSuccess": "Adicionado ao carrinho",
     "cart": "Carrinho",
     "cartPreviewTitle": "Seu carrinho",
     "cartPreviewHint": "Revise os itens e quantidades antes de finalizar a compra.",

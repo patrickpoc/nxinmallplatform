@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { PriceDisplay } from "@/components/brand/price-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -57,6 +59,7 @@ export function FairPurchaseCard({
   booth,
   labels,
 }: Props) {
+  const t = useTranslations("fairBooth");
   const { addItem } = useFairCart();
   const [qty, setQty] = useState(1);
   const quotationHref = getQuotationHref(booth);
@@ -148,11 +151,17 @@ export function FairPurchaseCard({
         <div className="space-y-3 border-t border-border pt-4">
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm font-medium text-brand-dark">{labels.quantity}</span>
-            <QuantitySelector value={qty} onChange={setQty} className="shrink-0" />
+            <QuantitySelector
+              value={qty}
+              onChange={setQty}
+              min={selectedVariant.minOrderQty}
+              max={selectedVariant.stockQty > 0 ? selectedVariant.stockQty : 999}
+              className="shrink-0"
+            />
           </div>
           <Button
             className="w-full"
-            onClick={() =>
+            onClick={() => {
               addItem({
                 productId,
                 variantId: selectedVariant.id,
@@ -161,8 +170,9 @@ export function FairPurchaseCard({
                 priceAmount: selectedVariant.priceAmount,
                 priceCurrency: selectedVariant.priceCurrency,
                 quantity: qty,
-              })
-            }
+              });
+              toast.success(t("addToCartSuccess"));
+            }}
           >
             <ShoppingCart className="mr-2 h-4 w-4" />
             {labels.addToCart}
