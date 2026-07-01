@@ -83,15 +83,15 @@ export default async function FairBoothPage({
   }));
 
   return (
-    <div className="space-y-4 py-4">
+    <div className="space-y-4 py-3 sm:py-4">
       {booth.bannerUrl ? (
         <div
-          className="h-32 rounded-lg bg-cover bg-center"
+          className="h-24 rounded-lg bg-cover bg-center sm:h-32"
           style={{ backgroundImage: `url(${booth.bannerUrl})` }}
         />
       ) : null}
       <div>
-        <h1 className="text-2xl font-bold text-brand-dark">{booth.companyName}</h1>
+        <h1 className="text-xl font-bold text-brand-dark sm:text-2xl">{booth.companyName}</h1>
         <p className="text-sm text-brand-gray">{t("storeSubtitle")}</p>
       </div>
 
@@ -108,7 +108,7 @@ export default async function FairBoothPage({
       {products.length === 0 ? (
         <p className="py-12 text-center text-brand-gray">{t("noProducts")}</p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:gap-4">
           {products.map((p) => {
             const nameObj = p.name as { pt?: string; en?: string };
             const name = nameObj?.pt ?? nameObj?.en ?? "—";

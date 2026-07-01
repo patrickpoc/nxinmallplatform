@@ -52,7 +52,23 @@ export default async function FairVendorDashboardPage({ params }: { params: { lo
         {data.recentOrders.length === 0 ? (
           <p className="text-sm text-brand-gray">{t("noOrders")}</p>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-border">
+          <>
+            <div className="space-y-3 md:hidden">
+              {data.recentOrders.map((o) => (
+                <div key={o.id} className="rounded-lg border border-border bg-white p-4 shadow-card">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-mono text-xs text-brand-gray">{o.id.slice(0, 8)}…</p>
+                    <StatusPill status={o.status} />
+                  </div>
+                  <p className="mt-2 text-sm font-medium text-brand-dark">{o.guestName ?? "—"}</p>
+                  <div className="mt-2 flex items-center justify-between text-sm">
+                    <span className="text-brand-gray">{o.createdAt.toLocaleDateString(params.locale)}</span>
+                    <span className="font-semibold">R$ {o.totalBrl.toFixed(2)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
             <table className="w-full text-sm">
               <thead className="bg-surface-light text-left text-brand-gray">
                 <tr>
@@ -79,7 +95,8 @@ export default async function FairVendorDashboardPage({ params }: { params: { lo
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </div>
     </div>

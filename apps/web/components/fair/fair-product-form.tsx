@@ -102,7 +102,7 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
   }
 
   return (
-    <form className="max-w-2xl space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+    <form className="w-full max-w-2xl space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
       <div className="space-y-2">
         <Label>{t("productNamePt")}</Label>
         <Input {...form.register("name.pt")} />
@@ -148,7 +148,7 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="font-semibold">{t("variants")}</h2>
           <Button
             type="button"
@@ -197,7 +197,7 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="font-semibold">{t("images")}</h2>
           <Button
             type="button"
@@ -227,9 +227,9 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
         ))}
       </div>
 
-      <div className="flex gap-2">
-        <Button type="submit">{productId ? t("saveProduct") : t("createProduct")}</Button>
-        <Button type="button" variant="outline" onClick={() => router.push("/feira-vendor/produtos")}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <Button type="submit" className="w-full sm:w-auto">{productId ? t("saveProduct") : t("createProduct")}</Button>
+        <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => router.push("/feira-vendor/produtos")}>
           {t("cancel")}
         </Button>
         {productId ? <FairProductDeleteButton productId={productId} variant="form" /> : null}

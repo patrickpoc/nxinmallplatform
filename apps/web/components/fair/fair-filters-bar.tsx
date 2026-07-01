@@ -32,7 +32,7 @@ export function FairFiltersBar({ slug, categories, current }: Props) {
   }
 
   return (
-    <div className="sticky top-14 z-30 space-y-3 rounded-lg border border-border bg-white p-3">
+    <div className="sticky top-14 z-30 space-y-3 rounded-lg border border-border bg-white p-3 sm:p-4">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto] sm:items-center">
         <Input
           className="w-full"
@@ -55,9 +55,10 @@ export function FairFiltersBar({ slug, categories, current }: Props) {
         </select>
       </div>
       {categories.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
+        <div className="-mx-1 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:pb-0 [&::-webkit-scrollbar]:hidden">
           <Button
             size="sm"
+            className="shrink-0"
             variant={!current.category ? "default" : "outline"}
             onClick={() => navigate({ category: undefined })}
           >
@@ -67,6 +68,7 @@ export function FairFiltersBar({ slug, categories, current }: Props) {
             <Button
               key={c.id}
               size="sm"
+              className="shrink-0"
               variant={current.category === c.id ? "default" : "outline"}
               onClick={() => navigate({ category: c.id })}
             >

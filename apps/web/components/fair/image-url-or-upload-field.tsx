@@ -47,12 +47,12 @@ export function ImageUrlOrUploadField({ label, hint, value, onChange, purpose }:
     <div className="space-y-2">
       <Label>{label}</Label>
       {hint ? <p className="text-xs text-brand-gray">{hint}</p> : null}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <Input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="https://..."
-          className="min-w-[200px] flex-1"
+          className="min-w-0 flex-1"
         />
         <input
           ref={inputRef}
@@ -68,6 +68,7 @@ export function ImageUrlOrUploadField({ label, hint, value, onChange, purpose }:
           type="button"
           variant="outline"
           disabled={uploading}
+          className="w-full sm:w-auto"
           onClick={() => inputRef.current?.click()}
         >
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}

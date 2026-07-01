@@ -35,7 +35,7 @@ export function FairProductCard({ slug, product }: Props) {
       <Link href={`/feira/${slug}/produtos/${id}`} className="block">
         <div className="relative aspect-square border-b border-border bg-white">
           {imageUrl ? (
-            <Image src={imageUrl} alt={name} fill className="object-contain p-3" sizes="200px" unoptimized />
+            <Image src={imageUrl} alt={name} fill className="object-contain p-2 sm:p-3" sizes="(max-width: 640px) 50vw, 200px" unoptimized />
           ) : (
             <div className="flex h-full items-center justify-center text-brand-gray">
               <ImageOff className="h-8 w-8 opacity-40" />
@@ -43,9 +43,9 @@ export function FairProductCard({ slug, product }: Props) {
           )}
         </div>
       </Link>
-      <CardContent className="flex flex-1 flex-col gap-2 p-3">
+      <CardContent className="flex flex-1 flex-col gap-2 p-2.5 sm:p-3">
         <Link href={`/feira/${slug}/produtos/${id}`}>
-          <p className="line-clamp-2 min-h-10 text-sm font-semibold text-brand-dark">{name}</p>
+          <p className="line-clamp-2 min-h-[2.5rem] text-xs font-semibold text-brand-dark sm:min-h-10 sm:text-sm">{name}</p>
         </Link>
         <p className="text-sm font-bold text-brand-blue">
           <PriceDisplay amount={priceAmount} currency={priceCurrency} locale={locale} />

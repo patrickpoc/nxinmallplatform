@@ -20,7 +20,7 @@ export default async function FairBoothLayout({
     <FairCartProvider slug={params.slug}>
       <div className="min-h-screen bg-surface-light">
         <FairBoothHeader slug={params.slug} boothName={booth.companyName} logoUrl={booth.logoUrl} />
-        <main className="mx-auto max-w-5xl px-4 pb-12">{children}</main>
+        <main className="mx-auto max-w-5xl px-3 pb-10 sm:px-4 sm:pb-12">{children}</main>
       </div>
     </FairCartProvider>
   );

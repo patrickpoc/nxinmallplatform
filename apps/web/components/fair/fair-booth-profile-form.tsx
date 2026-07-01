@@ -65,7 +65,7 @@ export function FairBoothProfileForm({ booth, locale }: Props) {
   }
 
   return (
-    <form className="max-w-2xl space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
+    <form className="w-full max-w-2xl space-y-6 sm:space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
       <section className="space-y-4 rounded-lg border border-border p-4">
         <h2 className="font-semibold text-brand-dark">{t("sectionCompany")}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -179,9 +179,9 @@ export function FairBoothProfileForm({ booth, locale }: Props) {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>{t("boothSlug")}</Label>
-            <div className="flex items-center gap-1 text-sm text-brand-gray">
-              <span>/{locale}/feira/</span>
-              <Input className="flex-1" {...form.register("slug")} />
+            <div className="flex flex-col gap-1 text-sm text-brand-gray sm:flex-row sm:items-center">
+              <span className="shrink-0">/{locale}/feira/</span>
+              <Input className="min-w-0 flex-1" {...form.register("slug")} />
             </div>
           </div>
           <div className="space-y-2">

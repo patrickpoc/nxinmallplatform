@@ -74,9 +74,9 @@ export function FairVendorRegisterForm() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="slug">{t("boothSlug")}</Label>
-            <div className="flex items-center gap-1 text-sm text-brand-gray">
-              <span>/{locale}/feira/</span>
-              <Input id="slug" className="flex-1" placeholder="minha-empresa" {...form.register("slug")} />
+            <div className="flex flex-col gap-1 text-sm text-brand-gray sm:flex-row sm:items-center">
+              <span className="shrink-0">/{locale}/feira/</span>
+              <Input id="slug" className="min-w-0 flex-1" placeholder="minha-empresa" {...form.register("slug")} />
             </div>
           </div>
           <div className="space-y-2">

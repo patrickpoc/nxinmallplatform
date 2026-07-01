@@ -2,7 +2,7 @@
 
 import { loginSchema } from "@nxinmall/validators";
 import { Loader2 } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { getSession, signIn, signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useState } from "react";
@@ -37,6 +37,12 @@ export function FairVendorLoginForm() {
       });
       if (res?.error) {
         setError(t("loginError"));
+        return;
+      }
+      const session = await getSession();
+      if (session?.user?.role !== "FAIR_VENDOR") {
+        await signOut({ redirect: false });
+        setError(t("wrongRoleError"));
         return;
       }
       router.push("/feira-vendor");

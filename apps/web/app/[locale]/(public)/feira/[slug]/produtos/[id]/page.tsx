@@ -66,10 +66,10 @@ export default async function FairProductPage({
   const specEntries = attributes ? Object.entries(attributes) : [];
 
   return (
-    <div className="space-y-6 py-4">
-      <h1 className="text-xl font-bold text-brand-dark md:text-2xl">{name}</h1>
+    <div className="space-y-4 py-3 sm:space-y-6 sm:py-4">
+      <h1 className="text-lg font-bold text-brand-dark sm:text-xl md:text-2xl">{name}</h1>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         <ProductGallery images={galleryImages} alt={name} />
         <FairPurchaseCard
           slug={params.slug}
@@ -87,13 +87,17 @@ export default async function FairProductPage({
       </div>
 
       <Tabs defaultValue="details">
-        <TabsList>
-          <TabsTrigger value="details">{t("tabDetails")}</TabsTrigger>
-          <TabsTrigger value="specs">{t("tabSpecifications")}</TabsTrigger>
+        <TabsList className="grid h-auto w-full grid-cols-2">
+          <TabsTrigger value="details" className="min-h-10">
+            {t("tabDetails")}
+          </TabsTrigger>
+          <TabsTrigger value="specs" className="min-h-10">
+            {t("tabSpecifications")}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="details">
           <Card className="shadow-card">
-            <CardContent className="space-y-4 p-6 text-sm text-brand-gray">
+            <CardContent className="space-y-4 p-4 text-sm text-brand-gray sm:p-6">
               {description ? <p className="whitespace-pre-wrap">{description}</p> : <p>{t("noDescription")}</p>}
               {descriptionImage ? (
                 <div className="relative mx-auto max-w-md aspect-video">
@@ -115,7 +119,8 @@ export default async function FairProductPage({
               {specEntries.length === 0 ? (
                 <p className="p-6 text-sm text-brand-gray">{t("noSpecifications")}</p>
               ) : (
-                <Table>
+                <div className="overflow-x-auto">
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>{t("specKey")}</TableHead>
@@ -131,6 +136,7 @@ export default async function FairProductPage({
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               )}
             </CardContent>
           </Card>

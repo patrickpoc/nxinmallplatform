@@ -15,6 +15,7 @@ import { FairPixPaymentCard, type BoothPixInfo } from "@/components/fair/fair-pi
 import { useFairCart } from "@/lib/fair/fair-cart-context";
 import { createFairOrder } from "@/lib/actions/fair-vendor/orders";
 import { maskCep, maskCnpj, maskCpf, maskPhone } from "@/lib/cart/input-masks";
+import { cn } from "@/lib/utils";
 
 type Props = {
   slug: string;
@@ -107,7 +108,7 @@ export function FairCheckoutPageClient({ slug, locale, boothPix }: Props) {
 
   if (done) {
     return (
-      <div className="mx-auto max-w-lg space-y-6 py-8">
+      <div className="mx-auto w-full max-w-lg space-y-4 px-1 py-6 sm:px-0 sm:py-8">
         <div className="space-y-3 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
             <Check className="h-6 w-6 text-green-600" />
@@ -124,12 +125,18 @@ export function FairCheckoutPageClient({ slug, locale, boothPix }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6 py-6">
-      <h1 className="text-xl font-bold text-brand-dark">{t("checkoutTitle")}</h1>
+    <div className="mx-auto w-full max-w-lg space-y-4 px-1 py-4 sm:space-y-6 sm:px-0 sm:py-6">
+      <h1 className="text-lg font-bold text-brand-dark sm:text-xl">{t("checkoutTitle")}</h1>
 
-      <nav className="flex flex-wrap justify-center gap-3 text-xs font-medium">
+      <nav className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {STEP_KEYS.map((key, i) => (
-          <span key={key} className={step === i + 1 ? "text-brand-blue" : "text-brand-gray"}>
+          <span
+            key={key}
+            className={cn(
+              "shrink-0 rounded-full px-2.5 py-1 text-xs font-medium sm:px-3",
+              step === i + 1 ? "bg-brand-blue/10 text-brand-blue" : "text-brand-gray",
+            )}
+          >
             {i + 1}. {t(`step${key}`)}
           </span>
         ))}
@@ -137,7 +144,7 @@ export function FairCheckoutPageClient({ slug, locale, boothPix }: Props) {
 
       {step === 1 ? (
         <Card className="shadow-card">
-          <CardContent className="space-y-4 p-6">
+          <CardContent className="space-y-4 p-4 sm:p-6">
             <div className="space-y-2">
               <Label>{t("buyerName")}</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -152,7 +159,7 @@ export function FairCheckoutPageClient({ slug, locale, boothPix }: Props) {
             </div>
             <div className="space-y-2">
               <Label>{t("buyerDocumentType")}</Label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {(["CPF", "CNPJ"] as const).map((type) => (
                   <Button
                     key={type}
@@ -186,7 +193,7 @@ export function FairCheckoutPageClient({ slug, locale, boothPix }: Props) {
               <Label>{t("street")}</Label>
               <Input value={street} onChange={(e) => setStreet(e.target.value)} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>{t("city")}</Label>
                 <Input value={city} onChange={(e) => setCity(e.target.value)} />
@@ -213,14 +220,14 @@ export function FairCheckoutPageClient({ slug, locale, boothPix }: Props) {
 
       {step === 2 ? (
         <Card className="shadow-card">
-          <CardContent className="space-y-4 p-6">
+          <CardContent className="space-y-4 p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-brand-dark">{tCheckout("freightTitle")}</h2>
             <SellerFreightCard />
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(1)}>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button variant="outline" className="w-full sm:w-auto" onClick={() => setStep(1)}>
                 {t("back")}
               </Button>
-              <Button className="flex-1" onClick={() => setStep(3)}>
+              <Button className="w-full sm:flex-1" onClick={() => setStep(3)}>
                 {t("continue")}
               </Button>
             </div>
@@ -230,18 +237,18 @@ export function FairCheckoutPageClient({ slug, locale, boothPix }: Props) {
 
       {step === 3 ? (
         <Card className="shadow-card">
-          <CardContent className="space-y-4 p-6">
+          <CardContent className="space-y-4 p-4 sm:p-6">
             <FairPixPaymentCard
               boothPix={boothPix}
               locale={locale}
               totalBrl={subtotal}
               showTotal
             />
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(2)}>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button variant="outline" className="w-full sm:w-auto" onClick={() => setStep(2)}>
                 {t("back")}
               </Button>
-              <Button className="flex-1" disabled={!hasPixKey} onClick={() => setStep(4)}>
+              <Button className="w-full sm:flex-1" disabled={!hasPixKey} onClick={() => setStep(4)}>
                 {t("continue")}
               </Button>
             </div>
@@ -251,15 +258,15 @@ export function FairCheckoutPageClient({ slug, locale, boothPix }: Props) {
 
       {step === 4 ? (
         <Card className="shadow-card">
-          <CardContent className="space-y-4 p-6">
+          <CardContent className="space-y-4 p-4 sm:p-6">
             <h3 className="font-semibold">{t("reviewOrder")}</h3>
             <ul className="space-y-2 text-sm">
               {lines.map((l) => (
-                <li key={l.lineId} className="flex justify-between">
-                  <span>
+                <li key={l.lineId} className="flex items-start justify-between gap-3">
+                  <span className="min-w-0 flex-1 break-words">
                     {l.name} × {l.quantity}
                   </span>
-                  <span>
+                  <span className="shrink-0">
                     <PriceDisplay amount={l.priceAmount * l.quantity} currency="BRL" locale={locale} />
                   </span>
                 </li>
@@ -273,11 +280,11 @@ export function FairCheckoutPageClient({ slug, locale, boothPix }: Props) {
               <span>{t("total")}</span>
               <PriceDisplay amount={subtotal} currency="BRL" locale={locale} />
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(3)}>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button variant="outline" className="w-full sm:w-auto" onClick={() => setStep(3)}>
                 {t("back")}
               </Button>
-              <Button className="flex-1" disabled={submitting || !hasPixKey} onClick={() => void doConfirm()}>
+              <Button className="w-full sm:flex-1" disabled={submitting || !hasPixKey} onClick={() => void doConfirm()}>
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("confirmOrder")}
               </Button>
             </div>

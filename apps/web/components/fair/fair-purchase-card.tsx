@@ -43,7 +43,7 @@ export function FairPurchaseCard({
 
   return (
     <Card className="shadow-card">
-      <CardContent className="space-y-4 p-5">
+      <CardContent className="space-y-4 p-4 sm:p-5">
         <div>
           <p className="text-xs font-semibold uppercase text-brand-gray">{t("price")}</p>
           <p className="text-2xl font-bold text-brand-dark">

@@ -54,12 +54,13 @@ export function FairPixPaymentCard({ boothPix, locale, totalBrl, showTotal }: Pr
       {hasPixKey ? (
         <div className="space-y-2">
           <Label>{t("pixKey")}</Label>
-          <div className="flex gap-2">
-            <Input readOnly value={boothPix.pixKey!} className="font-mono text-sm" />
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input readOnly value={boothPix.pixKey!} className="min-w-0 font-mono text-sm" />
             <Button
               type="button"
               variant="outline"
               size="icon"
+              className="h-10 w-full shrink-0 sm:w-10"
               aria-label={t("copyPixKey")}
               onClick={() => {
                 void navigator.clipboard.writeText(boothPix.pixKey!);
