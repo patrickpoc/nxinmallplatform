@@ -202,6 +202,7 @@ export const fairProductVariantSchema = z.object({
     .array(z.union([z.string().url("URL de imagem inválida"), z.literal("")]))
     .max(5)
     .optional(),
+  isStorefrontVariant: z.boolean().optional(),
   attributes: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -268,6 +269,14 @@ export const fairProductCreateSchema = fairProductCreateBaseSchema.superRefine((
         });
       }
     });
+    const storefrontCount = data.variants.filter((v) => v.isStorefrontVariant).length;
+    if (storefrontCount !== 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Selecione exatamente uma variação como imagem da vitrine",
+        path: ["variants"],
+      });
+    }
   }
 });
 

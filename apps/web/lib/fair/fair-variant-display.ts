@@ -4,6 +4,7 @@ export type FairVariantAttributes = {
   label?: string;
   imageUrl?: string;
   imageUrls?: string[];
+  isStorefront?: boolean;
   cor?: string;
   color?: string;
 };
@@ -76,4 +77,33 @@ export function buildFairCartItemName(productName: string, variantLabel: string)
 
 export function fairVariantsUseOwnImages(variants: FairVariantDisplayInput[]): boolean {
   return variants.length > 1 && variants.some((v) => getVariantImageUrls(v).length > 0);
+}
+
+function getVariantMainImageUrl(
+  variant: Pick<FairVariantDisplayInput, "attributes">,
+): string | undefined {
+  const attrs = parseFairVariantAttributes(variant.attributes);
+  const url = attrs.imageUrl?.trim();
+  return url || undefined;
+}
+
+export function getFairStorefrontImageUrl(
+  variants: Pick<FairVariantDisplayInput, "attributes">[],
+  galleryImages: { url: string; isPrimary?: boolean }[],
+): string | undefined {
+  if (variants.length > 1) {
+    const flagged = variants.find((v) => parseFairVariantAttributes(v.attributes).isStorefront);
+    const withImage = variants.find((v) => getVariantMainImageUrl(v));
+    const candidate = flagged ?? withImage;
+    const url = candidate ? getVariantMainImageUrl(candidate) : undefined;
+    if (url) return url;
+  }
+
+  if (variants.length === 1) {
+    const url = getVariantMainImageUrl(variants[0]!);
+    if (url) return url;
+  }
+
+  const primary = galleryImages.find((i) => i.isPrimary) ?? galleryImages[0];
+  return primary?.url;
 }

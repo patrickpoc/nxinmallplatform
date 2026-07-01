@@ -36,6 +36,21 @@ export default async function FairVendorEditProductPage({
     zh: "",
   };
 
+  const variantAttrs = product.variants.map(
+    (v) =>
+      (v.attributes as {
+        label?: string;
+        imageUrl?: string;
+        imageUrls?: string[];
+        isStorefront?: boolean;
+      } | null) ?? {},
+  );
+  let storefrontIndex = variantAttrs.findIndex((attrs) => attrs.isStorefront);
+  if (storefrontIndex < 0) {
+    storefrontIndex = variantAttrs.findIndex((attrs) => attrs.imageUrl?.trim());
+    if (storefrontIndex < 0) storefrontIndex = 0;
+  }
+
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-brand-dark">{t("editProduct")}</h2>
@@ -47,8 +62,8 @@ export default async function FairVendorEditProductPage({
           description,
           categoryId: product.categoryId,
           status: product.status as "DRAFT" | "ACTIVE" | "PAUSED",
-          variants: product.variants.map((v) => {
-            const attrs = (v.attributes as { label?: string; imageUrl?: string; imageUrls?: string[] } | null) ?? {};
+          variants: product.variants.map((v, index) => {
+            const attrs = variantAttrs[index] ?? {};
             return {
               sku: v.sku,
               priceAmount: Number(v.priceAmount).toFixed(2),
@@ -58,6 +73,7 @@ export default async function FairVendorEditProductPage({
               variantLabel: attrs.label ?? "",
               variantImageUrl: attrs.imageUrl ?? "",
               variantImageUrls: attrs.imageUrls ?? [],
+              isStorefrontVariant: index === storefrontIndex,
             };
           }),
           images:

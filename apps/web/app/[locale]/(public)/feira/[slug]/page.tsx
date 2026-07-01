@@ -6,6 +6,7 @@ import { FairBoothBanner } from "@/components/fair/fair-booth-banner";
 import { FairFiltersBar } from "@/components/fair/fair-filters-bar";
 import { productNameContainsWhere } from "@/lib/product-listing";
 import { getFairBoothBySlug } from "@/lib/fair/fair-booth";
+import { getFairStorefrontImageUrl } from "@/lib/fair/fair-variant-display";
 import type { CartPriceCurrency } from "@/lib/cart/types";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +50,7 @@ export default async function FairBoothPage({
     },
     include: {
       variants: true,
-      images: { where: { kind: "GALLERY" }, orderBy: { sortOrder: "asc" }, take: 1 },
+      images: { where: { kind: "GALLERY" }, orderBy: { sortOrder: "asc" } },
       category: { select: { id: true, name: true } },
     },
     orderBy: sort === "newest" ? { createdAt: "desc" } : undefined,
@@ -109,7 +110,7 @@ export default async function FairBoothPage({
             const nameObj = p.name as { pt?: string; en?: string };
             const name = nameObj?.pt ?? nameObj?.en ?? "—";
             const v = p.variants.slice().sort((a, b) => Number(a.priceAmount) - Number(b.priceAmount))[0];
-            const primaryImage = p.images.find((i) => i.isPrimary) ?? p.images[0];
+            const storefrontImageUrl = getFairStorefrontImageUrl(p.variants, p.images);
             return (
               <FairProductCard
                 key={p.id}
@@ -117,7 +118,7 @@ export default async function FairBoothPage({
                 product={{
                   id: p.id,
                   name,
-                  imageUrl: primaryImage?.url,
+                  imageUrl: storefrontImageUrl,
                   priceAmount: v ? Number(v.priceAmount) : 0,
                   priceCurrency: (v?.priceCurrency as CartPriceCurrency) ?? "BRL",
                   variantId: v?.id,

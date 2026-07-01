@@ -38,7 +38,8 @@ function normalizeFairDescription(
 }
 
 function mapVariantForPersist(variant: FairProductFormInput["variants"][number]) {
-  const { variantLabel, variantImageUrl, variantImageUrls, attributes, ...rest } = variant;
+  const { variantLabel, variantImageUrl, variantImageUrls, isStorefrontVariant, attributes, ...rest } =
+    variant;
   const attrs: Record<string, unknown> = { ...((attributes as Record<string, unknown> | undefined) ?? {}) };
   const label = variantLabel?.trim();
   const imageUrl = variantImageUrl?.trim();
@@ -53,6 +54,8 @@ function mapVariantForPersist(variant: FairProductFormInput["variants"][number])
   const uniqueExtras = [...new Set(extras)];
   if (uniqueExtras.length > 0) attrs.imageUrls = uniqueExtras;
   else delete attrs.imageUrls;
+  if (isStorefrontVariant) attrs.isStorefront = true;
+  else delete attrs.isStorefront;
   return {
     ...rest,
     attributes: Object.keys(attrs).length > 0 ? attrs : undefined,

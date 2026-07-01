@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FAIR_NEW_CATEGORY_ID } from "@nxinmall/constants";
 import { fairProductCreateSchema } from "@nxinmall/validators";
 import { Loader2 } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useFieldArray, useForm, type FieldErrors, type UseFormReturn } from "react-hook-form";
@@ -180,6 +181,7 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
           variantLabel: "",
           variantImageUrl: "",
           variantImageUrls: [],
+          isStorefrontVariant: true,
         },
       ],
       ...defaultValues,
@@ -196,6 +198,41 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
   });
 
   const multiVariant = variantFields.length > 1;
+
+  function selectStorefrontVariant(index: number) {
+    variantFields.forEach((_, i) => {
+      form.setValue(`variants.${i}.isStorefrontVariant`, i === index, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    });
+  }
+
+  function handleRemoveVariant(index: number) {
+    const wasStorefront = form.getValues(`variants.${index}.isStorefrontVariant`);
+    removeVariant(index);
+    if (wasStorefront) {
+      form.setValue("variants.0.isStorefrontVariant", true, { shouldValidate: true, shouldDirty: true });
+    }
+  }
+
+  function handleAppendVariant() {
+    const current = form.getValues("variants");
+    appendVariant({
+      sku: "",
+      priceAmount: "",
+      minOrderQty: 1,
+      unit: "UNIT",
+      stockQty: 0,
+      variantLabel: "",
+      variantImageUrl: "",
+      variantImageUrls: [],
+      isStorefrontVariant: false,
+    });
+    if (current.length === 1 && !current[0]?.isStorefrontVariant) {
+      form.setValue("variants.0.isStorefrontVariant", true, { shouldValidate: true, shouldDirty: true });
+    }
+  }
 
   const { fields: imageFields, append: appendImage, remove: removeImage } = useFieldArray({
     control: form.control,
@@ -355,18 +392,7 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
             type="button"
             variant="outline"
             size="sm"
-            onClick={() =>
-              appendVariant({
-                sku: "",
-                priceAmount: "",
-                minOrderQty: 1,
-                unit: "UNIT",
-                stockQty: 0,
-                variantLabel: "",
-                variantImageUrl: "",
-                variantImageUrls: [],
-              })
-            }
+            onClick={handleAppendVariant}
           >
             {t("addVariant")}
           </Button>
@@ -487,12 +513,67 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
               </select>
             </div>
             {variantFields.length > 1 ? (
-              <Button type="button" variant="ghost" size="sm" onClick={() => removeVariant(index)}>
+              <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveVariant(index)}>
                 {t("remove")}
               </Button>
             ) : null}
           </div>
         ))}
+
+        {multiVariant ? (
+          <div className="space-y-3 rounded-lg border border-border p-4">
+            <div>
+              <h3 className="font-semibold">{t("storefrontImage")}</h3>
+              <p className="mt-1 text-xs text-brand-gray">{t("storefrontImageHint")}</p>
+            </div>
+            {errors.variants?.message ? (
+              <p className="text-sm text-destructive">{String(errors.variants.message)}</p>
+            ) : null}
+            <div className="flex flex-wrap gap-3">
+              {variantFields.map((field, index) => {
+                const variantLabel = form.watch(`variants.${index}.variantLabel`)?.trim();
+                const imageUrl = form.watch(`variants.${index}.variantImageUrl`) ?? "";
+                const isSelected = Boolean(form.watch(`variants.${index}.isStorefrontVariant`));
+                const displayLabel = variantLabel || `${t("variantLabel")} ${index + 1}`;
+                return (
+                  <button
+                    key={`storefront-${field.id}`}
+                    type="button"
+                    onClick={() => selectStorefrontVariant(index)}
+                    className={cn(
+                      "flex min-w-[5rem] flex-col items-center gap-1.5 rounded-lg border p-2 text-center transition-colors",
+                      isSelected
+                        ? "border-brand-blue ring-2 ring-brand-blue/20"
+                        : "border-border hover:border-brand-gray/50",
+                    )}
+                    aria-pressed={isSelected}
+                  >
+                    <span className="relative block h-16 w-16 overflow-hidden rounded-md bg-white">
+                      {imageUrl ? (
+                        <Image
+                          src={imageUrl}
+                          alt=""
+                          fill
+                          className="object-contain p-0.5"
+                          sizes="64px"
+                          unoptimized
+                        />
+                      ) : (
+                        <span className="flex h-full items-center justify-center text-xs text-brand-gray">
+                          —
+                        </span>
+                      )}
+                    </span>
+                    <span className="max-w-[6rem] truncate text-xs font-medium text-brand-dark">
+                      {displayLabel}
+                    </span>
+                    <span className="text-[10px] text-brand-gray">{t("storefrontImageVariant")}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="space-y-4">
@@ -528,13 +609,15 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
               }
               error={errors.images?.[index]?.url?.message}
             />
-            <label className="flex flex-col gap-1">
-              <span className="flex items-center gap-2">
-                <input type="checkbox" {...form.register(`images.${index}.isPrimary`)} />
-                <span className="text-sm">{t("imagePrimary")}</span>
-              </span>
-              <span className="pl-6 text-xs text-brand-gray">{t("imagePrimaryHint")}</span>
-            </label>
+            {!multiVariant ? (
+              <label className="flex flex-col gap-1">
+                <span className="flex items-center gap-2">
+                  <input type="checkbox" {...form.register(`images.${index}.isPrimary`)} />
+                  <span className="text-sm">{t("imagePrimary")}</span>
+                </span>
+                <span className="pl-6 text-xs text-brand-gray">{t("imagePrimaryHint")}</span>
+              </label>
+            ) : null}
             {imageFields.length > 1 ? (
               <Button type="button" variant="ghost" size="sm" onClick={() => removeImage(index)}>
                 {t("remove")}
