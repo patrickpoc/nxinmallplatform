@@ -203,14 +203,21 @@ const fairProductCreateBaseSchema = z.object({
     })
     .optional(),
   categoryId: z.string().min(1),
-  newCategoryName: z.string().min(2).max(100).optional(),
+  newCategoryName: z.preprocess(
+    (val) => {
+      if (typeof val !== "string") return undefined;
+      const trimmed = val.trim();
+      return trimmed === "" ? undefined : trimmed;
+    },
+    z.string().min(2, "Nome da categoria deve ter pelo menos 2 caracteres").max(100).optional(),
+  ),
   status: z.enum(["DRAFT", "ACTIVE", "PAUSED"]).default("DRAFT"),
   variants: z.array(fairProductVariantSchema).min(1).max(5),
   images: z.array(fairProductImageSchema).max(10).default([]),
 });
 
 export const fairProductCreateSchema = fairProductCreateBaseSchema.superRefine((data, ctx) => {
-  if (data.categoryId === "__new__" && !data.newCategoryName?.trim()) {
+  if (data.categoryId === "__new__" && !data.newCategoryName) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "Informe o nome da nova categoria",
