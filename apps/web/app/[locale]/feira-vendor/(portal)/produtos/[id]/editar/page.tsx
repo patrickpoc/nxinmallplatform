@@ -14,7 +14,11 @@ export default async function FairVendorEditProductPage({
   if (!session?.user) redirect(`/${params.locale}/feira-vendor/auth/login`);
 
   const t = await getTranslations("fairVendor");
-  const [categories, product] = await Promise.all([
+  const [booth, categories, product] = await Promise.all([
+    prisma.fairBooth.findUnique({
+      where: { userId: session.user.id },
+      select: { slug: true },
+    }),
     prisma.category.findMany({ select: { id: true, slug: true, name: true }, orderBy: { slug: "asc" } }),
     prisma.product.findFirst({
       where: { id: params.id, sellerId: session.user.id, salesChannel: "FAIR" },
@@ -23,6 +27,7 @@ export default async function FairVendorEditProductPage({
   ]);
 
   if (!product) notFound();
+  if (!booth) redirect(`/${params.locale}/feira-vendor/perfil`);
 
   const name = product.name as { en?: string; pt?: string; zh?: string };
   const description = (product.description as { en?: string; pt?: string; zh?: string } | null) ?? {

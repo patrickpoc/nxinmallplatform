@@ -6,6 +6,9 @@ export const DEFAULT_LOCALE: AppLocale = "en";
 /** Seeded demo seller — admin CRUD attaches products to this user only. */
 export const DEMO_PLATFORM_SELLER_EMAIL = "demo-seller@nxinmall.local" as const;
 
+/** Fair vendor product form: select value to create a booth-local category. */
+export const FAIR_NEW_CATEGORY_ID = "__new__" as const;
+
 /** User roles in the marketplace. */
 export const UserRole = {
   BUYER: "BUYER",

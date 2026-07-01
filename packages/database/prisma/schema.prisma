@@ -270,10 +270,14 @@ model Order {
   fairBooth    FairBooth?   @relation(fields: [fairBoothId], references: [id])
   guestName    String?
   guestEmail   String?
-  guestPhone   String?
-  guestCpf     String?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  guestPhone         String?
+  guestCpf           String?
+  /** Fair checkout delivery address (JSON: street, city, state?, postalCode, country). */
+  shippingAddress    Json?
+  /** When set, fair vendor hid this order from their dashboard listing. */
+  vendorDismissedAt  DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 
   items       OrderItem[]
   documents   OrderDocument[]

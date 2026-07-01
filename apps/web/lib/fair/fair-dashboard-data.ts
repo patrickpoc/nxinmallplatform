@@ -43,7 +43,7 @@ export async function getFairDashboardData(vendorId: string): Promise<FairDashbo
       select: { id: true, status: true, name: true },
     }),
     prisma.order.findMany({
-      where: { sellerId: vendorId, salesChannel: "FAIR" },
+      where: { sellerId: vendorId, salesChannel: "FAIR", vendorDismissedAt: null },
       orderBy: { createdAt: "desc" },
       include: {
         items: { include: { variant: { select: { priceAmount: true, priceCurrency: true } } } },

@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 
 const statusVariant: Record<string, "default" | "secondary" | "success" | "warning" | "destructive" | "outline"> = {
   PENDING: "warning",
+  CONFIRMED: "success",
+  PROCESSING: "secondary",
   OPEN: "secondary",
   ACTIVE: "success",
   DRAFT: "outline",

@@ -160,6 +160,13 @@ export const fairBoothProfileSchema = z.object({
 });
 
 export const fairProductImageSchema = z.object({
+  url: z.union([z.string().url(), z.literal("")]),
+  isPrimary: z.boolean().default(false),
+  kind: z.enum(["GALLERY", "DESCRIPTION"]).default("GALLERY"),
+});
+
+/** Strict image schema for persisted products (non-empty URL). */
+export const fairProductImagePersistSchema = z.object({
   url: z.string().url(),
   isPrimary: z.boolean().default(false),
   kind: z.enum(["GALLERY", "DESCRIPTION"]).default("GALLERY"),
@@ -174,24 +181,42 @@ export const fairProductVariantSchema = z.object({
   attributes: z.record(z.string(), z.unknown()).optional(),
 });
 
-export const fairProductCreateSchema = z.object({
-  name: z.object({
-    en: z.string().optional(),
-    pt: z.string().min(1),
-    zh: z.string().optional(),
-  }),
-  description: z
-    .object({
+export const fairProductCreateSchema = z
+  .object({
+    name: z.object({
       en: z.string().optional(),
-      pt: z.string().optional(),
+      pt: z.string().min(1),
       zh: z.string().optional(),
-    })
-    .optional(),
-  categoryId: z.string().uuid(),
-  status: z.enum(["DRAFT", "ACTIVE", "PAUSED"]).default("DRAFT"),
-  variants: z.array(fairProductVariantSchema).min(1).max(5),
-  images: z.array(fairProductImageSchema).max(10).default([]),
-});
+    }),
+    description: z
+      .object({
+        en: z.string().optional(),
+        pt: z.string().optional(),
+        zh: z.string().optional(),
+      })
+      .optional(),
+    categoryId: z.string().min(1),
+    newCategoryName: z.string().min(2).max(100).optional(),
+    status: z.enum(["DRAFT", "ACTIVE", "PAUSED"]).default("DRAFT"),
+    variants: z.array(fairProductVariantSchema).min(1).max(5),
+    images: z.array(fairProductImageSchema).max(10).default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.categoryId === "__new__" && !data.newCategoryName?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "New category name is required",
+        path: ["newCategoryName"],
+      });
+    }
+  });
+
+/** Server-side schema after empty gallery URLs are stripped. */
+export const fairProductPersistSchema = fairProductCreateSchema
+  .omit({ images: true })
+  .extend({
+    images: z.array(fairProductImagePersistSchema).max(10).default([]),
+  });
 
 export const fairCheckoutSchema = z
   .object({

@@ -10,10 +10,18 @@ export default async function FairVendorNewProductPage({ params }: { params: { l
   if (!session?.user) redirect(`/${params.locale}/feira-vendor/auth/login`);
 
   const t = await getTranslations("fairVendor");
-  const categories = await prisma.category.findMany({
-    select: { id: true, slug: true, name: true },
-    orderBy: { slug: "asc" },
-  });
+  const [booth, categories] = await Promise.all([
+    prisma.fairBooth.findUnique({
+      where: { userId: session.user.id },
+      select: { slug: true },
+    }),
+    prisma.category.findMany({
+      select: { id: true, slug: true, name: true },
+      orderBy: { slug: "asc" },
+    }),
+  ]);
+
+  if (!booth) redirect(`/${params.locale}/feira-vendor/perfil`);
 
   return (
     <div className="space-y-4">

@@ -1,7 +1,8 @@
 "use server";
 
+import { FAIR_NEW_CATEGORY_ID } from "@nxinmall/constants";
 import { prisma, Prisma } from "@nxinmall/database";
-import { fairProductCreateSchema } from "@nxinmall/validators";
+import { fairProductCreateSchema, fairProductPersistSchema } from "@nxinmall/validators";
 import { revalidatePath } from "next/cache";
 import type { Session } from "next-auth";
 import { z } from "zod";
@@ -25,13 +26,104 @@ function normalizeName(name: { en?: string; pt?: string; zh?: string }) {
   };
 }
 
+function slugifyCategoryName(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+}
+
+async function resolveFairCategoryId(
+  sellerId: string,
+  categoryId: string,
+  newCategoryName?: string,
+): Promise<string> {
+  if (categoryId !== FAIR_NEW_CATEGORY_ID) {
+    const exists = await prisma.category.findUnique({ where: { id: categoryId } });
+    if (!exists) throw new Error("Categoria inválida");
+    return categoryId;
+  }
+
+  const trimmed = newCategoryName?.trim();
+  if (!trimmed) throw new Error("Nome da nova categoria é obrigatório");
+
+  const booth = await prisma.fairBooth.findUnique({ where: { userId: sellerId } });
+  if (!booth) throw new Error("Perfil do estande não encontrado");
+
+  const baseSlug = `feira-${booth.slug}-${slugifyCategoryName(trimmed)}`.slice(0, 64);
+  let slug = baseSlug;
+  let suffix = 1;
+  while (await prisma.category.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${suffix}`.slice(0, 64);
+    suffix += 1;
+  }
+
+  const category = await prisma.category.create({
+    data: {
+      slug,
+      name: { pt: trimmed, en: trimmed, zh: trimmed },
+    },
+  });
+  return category.id;
+}
+
+function preparePersistPayload(input: FairProductFormInput, resolvedCategoryId: string) {
+  const images = input.images
+    .filter((img) => img.url.trim())
+    .map((img) => ({
+      url: img.url.trim(),
+      isPrimary: img.isPrimary,
+      kind: img.kind,
+    }));
+  const payload = {
+    ...input,
+    categoryId: resolvedCategoryId,
+    images,
+  };
+
+  const parsed = fairProductPersistSchema.safeParse(payload);
+  if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const messages = Object.entries(fieldErrors)
+      .flatMap(([key, msgs]) => (msgs ?? []).map((m) => `${key}: ${m}`))
+      .join("; ");
+    throw new Error(messages || "Validation failed");
+  }
+  return parsed.data;
+}
+
+function revalidateFairProductPaths(boothSlug?: string) {
+  revalidatePath("/feira-vendor/produtos");
+  if (boothSlug) {
+    revalidatePath(`/feira/${boothSlug}`);
+  }
+}
+
 export async function createFairProduct(input: FairProductFormInput) {
   const sellerId = assertFairVendor(await auth());
   const parsed = formSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.flatten().formErrors.join("; ") || "Validation failed");
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const messages = Object.entries(fieldErrors)
+      .flatMap(([key, msgs]) => (msgs ?? []).map((m) => `${key}: ${m}`))
+      .join("; ");
+    throw new Error(messages || "Validation failed");
   }
-  const d = parsed.data;
+
+  const resolvedCategoryId = await resolveFairCategoryId(
+    sellerId,
+    parsed.data.categoryId,
+    parsed.data.newCategoryName,
+  );
+  const d = preparePersistPayload(parsed.data, resolvedCategoryId);
+
+  const booth = await prisma.fairBooth.findUnique({
+    where: { userId: sellerId },
+    select: { slug: true },
+  });
 
   await prisma.product.create({
     data: {
@@ -64,21 +156,36 @@ export async function createFairProduct(input: FairProductFormInput) {
     },
   });
 
-  revalidatePath("/feira-vendor/produtos");
+  revalidateFairProductPaths(booth?.slug);
 }
 
 export async function updateFairProduct(productId: string, input: FairProductFormInput) {
   const sellerId = assertFairVendor(await auth());
   const parsed = formSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.flatten().formErrors.join("; ") || "Validation failed");
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const messages = Object.entries(fieldErrors)
+      .flatMap(([key, msgs]) => (msgs ?? []).map((m) => `${key}: ${m}`))
+      .join("; ");
+    throw new Error(messages || "Validation failed");
   }
-  const d = parsed.data;
 
   const existing = await prisma.product.findFirst({
     where: { id: productId, sellerId, salesChannel: "FAIR" },
   });
   if (!existing) throw new Error("Product not found");
+
+  const resolvedCategoryId = await resolveFairCategoryId(
+    sellerId,
+    parsed.data.categoryId,
+    parsed.data.newCategoryName,
+  );
+  const d = preparePersistPayload(parsed.data, resolvedCategoryId);
+
+  const booth = await prisma.fairBooth.findUnique({
+    where: { userId: sellerId },
+    select: { slug: true },
+  });
 
   await prisma.$transaction(async (tx) => {
     await tx.product.update({
@@ -118,7 +225,7 @@ export async function updateFairProduct(productId: string, input: FairProductFor
     }
   });
 
-  revalidatePath("/feira-vendor/produtos");
+  revalidateFairProductPaths(booth?.slug);
   revalidatePath(`/feira-vendor/produtos/${productId}/editar`);
 }
 

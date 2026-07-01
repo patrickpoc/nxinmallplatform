@@ -2,7 +2,13 @@
 
 import { prisma, Prisma } from "@nxinmall/database";
 import { fairCheckoutSchema } from "@nxinmall/validators";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import {
+  buildFairOrderHandoffSummary,
+  fairProductNameFromJson,
+  type FairShippingAddress,
+} from "@/lib/fair/fair-order-handoff-summary";
 
 export type CreateFairOrderResult = {
   orderId: string;
@@ -10,6 +16,74 @@ export type CreateFairOrderResult = {
   pixBeneficiaryName: string | null;
   totalBrl: number;
 };
+
+const fairOrderInclude = {
+  items: {
+    include: {
+      variant: {
+        include: { product: { select: { name: true } } },
+      },
+    },
+  },
+  payments: { orderBy: { createdAt: "asc" as const }, take: 1 },
+  fairBooth: { select: { companyName: true } },
+} as const;
+
+async function assertFairVendorOwnsOrder(orderId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  if (session.user.role !== "FAIR_VENDOR") throw new Error("Forbidden");
+
+  const order = await prisma.order.findFirst({
+    where: {
+      id: orderId,
+      sellerId: session.user.id,
+      salesChannel: "FAIR",
+    },
+    include: fairOrderInclude,
+  });
+  if (!order) throw new Error("Order not found");
+  return order;
+}
+
+function orderHandoffFromRecord(
+  order: Awaited<ReturnType<typeof assertFairVendorOwnsOrder>>,
+  locale?: string,
+) {
+  const items = order.items.map((item) => {
+    const unitPriceBrl = Number(item.variant.priceAmount) || Number(item.unitPriceUsd);
+    const quantity = Number(item.qty);
+    return {
+      productName: fairProductNameFromJson(item.variant.product.name),
+      sku: item.variant.sku,
+      quantity,
+      unitPriceBrl,
+      lineTotalBrl: Math.round(unitPriceBrl * quantity * 100) / 100,
+    };
+  });
+  const totalBrl = Math.round(items.reduce((s, i) => s + i.lineTotalBrl, 0) * 100) / 100;
+  const paymentMeta = order.payments[0]?.metadata as { guestDocumentType?: string } | null;
+
+  return buildFairOrderHandoffSummary({
+    orderId: order.id,
+    status: order.status,
+    createdAt: order.createdAt,
+    boothName: order.fairBooth?.companyName ?? "—",
+    guestName: order.guestName,
+    guestEmail: order.guestEmail,
+    guestPhone: order.guestPhone,
+    guestCpf: order.guestCpf,
+    guestDocumentType: paymentMeta?.guestDocumentType ?? null,
+    shippingAddress: order.shippingAddress as FairShippingAddress | null,
+    items,
+    totalBrl,
+    locale,
+  });
+}
+
+function revalidateFairVendor() {
+  revalidatePath("/feira-vendor");
+}
 
 export async function createFairOrder(input: unknown): Promise<CreateFairOrderResult> {
   const parsed = fairCheckoutSchema.safeParse(input);
@@ -67,6 +141,13 @@ export async function createFairOrder(input: unknown): Promise<CreateFairOrderRe
         guestEmail: d.guestEmail,
         guestPhone: d.guestPhone,
         guestCpf: d.guestCpf,
+        shippingAddress: {
+          street: d.street,
+          city: d.city,
+          state: d.state ?? null,
+          postalCode: d.postalCode,
+          country: d.country,
+        },
         incoterm: "seller",
         items: { create: lineData },
         payments: {
@@ -101,4 +182,56 @@ export async function createFairOrder(input: unknown): Promise<CreateFairOrderRe
     pixBeneficiaryName: booth.pixBeneficiaryName,
     totalBrl: Math.round(totalBrl * 100) / 100,
   };
+}
+
+export async function confirmFairOrder(orderId: string): Promise<{ summary: string }> {
+  const order = await assertFairVendorOwnsOrder(orderId);
+  if (order.status !== "PENDING") {
+    throw new Error("Only pending orders can be confirmed");
+  }
+
+  const updated = await prisma.order.update({
+    where: { id: orderId },
+    data: { status: "CONFIRMED" },
+    include: fairOrderInclude,
+  });
+
+  revalidateFairVendor();
+  return { summary: orderHandoffFromRecord(updated) };
+}
+
+export async function cancelFairOrder(orderId: string): Promise<void> {
+  const order = await assertFairVendorOwnsOrder(orderId);
+  if (order.status !== "PENDING" && order.status !== "CONFIRMED") {
+    throw new Error("Only pending or confirmed orders can be cancelled");
+  }
+
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { status: "CANCELLED" },
+  });
+
+  revalidateFairVendor();
+}
+
+export async function dismissFairOrder(orderId: string): Promise<void> {
+  const order = await assertFairVendorOwnsOrder(orderId);
+  if (order.status !== "CANCELLED") {
+    throw new Error("Only cancelled orders can be removed from the listing");
+  }
+
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { vendorDismissedAt: new Date() },
+  });
+
+  revalidateFairVendor();
+}
+
+export async function getFairOrderHandoffSummary(
+  orderId: string,
+  locale?: string,
+): Promise<string> {
+  const order = await assertFairVendorOwnsOrder(orderId);
+  return orderHandoffFromRecord(order, locale);
 }
