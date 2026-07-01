@@ -160,7 +160,7 @@ export const fairBoothProfileSchema = z.object({
 });
 
 export const fairProductImageSchema = z.object({
-  url: z.union([z.string().url(), z.literal("")]),
+  url: z.union([z.string().url("URL de imagem inválida"), z.literal("")]),
   isPrimary: z.boolean().default(false),
   kind: z.enum(["GALLERY", "DESCRIPTION"]).default("GALLERY"),
 });
@@ -172,19 +172,27 @@ export const fairProductImagePersistSchema = z.object({
   kind: z.enum(["GALLERY", "DESCRIPTION"]).default("GALLERY"),
 });
 
+const fairPriceAmountSchema = z.preprocess(
+  (val) => (typeof val === "string" ? val.trim().replace(",", ".") : val),
+  z.string().regex(/^\d+(\.\d{1,2})?$/, "Use o formato 0.00 (ex.: 10.50)"),
+);
+
 export const fairProductVariantSchema = z.object({
-  sku: z.string().min(1).max(64),
-  priceAmount: z.string().regex(/^\d+(\.\d{1,2})?$/),
-  minOrderQty: z.number().int().positive(),
+  sku: z.string().min(1, "SKU é obrigatório").max(64),
+  priceAmount: fairPriceAmountSchema,
+  minOrderQty: z.number().int().positive().default(1),
   unit: z.enum(["KG", "TON", "UNIT", "BOX", "PALLET"]),
-  stockQty: z.number().int().nonnegative(),
+  stockQty: z.preprocess(
+    (val) => (typeof val === "number" && Number.isNaN(val) ? 0 : val),
+    z.number().int().nonnegative(),
+  ),
   attributes: z.record(z.string(), z.unknown()).optional(),
 });
 
 const fairProductCreateBaseSchema = z.object({
   name: z.object({
     en: z.string().optional(),
-    pt: z.string().min(1),
+    pt: z.string().min(1, "Nome do produto é obrigatório"),
     zh: z.string().optional(),
   }),
   description: z
@@ -205,7 +213,7 @@ export const fairProductCreateSchema = fairProductCreateBaseSchema.superRefine((
   if (data.categoryId === "__new__" && !data.newCategoryName?.trim()) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "New category name is required",
+      message: "Informe o nome da nova categoria",
       path: ["newCategoryName"],
     });
   }

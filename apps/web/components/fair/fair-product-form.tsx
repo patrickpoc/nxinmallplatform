@@ -6,7 +6,7 @@ import { fairProductCreateSchema } from "@nxinmall/validators";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, type FieldErrors } from "react-hook-form";
 import { z } from "zod";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import {
   updateFairProduct,
   type FairProductFormInput,
 } from "@/lib/actions/fair-vendor/products";
+import { cn } from "@/lib/utils";
 
 const formSchema = fairProductCreateSchema;
 
@@ -41,18 +42,42 @@ function labelName(name: unknown): string {
   return "";
 }
 
-function fieldError(errors: Record<string, unknown> | undefined, path: string): string | undefined {
-  if (!errors) return undefined;
-  const parts = path.split(".");
-  let cur: unknown = errors;
-  for (const p of parts) {
-    if (!cur || typeof cur !== "object") return undefined;
-    cur = (cur as Record<string, unknown>)[p];
+function collectFormErrors(errors: FieldErrors<FormValues> | undefined): string[] {
+  if (!errors) return [];
+  const messages: string[] = [];
+
+  function walk(node: unknown) {
+    if (!node || typeof node !== "object") return;
+    if ("message" in node && typeof (node as { message?: unknown }).message === "string") {
+      const message = (node as { message: string }).message;
+      if (!messages.includes(message)) messages.push(message);
+      return;
+    }
+    if (Array.isArray(node)) {
+      node.forEach((item) => walk(item));
+      return;
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (key === "ref") continue;
+      walk(value);
+    }
   }
-  if (cur && typeof cur === "object" && "message" in cur) {
-    return String((cur as { message?: unknown }).message);
+
+  walk(errors);
+  return messages;
+}
+
+function invalidClass(hasError: boolean) {
+  return hasError ? "border-destructive focus-visible:ring-destructive/30" : "";
+}
+
+function isValidHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
   }
-  return undefined;
 }
 
 function galleryDefaults(defaultValues?: Partial<FormValues>) {
@@ -70,6 +95,8 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
   const t = useTranslations("fairVendor");
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [validationSummary, setValidationSummary] = useState<string[]>([]);
+  const [descriptionImageError, setDescriptionImageError] = useState<string | undefined>();
   const [descriptionImageUrl, setDescriptionImageUrl] = useState(() =>
     descriptionImageDefault(defaultValues),
   );
@@ -103,11 +130,23 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
     name: "images",
   });
 
-  function onInvalid() {
-    toast.error(t("productValidationError"));
+  function onInvalid(fieldErrors: FieldErrors<FormValues>) {
+    const messages = collectFormErrors(fieldErrors);
+    setValidationSummary(messages);
+    toast.error(messages[0] ?? t("productValidationError"));
   }
 
   async function onSubmit(values: FormValues) {
+    setValidationSummary([]);
+    setDescriptionImageError(undefined);
+
+    if (descriptionImageUrl.trim() && !isValidHttpUrl(descriptionImageUrl.trim())) {
+      const message = t("invalidImageUrl");
+      setDescriptionImageError(message);
+      setValidationSummary([message]);
+      toast.error(message);
+      return;
+    }
     const galleryImages = values.images
       .filter((img) => img.url.trim())
       .map((img) => ({ ...img, kind: "GALLERY" as const }));
@@ -132,8 +171,10 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
       router.refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : t("productSaveError");
+      const parts = message.split("; ").map((part) => part.trim()).filter(Boolean);
+      setValidationSummary(parts.length > 0 ? parts : [message]);
       form.setError("root", { message });
-      toast.error(message);
+      toast.error(parts[0] ?? message);
     } finally {
       setSubmitting(false);
     }
@@ -146,7 +187,18 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
       className="w-full max-w-2xl space-y-6"
       onSubmit={form.handleSubmit(onSubmit, onInvalid)}
     >
-      {errors.root?.message ? (
+      {validationSummary.length > 0 ? (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <p className="font-medium">{t("productValidationError")}</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            {validationSummary.map((message) => (
+              <li key={message}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {errors.root?.message && validationSummary.length === 0 ? (
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {errors.root.message}
         </div>
@@ -154,11 +206,12 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
 
       <div className="space-y-2">
         <Label>{t("productNamePt")}</Label>
-        <Input {...form.register("name.pt")} />
-        {fieldError(errors.name as Record<string, unknown>, "pt") ? (
-          <p className="text-sm text-destructive">
-            {fieldError(errors.name as Record<string, unknown>, "pt")}
-          </p>
+        <Input
+          className={invalidClass(Boolean(errors.name?.pt?.message))}
+          {...form.register("name.pt")}
+        />
+        {errors.name?.pt?.message ? (
+          <p className="text-sm text-destructive">{errors.name.pt.message}</p>
         ) : null}
       </div>
 
@@ -172,7 +225,11 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
           hint={t("descriptionImageHint")}
           purpose="product"
           value={descriptionImageUrl}
-          onChange={setDescriptionImageUrl}
+          onChange={(url) => {
+            setDescriptionImageUrl(url);
+            setDescriptionImageError(undefined);
+          }}
+          error={descriptionImageError}
         />
       </div>
 
@@ -180,7 +237,10 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
         <div className="space-y-2 sm:col-span-2">
           <Label>{t("category")}</Label>
           <select
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className={cn(
+              "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+              invalidClass(Boolean(errors.categoryId?.message)),
+            )}
             {...form.register("categoryId")}
           >
             <option value={FAIR_NEW_CATEGORY_ID}>{t("newCategory")}</option>
@@ -194,6 +254,7 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
             <div className="mt-2 space-y-1">
               <Input
                 placeholder={t("newCategoryPlaceholder")}
+                className={invalidClass(Boolean(errors.newCategoryName?.message))}
                 {...form.register("newCategoryName")}
               />
               {errors.newCategoryName?.message ? (
@@ -230,28 +291,56 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
           </Button>
         </div>
         {variantFields.map((field, index) => (
-          <div key={field.id} className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-2">
+          <div
+            key={field.id}
+            className={cn(
+              "grid gap-3 rounded-lg border p-4 sm:grid-cols-2",
+              errors.variants?.[index] ? "border-destructive/50 bg-destructive/5" : "border-border",
+            )}
+          >
+            <input
+              type="hidden"
+              {...form.register(`variants.${index}.minOrderQty`, { valueAsNumber: true })}
+            />
             <div className="space-y-2">
               <Label>{t("sku")}</Label>
-              <Input {...form.register(`variants.${index}.sku`)} />
-              {fieldError(errors.variants as Record<string, unknown>, `${index}.sku`) ? (
-                <p className="text-sm text-destructive">
-                  {fieldError(errors.variants as Record<string, unknown>, `${index}.sku`)}
-                </p>
+              <Input
+                className={invalidClass(Boolean(errors.variants?.[index]?.sku?.message))}
+                {...form.register(`variants.${index}.sku`)}
+              />
+              {errors.variants?.[index]?.sku?.message ? (
+                <p className="text-sm text-destructive">{errors.variants[index]?.sku?.message}</p>
               ) : null}
             </div>
             <div className="space-y-2">
               <Label>{t("priceBrl")}</Label>
-              <Input {...form.register(`variants.${index}.priceAmount`)} />
-              {fieldError(errors.variants as Record<string, unknown>, `${index}.priceAmount`) ? (
+              <Input
+                className={invalidClass(Boolean(errors.variants?.[index]?.priceAmount?.message))}
+                {...form.register(`variants.${index}.priceAmount`)}
+              />
+              {errors.variants?.[index]?.priceAmount?.message ? (
                 <p className="text-sm text-destructive">
-                  {fieldError(errors.variants as Record<string, unknown>, `${index}.priceAmount`)}
+                  {errors.variants[index]?.priceAmount?.message}
                 </p>
               ) : null}
             </div>
             <div className="space-y-2">
               <Label>{t("stockQty")}</Label>
-              <Input type="number" {...form.register(`variants.${index}.stockQty`, { valueAsNumber: true })} />
+              <Input
+                type="number"
+                className={invalidClass(Boolean(errors.variants?.[index]?.stockQty?.message))}
+                {...form.register(`variants.${index}.stockQty`, {
+                  valueAsNumber: true,
+                  setValueAs: (value) => {
+                    if (value === "" || value === null || value === undefined) return 0;
+                    const parsed = Number(value);
+                    return Number.isNaN(parsed) ? 0 : parsed;
+                  },
+                })}
+              />
+              {errors.variants?.[index]?.stockQty?.message ? (
+                <p className="text-sm text-destructive">{errors.variants[index]?.stockQty?.message}</p>
+              ) : null}
             </div>
             <div className="space-y-2">
               <Label>{t("unit")}</Label>
@@ -287,7 +376,14 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
           </Button>
         </div>
         {imageFields.map((field, index) => (
-          <div key={field.id} className="space-y-3 rounded-lg border border-border p-4">
+          <div
+            key={field.id}
+            className={cn(
+              "space-y-3 rounded-lg border p-4",
+              errors.images?.[index]?.url?.message ? "border-destructive/50 bg-destructive/5" : "border-border",
+            )}
+          >
+            <input type="hidden" {...form.register(`images.${index}.kind`)} />
             <ImageUrlOrUploadField
               label={t("imageUrl")}
               purpose="product"
@@ -295,6 +391,7 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
               onChange={(url) =>
                 form.setValue(`images.${index}.url`, url, { shouldValidate: true, shouldDirty: true })
               }
+              error={errors.images?.[index]?.url?.message}
             />
             <label className="flex items-center gap-2">
               <input type="checkbox" {...form.register(`images.${index}.isPrimary`)} />

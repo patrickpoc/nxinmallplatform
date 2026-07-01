@@ -994,6 +994,7 @@
     "productCreated": "Produto criado",
     "productSaveError": "Erro ao salvar produto",
     "productValidationError": "Revise os campos destacados antes de salvar",
+    "invalidImageUrl": "URL de imagem inválida. Use https://...",
     "newCategory": "+ Nova categoria",
     "newCategoryPlaceholder": "Nome da nova categoria",
     "newCategoryRequired": "Informe o nome da nova categoria",

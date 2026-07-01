@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 type Props = {
   label: string;
@@ -15,9 +16,10 @@ type Props = {
   value: string;
   onChange: (url: string) => void;
   purpose: "pix" | "product" | "logo" | "banner";
+  error?: string;
 };
 
-export function ImageUrlOrUploadField({ label, hint, value, onChange, purpose }: Props) {
+export function ImageUrlOrUploadField({ label, hint, value, onChange, purpose, error }: Props) {
   const t = useTranslations("fairVendor");
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -52,7 +54,7 @@ export function ImageUrlOrUploadField({ label, hint, value, onChange, purpose }:
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="https://..."
-          className="min-w-0 flex-1"
+          className={cn("min-w-0 flex-1", error && "border-destructive focus-visible:ring-destructive/30")}
         />
         <input
           ref={inputRef}
@@ -76,6 +78,7 @@ export function ImageUrlOrUploadField({ label, hint, value, onChange, purpose }:
         </Button>
       </div>
       <p className="text-xs text-brand-gray">{t("orPasteUrl")}</p>
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {value ? (
         <div className="relative mx-auto mt-2 max-w-xs aspect-square overflow-hidden rounded-lg border border-border bg-muted">
           <Image src={value} alt="" fill className="object-contain p-2" unoptimized />

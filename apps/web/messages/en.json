@@ -1014,6 +1014,7 @@
     "productCreated": "Product created",
     "productSaveError": "Failed to save product",
     "productValidationError": "Fix the highlighted fields before saving",
+    "invalidImageUrl": "Invalid image URL. Use https://...",
     "newCategory": "+ New category",
     "newCategoryPlaceholder": "New category name",
     "newCategoryRequired": "Enter a name for the new category",

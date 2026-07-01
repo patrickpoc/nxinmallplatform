@@ -994,6 +994,7 @@
     "productCreated": "产品已创建",
     "productSaveError": "保存产品失败",
     "productValidationError": "保存前请修正标出的字段",
+    "invalidImageUrl": "图片链接无效，请使用 https://...",
     "newCategory": "+ 新分类",
     "newCategoryPlaceholder": "新分类名称",
     "newCategoryRequired": "请输入新分类名称",
