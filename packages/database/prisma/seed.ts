@@ -477,6 +477,116 @@ async function main() {
   }
   console.log(`[seed] Upserted ${sellerIds.length} sellers with companies.`);
 
+  // Demo fair booth: demo-fair@nxinmall.local / demo — painel /feira-vendor, loja /feira/demo-feira
+  const fairVendorEmail = "demo-fair@nxinmall.local";
+  const fairVendorHash = await bcrypt.hash("demo", 10);
+  const fairVendor = await prisma.user.upsert({
+    where: { email: fairVendorEmail },
+    create: {
+      email: fairVendorEmail,
+      name: "Feira Demo",
+      passwordHash: fairVendorHash,
+      role: "FAIR_VENDOR",
+      status: "ACTIVE",
+      emailVerified: new Date(),
+    },
+    update: {
+      passwordHash: fairVendorHash,
+      role: "FAIR_VENDOR",
+      status: "ACTIVE",
+      emailVerified: new Date(),
+      name: "Feira Demo",
+    },
+  });
+
+  await prisma.fairBooth.upsert({
+    where: { userId: fairVendor.id },
+    create: {
+      userId: fairVendor.id,
+      slug: "demo-feira",
+      companyName: "Feira Demo",
+      country: "BR",
+      type: "supplier",
+      city: "São Paulo",
+      state: "SP",
+      phone: "+55 11 99999-0000",
+      pixKey: fairVendorEmail,
+      pixKeyType: "EMAIL",
+      pixBeneficiaryName: "Feira Demo Ltda",
+      isActive: true,
+    },
+    update: {
+      slug: "demo-feira",
+      companyName: "Feira Demo",
+      country: "BR",
+      type: "supplier",
+      city: "São Paulo",
+      state: "SP",
+      phone: "+55 11 99999-0000",
+      pixKey: fairVendorEmail,
+      pixKeyType: "EMAIL",
+      pixBeneficiaryName: "Feira Demo Ltda",
+      isActive: true,
+    },
+  });
+  console.log("[seed] Upserted fair vendor demo-fair@nxinmall.local (booth slug: demo-feira).");
+
+  const fairProductCount = await prisma.product.count({
+    where: { sellerId: fairVendor.id, salesChannel: "FAIR" },
+  });
+  if (fairProductCount === 0) {
+    const catFertilizers = await prisma.category.findFirst({ where: { slug: "fertilizers" } });
+    const catCorn = await prisma.category.findFirst({ where: { slug: "corn-seeds" } });
+    const fairProducts = [
+      catFertilizers && {
+        categoryId: catFertilizers.id,
+        name: { en: "NPK fertilizer 20-05-20 (fair demo)", pt: "Fertilizante NPK 20-05-20 (demo feira)", zh: "NPK肥料（展会演示）" },
+        sku: "FAIR-DEMO-NPK",
+        price: "189.90",
+      },
+      catCorn && {
+        categoryId: catCorn.id,
+        name: { en: "Hybrid corn seeds 2kg (fair demo)", pt: "Sementes de milho híbrido 2kg (demo feira)", zh: "杂交玉米种子2kg（展会演示）" },
+        sku: "FAIR-DEMO-CORN",
+        price: "79.50",
+      },
+    ].filter(Boolean) as { categoryId: string; name: Record<string, string>; sku: string; price: string }[];
+
+    for (const fp of fairProducts) {
+      await prisma.product.create({
+        data: {
+          sellerId: fairVendor.id,
+          categoryId: fp.categoryId,
+          name: fp.name,
+          description: {
+            en: "Demo product for fair booth checkout flow.",
+            pt: "Produto de demonstração para testar a feira e o checkout.",
+            zh: "用于测试展会结账流程的演示商品。",
+          },
+          status: "ACTIVE",
+          salesChannel: "FAIR",
+          images: {
+            create: [{ url: `https://picsum.photos/seed/${fp.sku}/800/800`, isPrimary: true, sortOrder: 0 }],
+          },
+          variants: {
+            create: [{
+              sku: fp.sku,
+              priceUsd: new Prisma.Decimal(fp.price),
+              priceAmount: new Prisma.Decimal(fp.price),
+              priceCurrency: "BRL",
+              minOrderQty: 1,
+              unit: "UNIT",
+              stockQty: 100,
+            }],
+          },
+        },
+      });
+    }
+    if (fairProducts.length > 0) {
+      console.log(`[seed] Created ${fairProducts.length} FAIR demo product(s) for demo-feira.`);
+    }
+  }
+
   const demoProductCount = await prisma.product.count({ where: { sellerId: { in: sellerIds } } });
   if (demoProductCount === 0) {
     const catSeeds = await prisma.category.findFirst({ where: { slug: "corn-seeds" } });
@@ -574,8 +684,11 @@ async function main() {
     }
   }
 
-  // Reassign all existing products to random sellers
-  const allProducts = await prisma.product.findMany({ select: { id: true } });
+  // Reassign marketplace products to random sellers (keep FAIR booth listings untouched)
+  const allProducts = await prisma.product.findMany({
+    where: { salesChannel: "MARKETPLACE" },
+    select: { id: true },
+  });
   for (const product of allProducts) {
     const randomSellerId = sellerIds[randomInt(0, sellerIds.length - 1)]!;
     await prisma.product.update({

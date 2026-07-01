@@ -112,3 +112,110 @@ export const rfqResponseSchema = z.object({
 export const newsletterSchema = z.object({
   email: z.string().email(),
 });
+
+export const fairVendorRegisterSchema = z
+  .object({
+    email: z.string().email(),
+    password: z.string().min(8).max(128),
+    confirmPassword: z.string(),
+    companyName: z.string().min(2).max(200),
+    slug: z
+      .string()
+      .min(3)
+      .max(64)
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase alphanumeric with hyphens"),
+    acceptTerms: z.literal(true),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: "Passwords must match",
+    path: ["confirmPassword"],
+  });
+
+export const fairBoothProfileSchema = z.object({
+  companyName: z.string().min(2).max(200),
+  legalName: z.string().max(300).optional(),
+  cnpj: z.string().max(20).optional(),
+  country: z.string().length(2),
+  type: z.string().min(1).max(100),
+  street: z.string().max(300).optional(),
+  city: z.string().max(120).optional(),
+  state: z.string().max(120).optional(),
+  postalCode: z.string().max(32).optional(),
+  addressCountry: z.string().length(2).optional(),
+  phone: z.string().max(40).optional(),
+  whatsappNumber: z.string().max(40).optional(),
+  quotationUrl: z.string().url().optional().or(z.literal("")),
+  pixKey: z.string().max(200).optional(),
+  pixKeyType: z.enum(["CPF", "CNPJ", "EMAIL", "PHONE", "RANDOM"]).optional(),
+  pixBeneficiaryName: z.string().max(200).optional(),
+  pixImageUrl: z.string().url().optional().or(z.literal("")),
+  logoUrl: z.string().url().optional().or(z.literal("")),
+  bannerUrl: z.string().url().optional().or(z.literal("")),
+  slug: z
+    .string()
+    .min(3)
+    .max(64)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  isActive: z.boolean(),
+});
+
+export const fairProductImageSchema = z.object({
+  url: z.string().url(),
+  isPrimary: z.boolean().default(false),
+  kind: z.enum(["GALLERY", "DESCRIPTION"]).default("GALLERY"),
+});
+
+export const fairProductVariantSchema = z.object({
+  sku: z.string().min(1).max(64),
+  priceAmount: z.string().regex(/^\d+(\.\d{1,2})?$/),
+  minOrderQty: z.number().int().positive(),
+  unit: z.enum(["KG", "TON", "UNIT", "BOX", "PALLET"]),
+  stockQty: z.number().int().nonnegative(),
+  attributes: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const fairProductCreateSchema = z.object({
+  name: z.object({
+    en: z.string().optional(),
+    pt: z.string().min(1),
+    zh: z.string().optional(),
+  }),
+  description: z
+    .object({
+      en: z.string().optional(),
+      pt: z.string().optional(),
+      zh: z.string().optional(),
+    })
+    .optional(),
+  categoryId: z.string().uuid(),
+  status: z.enum(["DRAFT", "ACTIVE", "PAUSED"]).default("DRAFT"),
+  variants: z.array(fairProductVariantSchema).min(1).max(5),
+  images: z.array(fairProductImageSchema).max(10).default([]),
+});
+
+export const fairCheckoutSchema = z
+  .object({
+    boothSlug: z.string().min(1),
+    guestName: z.string().min(2).max(200),
+    guestEmail: z.string().email(),
+    guestPhone: z.string().min(8).max(40),
+    guestDocumentType: z.enum(["CPF", "CNPJ"]).default("CPF"),
+    guestCpf: z.string().min(11).max(14),
+    street: z.string().min(1).max(300),
+    city: z.string().min(1).max(120),
+    state: z.string().max(120).optional(),
+    postalCode: z.string().min(8).max(9),
+    country: z.string().length(2).default("BR"),
+    items: z
+      .array(
+        z.object({
+          variantId: z.string().min(1),
+          quantity: z.number().int().positive(),
+        }),
+      )
+      .min(1),
+  })
+  .refine(
+    (d) => (d.guestDocumentType === "CPF" ? d.guestCpf.length === 11 : d.guestCpf.length === 14),
+    { message: "Invalid tax document", path: ["guestCpf"] },
+  );

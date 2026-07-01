@@ -44,6 +44,7 @@ model User {
   buyerOrders   Order[]                @relation("OrderBuyer")
   sellerOrders  Order[]                @relation("OrderSeller")
   products      Product[]              @relation("ProductSeller")
+  fairBooth     FairBooth?
 }
 
 model Account {
@@ -148,6 +149,7 @@ model Product {
   name        Json
   description Json?
   status      ProductStatus @default(DRAFT)
+  salesChannel SalesChannel @default(MARKETPLACE)
   /** Home carousel: sponsored listings (paid placement). */
   isSponsored       Boolean   @default(false)
   sponsoredSortOrder Int?
@@ -196,12 +198,13 @@ model ProductVariant {
 }
 
 model ProductImage {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
   url       String
-  isPrimary Boolean  @default(false)
-  sortOrder Int      @default(0)
+  isPrimary Boolean          @default(false)
+  sortOrder Int              @default(0)
+  kind      ProductImageKind @default(GALLERY)
 }
 
 model ProductDoc {
@@ -253,17 +256,24 @@ model RFQResponse {
 }
 
 model Order {
-  id        String      @id @default(cuid())
-  buyerId   String
-  buyer     User        @relation("OrderBuyer", fields: [buyerId], references: [id])
-  sellerId  String
-  seller    User        @relation("OrderSeller", fields: [sellerId], references: [id])
-  status    OrderStatus @default(PENDING)
-  rfqId     String?
-  rfq       RFQ?        @relation(fields: [rfqId], references: [id])
-  incoterm  String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id           String       @id @default(cuid())
+  buyerId      String?
+  buyer        User?        @relation("OrderBuyer", fields: [buyerId], references: [id])
+  sellerId     String
+  seller       User         @relation("OrderSeller", fields: [sellerId], references: [id])
+  status       OrderStatus  @default(PENDING)
+  rfqId        String?
+  rfq          RFQ?         @relation(fields: [rfqId], references: [id])
+  incoterm     String?
+  salesChannel SalesChannel @default(MARKETPLACE)
+  fairBoothId  String?
+  fairBooth    FairBooth?   @relation(fields: [fairBoothId], references: [id])
+  guestName    String?
+  guestEmail   String?
+  guestPhone   String?
+  guestCpf     String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   items       OrderItem[]
   documents   OrderDocument[]
@@ -272,6 +282,37 @@ model Order {
   threads     MessageThread[]
   reviews     Review[]
   disputes    Dispute[]
+}
+
+model FairBooth {
+  id                  String      @id @default(cuid())
+  userId              String      @unique
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug                String      @unique
+  companyName         String
+  legalName           String?
+  cnpj                String?
+  country             String
+  type                String
+  street              String?
+  city                String?
+  state               String?
+  postalCode          String?
+  addressCountry      String?
+  phone               String?
+  whatsappNumber      String?
+  quotationUrl        String?
+  pixKey              String?
+  pixKeyType          PixKeyType?
+  pixBeneficiaryName  String?
+  pixImageUrl         String?
+  logoUrl             String?
+  bannerUrl           String?
+  isActive            Boolean     @default(false)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  orders Order[]
 }
 
 model OrderItem {
@@ -451,6 +492,25 @@ enum UserRole {
   BUYER
   SELLER
   ADMIN
+  FAIR_VENDOR
+}
+
+enum SalesChannel {
+  MARKETPLACE
+  FAIR
+}
+
+enum ProductImageKind {
+  GALLERY
+  DESCRIPTION
+}
+
+enum PixKeyType {
+  CPF
+  CNPJ
+  EMAIL
+  PHONE
+  RANDOM
 }
 
 enum UserStatus {
