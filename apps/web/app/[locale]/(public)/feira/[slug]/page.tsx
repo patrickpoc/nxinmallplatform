@@ -6,7 +6,7 @@ import { FairBoothBanner } from "@/components/fair/fair-booth-banner";
 import { FairFiltersBar } from "@/components/fair/fair-filters-bar";
 import { productNameContainsWhere } from "@/lib/product-listing";
 import { getFairBoothBySlug } from "@/lib/fair/fair-booth";
-import { getFairStorefrontImageUrl } from "@/lib/fair/fair-variant-display";
+import { getFairStorefrontImageUrl, getFairVariantImageUrl, getFairVariantLabel } from "@/lib/fair/fair-variant-display";
 import type { CartPriceCurrency } from "@/lib/cart/types";
 
 export const dynamic = "force-dynamic";
@@ -109,8 +109,20 @@ export default async function FairBoothPage({
           {products.map((p) => {
             const nameObj = p.name as { pt?: string; en?: string };
             const name = nameObj?.pt ?? nameObj?.en ?? "—";
-            const v = p.variants.slice().sort((a, b) => Number(a.priceAmount) - Number(b.priceAmount))[0];
+            const sortedVariants = p.variants.slice().sort((a, b) => Number(a.priceAmount) - Number(b.priceAmount));
+            const v = sortedVariants[0];
             const storefrontImageUrl = getFairStorefrontImageUrl(p.variants, p.images);
+            const cardVariants = sortedVariants.map((variant) => ({
+              id: variant.id,
+              sku: variant.sku,
+              label: getFairVariantLabel(variant),
+              imageUrl: getFairVariantImageUrl(variant, storefrontImageUrl),
+              priceAmount: Number(variant.priceAmount),
+              priceCurrency: (variant.priceCurrency as CartPriceCurrency) ?? "BRL",
+              unit: variant.unit,
+              stockQty: variant.stockQty,
+              minOrderQty: variant.minOrderQty,
+            }));
             return (
               <FairProductCard
                 key={p.id}
@@ -122,8 +134,7 @@ export default async function FairBoothPage({
                   priceAmount: v ? Number(v.priceAmount) : 0,
                   priceCurrency: (v?.priceCurrency as CartPriceCurrency) ?? "BRL",
                   variantId: v?.id,
-                  minOrderQty: v?.minOrderQty ?? 1,
-                  stockQty: v?.stockQty,
+                  variants: cardVariants,
                 }}
               />
             );

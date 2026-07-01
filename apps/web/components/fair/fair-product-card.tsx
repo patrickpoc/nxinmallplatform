@@ -7,7 +7,7 @@ import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PriceDisplay } from "@/components/brand/price-display";
-import { FairAddToCartDialog } from "@/components/fair/fair-add-to-cart-dialog";
+import { FairAddToCartDialog, type FairAddToCartVariant } from "@/components/fair/fair-add-to-cart-dialog";
 import type { CartPriceCurrency } from "@/lib/cart/types";
 
 export type FairProductCardData = {
@@ -17,8 +17,7 @@ export type FairProductCardData = {
   priceAmount: number;
   priceCurrency: CartPriceCurrency;
   variantId?: string;
-  minOrderQty?: number;
-  stockQty?: number;
+  variants: FairAddToCartVariant[];
 };
 
 type Props = {
@@ -29,7 +28,7 @@ type Props = {
 export function FairProductCard({ slug, product }: Props) {
   const t = useTranslations("fairBooth");
   const locale = useLocale();
-  const { id, name, imageUrl, priceAmount, priceCurrency, variantId, minOrderQty, stockQty } = product;
+  const { id, name, imageUrl, priceAmount, priceCurrency, variantId, variants } = product;
 
   return (
     <Card className="flex h-full flex-col overflow-hidden shadow-card">
@@ -54,20 +53,20 @@ export function FairProductCard({ slug, product }: Props) {
           locale={locale}
           className="text-sm font-bold text-brand-blue"
         />
-        {variantId ? (
+        {variantId && variants.length > 0 ? (
           <FairAddToCartDialog
             item={{
               productId: id,
-              variantId,
-              name,
-              imageUrl,
-              priceAmount,
-              priceCurrency,
-              minOrderQty,
-              stockQty,
+              productName: name,
+              variants,
             }}
             trigger={
-              <Button size="sm" className="mt-auto w-full justify-center" onClick={(e) => e.stopPropagation()}>
+              <Button
+                type="button"
+                size="sm"
+                className="mt-auto w-full justify-center"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <ShoppingCart className="mr-1 h-4 w-4" />
                 {t("addToCart")}
               </Button>
