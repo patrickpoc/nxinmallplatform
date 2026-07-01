@@ -47,9 +47,12 @@ export function FairProductCard({ slug, product }: Props) {
         <Link href={`/feira/${slug}/produtos/${id}`}>
           <p className="line-clamp-2 min-h-[2.5rem] text-xs font-semibold text-brand-dark sm:min-h-10 sm:text-sm">{name}</p>
         </Link>
-        <p className="text-sm font-bold text-brand-blue">
-          <PriceDisplay amount={priceAmount} currency={priceCurrency} locale={locale} />
-        </p>
+        <PriceDisplay
+          amount={priceAmount}
+          currency={priceCurrency}
+          locale={locale}
+          className="text-sm font-bold text-brand-blue"
+        />
         {variantId ? (
           <Button
             size="sm"

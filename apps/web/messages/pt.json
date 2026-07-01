@@ -1041,6 +1041,7 @@
     "productName": "Produto",
     "status": "Status",
     "priceBrl": "Preço (R$)",
+    "priceBrlHint": "Aceita centavos e valores abaixo de R$ 1 (ex.: 0.59 ou 0.590)",
     "stockQty": "Estoque",
     "edit": "Editar",
     "editProduct": "Editar produto",

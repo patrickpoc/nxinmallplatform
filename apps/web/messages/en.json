@@ -1061,6 +1061,7 @@
     "productName": "Product",
     "status": "Status",
     "priceBrl": "Price (BRL)",
+    "priceBrlHint": "Supports cents and values below R$ 1 (e.g. 0.59 or 0.590)",
     "stockQty": "Stock",
     "edit": "Edit",
     "editProduct": "Edit product",

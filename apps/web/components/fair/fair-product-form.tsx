@@ -110,7 +110,7 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
       categoryId: categories[0]?.id ?? FAIR_NEW_CATEGORY_ID,
       newCategoryName: "",
       variants: [
-        { sku: "", priceAmount: "0.00", minOrderQty: 1, unit: "UNIT", stockQty: 0 },
+        { sku: "", priceAmount: "", minOrderQty: 1, unit: "UNIT", stockQty: 0 },
       ],
       ...defaultValues,
       images: galleryDefaults(defaultValues),
@@ -284,7 +284,7 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
             variant="outline"
             size="sm"
             onClick={() =>
-              appendVariant({ sku: "", priceAmount: "0.00", minOrderQty: 1, unit: "UNIT", stockQty: 0 })
+              appendVariant({ sku: "", priceAmount: "", minOrderQty: 1, unit: "UNIT", stockQty: 0 })
             }
           >
             {t("addVariant")}
@@ -315,9 +315,12 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
             <div className="space-y-2">
               <Label>{t("priceBrl")}</Label>
               <Input
+                inputMode="decimal"
+                placeholder="0.59"
                 className={invalidClass(Boolean(errors.variants?.[index]?.priceAmount?.message))}
                 {...form.register(`variants.${index}.priceAmount`)}
               />
+              <p className="text-xs text-brand-gray">{t("priceBrlHint")}</p>
               {errors.variants?.[index]?.priceAmount?.message ? (
                 <p className="text-sm text-destructive">
                   {errors.variants[index]?.priceAmount?.message}

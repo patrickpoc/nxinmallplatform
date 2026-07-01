@@ -1041,6 +1041,7 @@
     "productName": "产品",
     "status": "状态",
     "priceBrl": "价格 (BRL)",
+    "priceBrlHint": "支持分币及低于 1 雷亚尔的单价（如 0.59 或 0.590）",
     "stockQty": "库存",
     "edit": "编辑",
     "editProduct": "编辑产品",

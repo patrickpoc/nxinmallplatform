@@ -172,9 +172,19 @@ export const fairProductImagePersistSchema = z.object({
   kind: z.enum(["GALLERY", "DESCRIPTION"]).default("GALLERY"),
 });
 
+function normalizeFairPriceInput(val: unknown): unknown {
+  if (typeof val !== "string") return val;
+  let s = val.trim().replace(",", ".");
+  if (s.startsWith(".")) s = `0${s}`;
+  return s;
+}
+
 const fairPriceAmountSchema = z.preprocess(
-  (val) => (typeof val === "string" ? val.trim().replace(",", ".") : val),
-  z.string().regex(/^\d+(\.\d{1,2})?$/, "Use o formato 0.00 (ex.: 10.50)"),
+  normalizeFairPriceInput,
+  z
+    .string()
+    .regex(/^\d+(\.\d{1,4})?$/, "Use formato decimal (ex.: 0.59 ou 10.50)")
+    .refine((val) => Number(val) > 0, "Preço deve ser maior que zero"),
 );
 
 export const fairProductVariantSchema = z.object({
