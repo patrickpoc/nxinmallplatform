@@ -1,4 +1,5 @@
 import { prisma } from "@nxinmall/database";
+import { parseStorefrontAmount, roundStorefrontMoney } from "@/lib/money-format";
 
 export type FairDashboardData = {
   boothName: string;
@@ -57,7 +58,8 @@ export async function getFairDashboardData(vendorId: string): Promise<FairDashbo
 
   const recentOrders = orders.slice(0, 10).map((o) => {
     const totalBrl = o.items.reduce((sum, item) => {
-      const amt = Number(item.variant.priceAmount) || Number(item.totalUsd);
+      const amt =
+        parseStorefrontAmount(item.variant.priceAmount) || parseStorefrontAmount(item.totalUsd);
       return sum + amt * Number(item.qty);
     }, 0);
     revenueBrl += totalBrl;
@@ -67,7 +69,7 @@ export async function getFairDashboardData(vendorId: string): Promise<FairDashbo
       id: o.id,
       status: o.status,
       createdAt: o.createdAt,
-      totalBrl: Math.round(totalBrl * 100) / 100,
+      totalBrl: roundStorefrontMoney(totalBrl),
       guestName: o.guestName,
       itemCount: o.items.length,
     };
@@ -82,7 +84,7 @@ export async function getFairDashboardData(vendorId: string): Promise<FairDashbo
       totalProducts: products.length,
       ordersToday,
       pendingOrders,
-      revenueBrl: Math.round(revenueBrl * 100) / 100,
+      revenueBrl: roundStorefrontMoney(revenueBrl),
       ordersCount: orders.length,
     },
     recentOrders,

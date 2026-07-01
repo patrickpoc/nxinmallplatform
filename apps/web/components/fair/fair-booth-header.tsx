@@ -1,11 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { ShoppingCart } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { Button } from "@/components/ui/button";
-import { useFairCart } from "@/lib/fair/fair-cart-context";
+import { FairBoothAuthMenu } from "@/components/fair/fair-booth-auth-menu";
+import { FairCartHeaderMenu } from "@/components/fair/fair-cart-header-menu";
 
 type Props = {
   slug: string;
@@ -14,9 +12,6 @@ type Props = {
 };
 
 export function FairBoothHeader({ slug, boothName, logoUrl }: Props) {
-  const t = useTranslations("fairBooth");
-  const { itemCount } = useFairCart();
-
   return (
     <header className="border-b border-border bg-white">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4">
@@ -26,15 +21,10 @@ export function FairBoothHeader({ slug, boothName, logoUrl }: Props) {
           ) : null}
           <span className="truncate text-sm font-semibold text-brand-dark sm:text-base">{boothName}</span>
         </Link>
-        <Button asChild variant="outline" size="sm" className="shrink-0">
-          <Link href={`/feira/${slug}/checkout`}>
-            <ShoppingCart className="h-4 w-4 sm:mr-1" />
-            <span className="hidden sm:inline">
-              {t("cart")} {itemCount > 0 ? `(${itemCount})` : ""}
-            </span>
-            {itemCount > 0 ? <span className="sm:hidden">({itemCount})</span> : null}
-          </Link>
-        </Button>
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <FairBoothAuthMenu slug={slug} />
+          <FairCartHeaderMenu slug={slug} />
+        </div>
       </div>
     </header>
   );

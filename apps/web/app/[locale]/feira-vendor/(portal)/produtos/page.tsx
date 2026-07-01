@@ -7,7 +7,7 @@ import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "@/components/brand/status-pill";
 import { FairProductDeleteButton } from "@/components/fair/fair-product-delete-button";
-import { Plus } from "lucide-react";
+import { formatStorefrontMoney, parseStorefrontAmount } from "@/lib/money-format";
 
 export default async function FairVendorProductsPage({ params }: { params: { locale: string } }) {
   setRequestLocale(params.locale);
@@ -39,7 +39,7 @@ export default async function FairVendorProductsPage({ params }: { params: { loc
           <div className="space-y-3 md:hidden">
             {products.map((p) => {
               const v = p.variants[0];
-              const price = v ? Number(v.priceAmount).toFixed(2) : "—";
+              const price = v ? formatStorefrontMoney(parseStorefrontAmount(v.priceAmount), "BRL") : "—";
               const stock = v?.stockQty ?? 0;
               return (
                 <div key={p.id} className="rounded-lg border border-border bg-white p-4 shadow-card">
@@ -48,7 +48,7 @@ export default async function FairVendorProductsPage({ params }: { params: { loc
                       <p className="font-medium text-brand-dark">{fairProductLabel(p.name)}</p>
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-brand-gray">
                         <StatusPill status={p.status} />
-                        <span>R$ {price}</span>
+                        <span>{price}</span>
                         <span>{t("stockQty")}: {stock}</span>
                       </div>
                     </div>
@@ -80,7 +80,7 @@ export default async function FairVendorProductsPage({ params }: { params: { loc
             <tbody>
               {products.map((p) => {
                 const v = p.variants[0];
-                const price = v ? Number(v.priceAmount).toFixed(2) : "—";
+                const price = v ? formatStorefrontMoney(parseStorefrontAmount(v.priceAmount), "BRL") : "—";
                 const stock = v?.stockQty ?? 0;
                 return (
                   <tr key={p.id} className="border-t border-border">
@@ -88,7 +88,7 @@ export default async function FairVendorProductsPage({ params }: { params: { loc
                     <td className="px-4 py-2">
                       <StatusPill status={p.status} />
                     </td>
-                    <td className="px-4 py-2">R$ {price}</td>
+                    <td className="px-4 py-2">{price}</td>
                     <td className="px-4 py-2">{stock}</td>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-3">

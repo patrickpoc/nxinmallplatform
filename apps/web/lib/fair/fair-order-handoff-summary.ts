@@ -1,3 +1,5 @@
+import { formatStorefrontMoney } from "@/lib/money-format";
+
 export type FairShippingAddress = {
   street?: string;
   city?: string;
@@ -41,7 +43,7 @@ const STATUS_LABELS_PT: Record<string, string> = {
 };
 
 function formatMoneyBrl(amount: number): string {
-  return amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  return formatStorefrontMoney(amount, "BRL");
 }
 
 function formatDate(d: Date, locale: string): string {

@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@/i18n/routing";
+import { formatStorefrontMoney } from "@/lib/money-format";
 
 export default async function FairVendorDashboardPage({ params }: { params: { locale: string } }) {
   setRequestLocale(params.locale);
@@ -40,7 +41,7 @@ export default async function FairVendorDashboardPage({ params }: { params: { lo
         {[
           { label: t("metricOrdersToday"), value: data.metrics.ordersToday },
           { label: t("metricPending"), value: data.metrics.pendingOrders },
-          { label: t("metricRevenue"), value: `R$ ${data.metrics.revenueBrl.toFixed(2)}` },
+          { label: t("metricRevenue"), value: formatStorefrontMoney(data.metrics.revenueBrl, "BRL") },
           { label: t("metricActiveProducts"), value: data.metrics.activeProducts },
         ].map((m) => (
           <Card key={m.label} className="shadow-card">

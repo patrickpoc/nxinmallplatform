@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { formatStorefrontMoney } from "@/lib/money-format";
 import {
   cancelFairOrder,
   confirmFairOrder,
@@ -186,7 +187,7 @@ export function FairRecentOrders({ orders, locale, boothName }: Props) {
               <span className="text-brand-gray">
                 {new Date(o.createdAt).toLocaleDateString(locale)}
               </span>
-              <span className="font-semibold">R$ {o.totalBrl.toFixed(2)}</span>
+              <span className="font-semibold">{formatStorefrontMoney(o.totalBrl, "BRL")}</span>
             </div>
             <div className="mt-3 border-t border-border pt-3">
               <p className="mb-2 text-xs font-medium text-brand-gray">{t("orderActions")}</p>
@@ -213,7 +214,7 @@ export function FairRecentOrders({ orders, locale, boothName }: Props) {
               <tr key={o.id} className="border-t border-border">
                 <td className="px-4 py-2 font-mono text-xs">{o.id.slice(0, 8)}…</td>
                 <td className="px-4 py-2">{o.guestName ?? "—"}</td>
-                <td className="px-4 py-2">R$ {o.totalBrl.toFixed(2)}</td>
+                <td className="px-4 py-2">{formatStorefrontMoney(o.totalBrl, "BRL")}</td>
                 <td className="px-4 py-2">
                   <StatusPill status={o.status} />
                 </td>

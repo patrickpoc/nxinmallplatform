@@ -10,6 +10,7 @@ import {
   type FairShippingAddress,
 } from "@/lib/fair/fair-order-handoff-summary";
 import { buildFairCartItemName, getFairVariantLabel } from "@/lib/fair/fair-variant-display";
+import { parseStorefrontAmount, roundStorefrontMoney } from "@/lib/money-format";
 
 export type CreateFairOrderResult = {
   orderId: string;
@@ -52,7 +53,8 @@ function orderHandoffFromRecord(
   locale?: string,
 ) {
   const items = order.items.map((item) => {
-    const unitPriceBrl = Number(item.variant.priceAmount) || Number(item.unitPriceUsd);
+    const unitPriceBrl =
+      parseStorefrontAmount(item.variant.priceAmount) || parseStorefrontAmount(item.unitPriceUsd);
     const quantity = Number(item.qty);
     return {
       productName: buildFairCartItemName(
@@ -62,10 +64,10 @@ function orderHandoffFromRecord(
       sku: item.variant.sku,
       quantity,
       unitPriceBrl,
-      lineTotalBrl: Math.round(unitPriceBrl * quantity * 100) / 100,
+      lineTotalBrl: roundStorefrontMoney(unitPriceBrl * quantity),
     };
   });
-  const totalBrl = Math.round(items.reduce((s, i) => s + i.lineTotalBrl, 0) * 100) / 100;
+  const totalBrl = roundStorefrontMoney(items.reduce((s, i) => s + i.lineTotalBrl, 0));
   const paymentMeta = order.payments[0]?.metadata as { guestDocumentType?: string } | null;
 
   return buildFairOrderHandoffSummary({
@@ -122,7 +124,7 @@ export async function createFairOrder(input: unknown): Promise<CreateFairOrderRe
   let totalBrl = 0;
   const lineData = d.items.map((item) => {
     const variant = variants.find((v) => v.id === item.variantId)!;
-    const unitPrice = Number(variant.priceAmount);
+    const unitPrice = parseStorefrontAmount(variant.priceAmount);
     const lineTotal = unitPrice * item.quantity;
     totalBrl += lineTotal;
     return {
@@ -184,7 +186,7 @@ export async function createFairOrder(input: unknown): Promise<CreateFairOrderRe
     orderId: order.id,
     pixKey: booth.pixKey,
     pixBeneficiaryName: booth.pixBeneficiaryName,
-    totalBrl: Math.round(totalBrl * 100) / 100,
+    totalBrl: roundStorefrontMoney(totalBrl),
   };
 }
 

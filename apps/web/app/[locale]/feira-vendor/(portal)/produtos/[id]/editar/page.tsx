@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { FairProductForm } from "@/components/fair/fair-product-form";
+import { amountToPriceInputString } from "@/lib/money-format";
 import { prisma } from "@nxinmall/database";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
@@ -66,7 +67,7 @@ export default async function FairVendorEditProductPage({
             const attrs = variantAttrs[index] ?? {};
             return {
               sku: v.sku,
-              priceAmount: Number(v.priceAmount).toFixed(2),
+              priceAmount: amountToPriceInputString(v.priceAmount),
               minOrderQty: v.minOrderQty,
               unit: v.unit,
               stockQty: v.stockQty,
