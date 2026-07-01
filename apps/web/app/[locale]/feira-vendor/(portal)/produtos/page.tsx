@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { StatusPill } from "@/components/brand/status-pill";
 import { FairProductDeleteButton } from "@/components/fair/fair-product-delete-button";
 import { formatStorefrontMoney, parseStorefrontAmount } from "@/lib/money-format";
+import { Plus } from "lucide-react";
 
 export default async function FairVendorProductsPage({ params }: { params: { locale: string } }) {
   setRequestLocale(params.locale);
