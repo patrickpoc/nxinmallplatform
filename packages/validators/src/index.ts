@@ -181,38 +181,38 @@ export const fairProductVariantSchema = z.object({
   attributes: z.record(z.string(), z.unknown()).optional(),
 });
 
-export const fairProductCreateSchema = z
-  .object({
-    name: z.object({
+const fairProductCreateBaseSchema = z.object({
+  name: z.object({
+    en: z.string().optional(),
+    pt: z.string().min(1),
+    zh: z.string().optional(),
+  }),
+  description: z
+    .object({
       en: z.string().optional(),
-      pt: z.string().min(1),
+      pt: z.string().optional(),
       zh: z.string().optional(),
-    }),
-    description: z
-      .object({
-        en: z.string().optional(),
-        pt: z.string().optional(),
-        zh: z.string().optional(),
-      })
-      .optional(),
-    categoryId: z.string().min(1),
-    newCategoryName: z.string().min(2).max(100).optional(),
-    status: z.enum(["DRAFT", "ACTIVE", "PAUSED"]).default("DRAFT"),
-    variants: z.array(fairProductVariantSchema).min(1).max(5),
-    images: z.array(fairProductImageSchema).max(10).default([]),
-  })
-  .superRefine((data, ctx) => {
-    if (data.categoryId === "__new__" && !data.newCategoryName?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "New category name is required",
-        path: ["newCategoryName"],
-      });
-    }
-  });
+    })
+    .optional(),
+  categoryId: z.string().min(1),
+  newCategoryName: z.string().min(2).max(100).optional(),
+  status: z.enum(["DRAFT", "ACTIVE", "PAUSED"]).default("DRAFT"),
+  variants: z.array(fairProductVariantSchema).min(1).max(5),
+  images: z.array(fairProductImageSchema).max(10).default([]),
+});
 
-/** Server-side schema after empty gallery URLs are stripped. */
-export const fairProductPersistSchema = fairProductCreateSchema
+export const fairProductCreateSchema = fairProductCreateBaseSchema.superRefine((data, ctx) => {
+  if (data.categoryId === "__new__" && !data.newCategoryName?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "New category name is required",
+      path: ["newCategoryName"],
+    });
+  }
+});
+
+/** Server-side schema after empty gallery URLs are stripped and category is resolved. */
+export const fairProductPersistSchema = fairProductCreateBaseSchema
   .omit({ images: true })
   .extend({
     images: z.array(fairProductImagePersistSchema).max(10).default([]),
