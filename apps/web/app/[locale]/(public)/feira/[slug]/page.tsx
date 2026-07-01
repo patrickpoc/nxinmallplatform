@@ -2,6 +2,7 @@ import { prisma } from "@nxinmall/database";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { FairProductCard } from "@/components/fair/fair-product-card";
+import { FairBoothBanner } from "@/components/fair/fair-booth-banner";
 import { FairFiltersBar } from "@/components/fair/fair-filters-bar";
 import { productNameContainsWhere } from "@/lib/product-listing";
 import { getFairBoothBySlug } from "@/lib/fair/fair-booth";
@@ -84,12 +85,7 @@ export default async function FairBoothPage({
 
   return (
     <div className="space-y-4 py-3 sm:py-4">
-      {booth.bannerUrl ? (
-        <div
-          className="h-24 rounded-lg bg-cover bg-center sm:h-32"
-          style={{ backgroundImage: `url(${booth.bannerUrl})` }}
-        />
-      ) : null}
+      {booth.bannerUrl ? <FairBoothBanner url={booth.bannerUrl} alt={booth.companyName} /> : null}
       <div>
         <h1 className="text-xl font-bold text-brand-dark sm:text-2xl">{booth.companyName}</h1>
         <p className="text-sm text-brand-gray">{t("storeSubtitle")}</p>

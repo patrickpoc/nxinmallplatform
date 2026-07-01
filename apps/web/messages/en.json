@@ -1062,6 +1062,10 @@
     "status": "Status",
     "priceBrl": "Price (BRL)",
     "priceBrlHint": "Supports cents and values below R$ 1 (e.g. 0.59 or 0.590)",
+    "variantLabel": "Variant name",
+    "variantLabelPlaceholder": "e.g. Black, Terracotta",
+    "variantImage": "Variant image",
+    "variantImageHint": "Required when there is more than one variant (e.g. color).",
     "stockQty": "Stock",
     "edit": "Edit",
     "editProduct": "Edit product",
@@ -1163,6 +1167,14 @@
     "orderId": "Order",
     "payWithPix": "Pay with Pix",
     "pixKey": "Pix key",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "quantity": "Quantity",
+    "variant": "Variant",
+    "sku": "SKU",
+    "unitLabel": "Unit",
+    "stock": "Stock",
+    "minOrder": "Min. order",
+    "purchaseInfoTitle": "Fair purchase",
+    "purchaseInfoBody": "Pay with Pix at checkout. Shipping and delivery are arranged directly with the vendor."
   }
 }

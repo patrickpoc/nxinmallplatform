@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_MEDIA_ASPECT_CLASS } from "@/lib/marketplace/product-media-aspect";
 import { cn } from "@/lib/utils";
@@ -11,11 +11,37 @@ type ProductGalleryProps = {
   images: { url: string }[];
   alt: string;
   aspectClass?: string;
+  index?: number;
+  onIndexChange?: (index: number) => void;
 };
 
-export function ProductGallery({ images, alt, aspectClass = PRODUCT_MEDIA_ASPECT_CLASS }: ProductGalleryProps) {
+export function ProductGallery({
+  images,
+  alt,
+  aspectClass = PRODUCT_MEDIA_ASPECT_CLASS,
+  index: controlledIndex,
+  onIndexChange,
+}: ProductGalleryProps) {
   const urls = useMemo(() => images.map((i) => i.url).filter(Boolean), [images]);
-  const [index, setIndex] = useState(0);
+  const [uncontrolledIndex, setUncontrolledIndex] = useState(0);
+  const isControlled = controlledIndex !== undefined;
+  const index = isControlled ? controlledIndex : uncontrolledIndex;
+
+  const setIndex = useCallback(
+    (next: number | ((prev: number) => number)) => {
+      const value = typeof next === "function" ? next(index) : next;
+      if (onIndexChange) onIndexChange(value);
+      if (!isControlled) setUncontrolledIndex(value);
+    },
+    [index, isControlled, onIndexChange],
+  );
+
+  useEffect(() => {
+    if (urls.length === 0) return;
+    if (index >= urls.length) {
+      setIndex(urls.length - 1);
+    }
+  }, [index, urls.length, setIndex]);
   const [zoomed, setZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
   const imgRef = useRef<HTMLDivElement>(null);

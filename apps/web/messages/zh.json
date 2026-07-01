@@ -1042,6 +1042,10 @@
     "status": "状态",
     "priceBrl": "价格 (BRL)",
     "priceBrlHint": "支持分币及低于 1 雷亚尔的单价（如 0.59 或 0.590）",
+    "variantLabel": "规格名称",
+    "variantLabelPlaceholder": "如：黑色、赤陶色",
+    "variantImage": "规格图片",
+    "variantImageHint": "多个规格时必填（如颜色）。",
     "stockQty": "库存",
     "edit": "编辑",
     "editProduct": "编辑产品",
@@ -1143,6 +1147,14 @@
     "orderId": "订单",
     "payWithPix": "Pix 支付",
     "pixKey": "Pix 密钥",
-    "copied": "已复制！"
+    "copied": "已复制！",
+    "quantity": "数量",
+    "variant": "规格",
+    "sku": "SKU",
+    "unitLabel": "单位",
+    "stock": "库存",
+    "minOrder": "起订量",
+    "purchaseInfoTitle": "展会购买",
+    "purchaseInfoBody": "结账时使用 Pix 支付。运费与配送请直接与供应商协商。"
   }
 }

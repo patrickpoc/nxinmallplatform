@@ -26,6 +26,32 @@ function normalizeName(name: { en?: string; pt?: string; zh?: string }) {
   };
 }
 
+function normalizeFairDescription(
+  desc?: { en?: string; pt?: string; zh?: string } | null,
+): ReturnType<typeof normalizeName> | typeof Prisma.JsonNull {
+  if (!desc) return Prisma.JsonNull;
+  const pt = desc.pt?.trim() ?? "";
+  const en = desc.en?.trim() ?? "";
+  const zh = desc.zh?.trim() ?? "";
+  if (!pt && !en && !zh) return Prisma.JsonNull;
+  return normalizeName({ pt, en, zh });
+}
+
+function mapVariantForPersist(variant: FairProductFormInput["variants"][number]) {
+  const { variantLabel, variantImageUrl, attributes, ...rest } = variant;
+  const attrs: Record<string, unknown> = { ...((attributes as Record<string, unknown> | undefined) ?? {}) };
+  const label = variantLabel?.trim();
+  const imageUrl = variantImageUrl?.trim();
+  if (label) attrs.label = label;
+  else delete attrs.label;
+  if (imageUrl) attrs.imageUrl = imageUrl;
+  else delete attrs.imageUrl;
+  return {
+    ...rest,
+    attributes: Object.keys(attrs).length > 0 ? attrs : undefined,
+  };
+}
+
 function slugifyCategoryName(name: string): string {
   return name
     .normalize("NFD")
@@ -82,6 +108,7 @@ function preparePersistPayload(input: FairProductFormInput, resolvedCategoryId: 
     ...input,
     categoryId: resolvedCategoryId,
     images,
+    variants: input.variants.map(mapVariantForPersist),
   };
 
   const parsed = fairProductPersistSchema.safeParse(payload);
@@ -130,7 +157,7 @@ export async function createFairProduct(input: FairProductFormInput) {
       sellerId,
       categoryId: d.categoryId,
       name: normalizeName(d.name),
-      description: d.description ? normalizeName(d.description) : undefined,
+      description: normalizeFairDescription(d.description),
       status: d.status,
       salesChannel: "FAIR",
       variants: {
@@ -193,7 +220,7 @@ export async function updateFairProduct(productId: string, input: FairProductFor
       data: {
         categoryId: d.categoryId,
         name: normalizeName(d.name),
-        description: d.description ? normalizeName(d.description) : undefined,
+        description: normalizeFairDescription(d.description),
         status: d.status,
       },
     });

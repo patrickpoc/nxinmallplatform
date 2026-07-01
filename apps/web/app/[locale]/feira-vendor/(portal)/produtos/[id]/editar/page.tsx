@@ -47,13 +47,18 @@ export default async function FairVendorEditProductPage({
           description,
           categoryId: product.categoryId,
           status: product.status as "DRAFT" | "ACTIVE" | "PAUSED",
-          variants: product.variants.map((v) => ({
-            sku: v.sku,
-            priceAmount: Number(v.priceAmount).toFixed(2),
-            minOrderQty: v.minOrderQty,
-            unit: v.unit,
-            stockQty: v.stockQty,
-          })),
+          variants: product.variants.map((v) => {
+            const attrs = (v.attributes as { label?: string; imageUrl?: string } | null) ?? {};
+            return {
+              sku: v.sku,
+              priceAmount: Number(v.priceAmount).toFixed(2),
+              minOrderQty: v.minOrderQty,
+              unit: v.unit,
+              stockQty: v.stockQty,
+              variantLabel: attrs.label ?? "",
+              variantImageUrl: attrs.imageUrl ?? "",
+            };
+          }),
           images:
             product.images.length > 0
               ? product.images.map((img) => ({

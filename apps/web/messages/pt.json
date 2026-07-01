@@ -1042,6 +1042,10 @@
     "status": "Status",
     "priceBrl": "Preço (R$)",
     "priceBrlHint": "Aceita centavos e valores abaixo de R$ 1 (ex.: 0.59 ou 0.590)",
+    "variantLabel": "Nome da variação",
+    "variantLabelPlaceholder": "Ex.: Preto, Terracota",
+    "variantImage": "Imagem da variação",
+    "variantImageHint": "Obrigatória quando há mais de uma variação (ex.: cor).",
     "stockQty": "Estoque",
     "edit": "Editar",
     "editProduct": "Editar produto",
@@ -1143,6 +1147,14 @@
     "orderId": "Pedido",
     "payWithPix": "Pague com Pix",
     "pixKey": "Chave Pix",
-    "copied": "Copiado!"
+    "copied": "Copiado!",
+    "quantity": "Quantidade",
+    "variant": "Variação",
+    "sku": "SKU",
+    "unitLabel": "Unidade",
+    "stock": "Estoque",
+    "minOrder": "Pedido mínimo",
+    "purchaseInfoTitle": "Compra na feira",
+    "purchaseInfoBody": "Pagamento via Pix no checkout. Frete e entrega combinados diretamente com o fornecedor."
   }
 }

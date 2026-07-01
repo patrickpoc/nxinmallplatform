@@ -196,6 +196,8 @@ export const fairProductVariantSchema = z.object({
     (val) => (typeof val === "number" && Number.isNaN(val) ? 0 : val),
     z.number().int().nonnegative(),
   ),
+  variantLabel: z.string().max(100).optional(),
+  variantImageUrl: z.union([z.string().url("URL de imagem inválida"), z.literal("")]).optional(),
   attributes: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -205,13 +207,24 @@ const fairProductCreateBaseSchema = z.object({
     pt: z.string().min(1, "Nome do produto é obrigatório"),
     zh: z.string().optional(),
   }),
-  description: z
-    .object({
-      en: z.string().optional(),
-      pt: z.string().optional(),
-      zh: z.string().optional(),
-    })
-    .optional(),
+  description: z.preprocess(
+    (val) => {
+      if (!val || typeof val !== "object") return undefined;
+      const o = val as { en?: string; pt?: string; zh?: string };
+      const pt = o.pt?.trim() ?? "";
+      const en = o.en?.trim() ?? "";
+      const zh = o.zh?.trim() ?? "";
+      if (!pt && !en && !zh) return undefined;
+      return { pt, en, zh };
+    },
+    z
+      .object({
+        en: z.string().optional(),
+        pt: z.string().optional(),
+        zh: z.string().optional(),
+      })
+      .optional(),
+  ),
   categoryId: z.string().min(1),
   newCategoryName: z.preprocess(
     (val) => {
@@ -232,6 +245,24 @@ export const fairProductCreateSchema = fairProductCreateBaseSchema.superRefine((
       code: z.ZodIssueCode.custom,
       message: "Informe o nome da nova categoria",
       path: ["newCategoryName"],
+    });
+  }
+  if (data.variants.length > 1) {
+    data.variants.forEach((variant, index) => {
+      if (!variant.variantLabel?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Informe o nome da variação",
+          path: ["variants", index, "variantLabel"],
+        });
+      }
+      if (!variant.variantImageUrl?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Informe a imagem da variação",
+          path: ["variants", index, "variantImageUrl"],
+        });
+      }
     });
   }
 });

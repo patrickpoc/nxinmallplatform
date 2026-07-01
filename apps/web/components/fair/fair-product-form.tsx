@@ -110,7 +110,15 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
       categoryId: categories[0]?.id ?? FAIR_NEW_CATEGORY_ID,
       newCategoryName: "",
       variants: [
-        { sku: "", priceAmount: "", minOrderQty: 1, unit: "UNIT", stockQty: 0 },
+        {
+          sku: "",
+          priceAmount: "",
+          minOrderQty: 1,
+          unit: "UNIT",
+          stockQty: 0,
+          variantLabel: "",
+          variantImageUrl: "",
+        },
       ],
       ...defaultValues,
       images: galleryDefaults(defaultValues),
@@ -124,6 +132,8 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
     control: form.control,
     name: "variants",
   });
+
+  const multiVariant = variantFields.length > 1;
 
   const { fields: imageFields, append: appendImage, remove: removeImage } = useFieldArray({
     control: form.control,
@@ -284,7 +294,15 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
             variant="outline"
             size="sm"
             onClick={() =>
-              appendVariant({ sku: "", priceAmount: "", minOrderQty: 1, unit: "UNIT", stockQty: 0 })
+              appendVariant({
+                sku: "",
+                priceAmount: "",
+                minOrderQty: 1,
+                unit: "UNIT",
+                stockQty: 0,
+                variantLabel: "",
+                variantImageUrl: "",
+              })
             }
           >
             {t("addVariant")}
@@ -302,6 +320,38 @@ export function FairProductForm({ categories, productId, defaultValues }: Props)
               type="hidden"
               {...form.register(`variants.${index}.minOrderQty`, { valueAsNumber: true })}
             />
+            {multiVariant ? (
+              <>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>{t("variantLabel")}</Label>
+                  <Input
+                    placeholder={t("variantLabelPlaceholder")}
+                    className={invalidClass(Boolean(errors.variants?.[index]?.variantLabel?.message))}
+                    {...form.register(`variants.${index}.variantLabel`)}
+                  />
+                  {errors.variants?.[index]?.variantLabel?.message ? (
+                    <p className="text-sm text-destructive">
+                      {errors.variants[index]?.variantLabel?.message}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <ImageUrlOrUploadField
+                    label={t("variantImage")}
+                    hint={t("variantImageHint")}
+                    purpose="product"
+                    value={form.watch(`variants.${index}.variantImageUrl`) ?? ""}
+                    onChange={(url) =>
+                      form.setValue(`variants.${index}.variantImageUrl`, url, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      })
+                    }
+                    error={errors.variants?.[index]?.variantImageUrl?.message}
+                  />
+                </div>
+              </>
+            ) : null}
             <div className="space-y-2">
               <Label>{t("sku")}</Label>
               <Input

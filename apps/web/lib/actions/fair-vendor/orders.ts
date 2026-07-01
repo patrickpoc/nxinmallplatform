@@ -9,6 +9,7 @@ import {
   fairProductNameFromJson,
   type FairShippingAddress,
 } from "@/lib/fair/fair-order-handoff-summary";
+import { buildFairCartItemName, getFairVariantLabel } from "@/lib/fair/fair-variant-display";
 
 export type CreateFairOrderResult = {
   orderId: string;
@@ -21,7 +22,7 @@ const fairOrderInclude = {
   items: {
     include: {
       variant: {
-        include: { product: { select: { name: true } } },
+        select: { sku: true, priceAmount: true, attributes: true, product: { select: { name: true } } },
       },
     },
   },
@@ -54,7 +55,10 @@ function orderHandoffFromRecord(
     const unitPriceBrl = Number(item.variant.priceAmount) || Number(item.unitPriceUsd);
     const quantity = Number(item.qty);
     return {
-      productName: fairProductNameFromJson(item.variant.product.name),
+      productName: buildFairCartItemName(
+        fairProductNameFromJson(item.variant.product.name),
+        getFairVariantLabel({ sku: item.variant.sku, attributes: item.variant.attributes }),
+      ),
       sku: item.variant.sku,
       quantity,
       unitPriceBrl,

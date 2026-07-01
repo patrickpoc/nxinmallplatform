@@ -18,7 +18,7 @@ export function FairBoothHeader({ slug, boothName, logoUrl }: Props) {
   const { itemCount } = useFairCart();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-white">
+    <header className="border-b border-border bg-white">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4">
         <Link href={`/feira/${slug}`} className="flex min-w-0 flex-1 items-center gap-2">
           {logoUrl ? (

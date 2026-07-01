@@ -2,8 +2,7 @@ import { prisma } from "@nxinmall/database";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ProductGallery } from "@/components/marketplace/product-gallery";
-import { FairPurchaseCard } from "@/components/fair/fair-purchase-card";
+import { FairProductDetailClient } from "@/components/fair/fair-product-detail-client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -58,10 +57,17 @@ export default async function FairProductPage({
     .map((i) => ({ url: i.url }));
   const descriptionImage = product.images.find((i) => i.kind === "DESCRIPTION");
 
-  const primaryVariant =
-    product.variants.slice().sort((a, b) => Number(a.priceAmount) - Number(b.priceAmount))[0] ?? null;
-  const primaryAmount = primaryVariant ? Number(primaryVariant.priceAmount) : 0;
-  const primaryCurrency = (primaryVariant?.priceCurrency as CartPriceCurrency) ?? "BRL";
+  const variants = product.variants.map((v) => ({
+    id: v.id,
+    sku: v.sku,
+    priceAmount: Number(v.priceAmount),
+    priceCurrency: (v.priceCurrency as CartPriceCurrency) ?? "BRL",
+    unit: v.unit,
+    stockQty: v.stockQty,
+    minOrderQty: v.minOrderQty,
+    attributes: v.attributes,
+  }));
+
   const attributes = (product.variants[0]?.attributes as Record<string, unknown> | null) ?? null;
   const specEntries = attributes ? Object.entries(attributes) : [];
 
@@ -69,22 +75,18 @@ export default async function FairProductPage({
     <div className="space-y-4 py-3 sm:space-y-6 sm:py-4">
       <h1 className="text-lg font-bold text-brand-dark sm:text-xl md:text-2xl">{name}</h1>
 
-      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
-        <ProductGallery images={galleryImages} alt={name} />
-        <FairPurchaseCard
-          slug={params.slug}
-          productId={product.id}
-          variantId={primaryVariant?.id ?? null}
-          productName={name}
-          primaryAmount={primaryAmount}
-          primaryCurrency={primaryCurrency}
-          booth={{
-            quotationUrl: booth.quotationUrl,
-            whatsappNumber: booth.whatsappNumber,
-            phone: booth.phone,
-          }}
-        />
-      </div>
+      <FairProductDetailClient
+        slug={params.slug}
+        productId={product.id}
+        productName={name}
+        galleryImages={galleryImages}
+        variants={variants}
+        booth={{
+          quotationUrl: booth.quotationUrl,
+          whatsappNumber: booth.whatsappNumber,
+          phone: booth.phone,
+        }}
+      />
 
       <Tabs defaultValue="details">
         <TabsList className="grid h-auto w-full grid-cols-2">
